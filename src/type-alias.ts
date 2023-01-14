@@ -1,6 +1,8 @@
 export type TypeAliasOptions = {
   isOptional: boolean;
   isNullable: boolean;
+  requiredError?: string;
+  invalidTypeError?: string;
 };
 
 export interface TypeAlias<T> {

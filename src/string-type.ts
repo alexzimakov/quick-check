@@ -1,4 +1,5 @@
 import { type TypeAlias, type TypeAliasOptions } from './type-alias.js';
+import { RapidCheckError } from './errors.js';
 
 type StringTypeOptions = TypeAliasOptions;
 
@@ -45,18 +46,18 @@ export class StringType<T> implements TypeAlias<T> {
       if (options.isOptional) {
         return value;
       }
-      throw new RangeError('value can not be `undefined`');
+      throw new RapidCheckError('required', 'value can not be `undefined`');
     }
 
     if (value === null) {
       if (this.options.isNullable) {
         return value;
       }
-      throw new RangeError('value can not be `null`');
+      throw new RapidCheckError('required', 'value can not be `null`');
     }
 
     if (typeof value !== 'string') {
-      throw new RangeError('value must be a string');
+      throw new RapidCheckError('string.type', 'value must be a string');
     }
     return value;
   }
