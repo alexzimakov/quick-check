@@ -1,0 +1,13 @@
+node_modules
+coverage
+esm
+cjs
+*.log
+.*
+!.gitignore
+!.nvmrc
+!.npmrc
+!.eslintrc.cjs
+!.eslintignore
+!.editorconfig
+!.husky

@@ -1,0 +1,49 @@
+{
+  "name": "rapid-check",
+  "version": "0.0.0",
+  "description": "A simple schema-based validation library for typescript and javascript.",
+  "homepage": "https://github.com/alexzimakov/rapid-check#readme",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./esm/index.js",
+      "require": "./cjs/index.js"
+    }
+  },
+  "main": "./cjs/index.js",
+  "types": "./cjs/index.d.ts",
+  "scripts": {
+    "prepare": "husky install",
+    "lint": "eslint '**/*.{js,ts}'",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
+    "build": "npm run build-esm && npm run build-cjs",
+    "build-esm": "node scripts/rm.js esm && npx tsc --p tsconfig.json",
+    "build-cjs": "node scripts/rm.js cjs && npx tsc --p tsconfig.cjs.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexzimakov/rapid-check.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alexzimakov/rapid-check/issues"
+  },
+  "author": {
+    "name": "Alexander Zimakov",
+    "email": "alexzmdev@gmail.com"
+  },
+  "lint-staged": {
+    "*.ts": "eslint --fix"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "5.48.1",
+    "@typescript-eslint/parser": "5.48.1",
+    "@vitest/coverage-c8": "0.27.1",
+    "eslint": "8.31.0",
+    "husky": "8.0.3",
+    "lint-staged": "13.1.0",
+    "typescript": "4.9.4",
+    "vitest": "0.27.1"
+  }
+}
