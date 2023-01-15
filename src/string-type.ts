@@ -1,23 +1,28 @@
 import { TypeAlias } from './type-alias.js';
 import { RapidCheckError } from './errors.js';
-import { Mapper } from './types.js';
+import { FormatMessage, Mapper } from './types.js';
 
 type StringTypeOptions = {
   isOptional: boolean;
   isNullable: boolean;
   shouldTrimValue: boolean;
   shouldCastValue: boolean;
+  typeError?: string;
   requiredError?: string;
-  invalidTypeError?: string;
 };
+
 type StringValidator = (value: string) => string;
-type StringValidatorMap = Map<string, StringValidator>;
+type StringValidators = { [name: string]: StringValidator };
+
+type MinLengthParams = { limit: number };
+type MaxLengthParams = { limit: number };
+type PatternParams = { regex: RegExp };
 
 export type StringTypeCreateParams = {
   cast?: boolean;
   trim?: boolean;
+  typeError?: string;
   requiredError?: string;
-  invalidTypeError?: string;
 };
 
 export class StringType<
@@ -25,28 +30,27 @@ export class StringType<
   Cast extends boolean
 > extends TypeAlias<Result> {
   protected readonly options: StringTypeOptions;
-  protected readonly validatorMap: StringValidatorMap;
-  protected readonly mapper?: Mapper;
+  protected readonly validators: StringValidators;
+  protected readonly mapper: Mapper | undefined;
 
   protected constructor(
     options: StringTypeOptions,
-    validatorMap: StringValidatorMap,
-    mapper?: Mapper
+    validators: StringValidators,
+    mapper: Mapper | undefined
   ) {
     super();
     this.options = options;
-    this.validatorMap = validatorMap;
+    this.validators = validators;
     this.mapper = mapper;
   }
 
-  static errorCodes = {
-    ...TypeAlias.errorCodes,
-    invalidType: 'string_invalid_type',
-  } as const;
-
-  static errorMessages = {
-    ...TypeAlias.errorMessages,
-    invalidType: 'Must be a string.',
+  static ErrorCodes = {
+    type: 'string.type',
+    required: 'string.required',
+    notEmpty: 'string.notEmpty',
+    minLength: 'string.minLength',
+    maxLength: 'string.maxLength',
+    pattern: 'string.pattern',
   } as const;
 
   static create<T extends StringTypeCreateParams>(params?: T): StringType<
@@ -58,8 +62,8 @@ export class StringType<
       shouldCastValue: params?.cast ?? false,
       shouldTrimValue: params?.trim ?? false,
       requiredError: params?.requiredError,
-      invalidTypeError: params?.invalidTypeError,
-    }, new Map());
+      typeError: params?.typeError,
+    }, {}, undefined);
   }
 
   optional(): StringType<
@@ -68,7 +72,7 @@ export class StringType<
     return new StringType({
       ...this.options,
       isOptional: true,
-    }, new Map(this.validatorMap), this.mapper);
+    }, { ...this.validators }, this.mapper);
   }
 
   nullable(): StringType<
@@ -77,7 +81,7 @@ export class StringType<
     return new StringType({
       ...this.options,
       isNullable: true,
-    }, new Map(this.validatorMap), this.mapper);
+    }, { ...this.validators }, this.mapper);
   }
 
   nullish(): StringType<
@@ -87,7 +91,7 @@ export class StringType<
       ...this.options,
       isOptional: true,
       isNullable: true,
-    }, new Map(this.validatorMap), this.mapper);
+    }, { ...this.validators }, this.mapper);
   }
 
   required(): StringType<
@@ -97,21 +101,21 @@ export class StringType<
       ...this.options,
       isOptional: false,
       isNullable: false,
-    }, new Map(this.validatorMap), this.mapper);
+    }, { ...this.validators }, this.mapper);
   }
 
   map<U>(mapper: (value: Result) => U): StringType<U, Cast> {
     return new StringType(
       { ...this.options },
-      new Map(this.validatorMap),
+      { ...this.validators },
       mapper
     );
   }
 
   parse(value: unknown): Result;
   parse(value: unknown): unknown {
-    const { errorCodes, errorMessages } = StringType;
-    const { options, validatorMap, mapper } = this;
+    const { ErrorCodes } = StringType;
+    const { options, validators, mapper } = this;
 
     if (options.shouldCastValue) {
       value = value == null ? '' : String(value);
@@ -125,15 +129,15 @@ export class StringType<
         return value;
       }
       throw new RapidCheckError(
-        errorCodes.required,
-        options.requiredError || errorMessages.required
+        ErrorCodes.required,
+        options.requiredError || 'Value cannot be null or undefined.'
       );
     }
 
     if (typeof value !== 'string') {
       throw new RapidCheckError(
-        errorCodes.invalidType,
-        options.invalidTypeError || errorMessages.invalidType
+        ErrorCodes.type,
+        options.typeError || 'Must be a string.'
       );
     }
 
@@ -141,7 +145,7 @@ export class StringType<
     if (options.shouldTrimValue) {
       res = value.trim();
     }
-    for (const validate of validatorMap.values()) {
+    for (const validate of Object.values(validators)) {
       res = validate(res);
     }
 
@@ -154,5 +158,121 @@ export class StringType<
     }
 
     return res;
+  }
+
+  notEmpty(params?: { message?: string }): StringType<Result, Cast> {
+    let message: string;
+    if (params?.message) {
+      message = params.message;
+    } else {
+      message = 'The value cannot be an empty string.';
+    }
+
+    const code = StringType.ErrorCodes.notEmpty;
+    const validator: StringValidator = (value) => {
+      if (value === '') {
+        throw new RapidCheckError(code, message);
+      }
+      return value;
+    };
+
+    return new StringType(
+      { ...this.options },
+      { ...this.validators, [code]: validator },
+      this.mapper
+    );
+  }
+
+  minLength(limit: number, params?: {
+    message?: string | FormatMessage<MinLengthParams>;
+  }): StringType<Result, Cast> {
+    let message: string;
+    if (params?.message) {
+      if (typeof params.message === 'function') {
+        message = params.message({ limit });
+      } else {
+        message = params.message;
+      }
+    } else {
+      message = `Must be at least ${limit} characters long.`;
+    }
+
+    const code = StringType.ErrorCodes.minLength;
+    const validator: StringValidator = (value) => {
+      if (value.length < limit) {
+        throw new RapidCheckError(code, message, {
+          params: { limit },
+        });
+      }
+      return value;
+    };
+
+    return new StringType(
+      { ...this.options },
+      { ...this.validators, [code]: validator },
+      this.mapper
+    );
+  }
+
+  maxLength(limit: number, params?: {
+    message?: string | FormatMessage<MaxLengthParams>;
+  }): StringType<Result, Cast> {
+    let message: string;
+    if (params?.message) {
+      if (typeof params.message === 'function') {
+        message = params.message({ limit });
+      } else {
+        message = params.message;
+      }
+    } else {
+      message = `Must be at most ${limit} characters long.`;
+    }
+
+    const code = StringType.ErrorCodes.maxLength;
+    const validator: StringValidator = (value) => {
+      if (value.length > limit) {
+        throw new RapidCheckError(code, message, {
+          params: { limit },
+        });
+      }
+      return value;
+    };
+
+    return new StringType(
+      { ...this.options },
+      { ...this.validators, [code]: validator },
+      this.mapper
+    );
+  }
+
+  pattern(regex: RegExp, params?: {
+    message?: string | FormatMessage<PatternParams>;
+  }): StringType<Result, Cast> {
+    let message: string;
+    if (params?.message) {
+      if (typeof params.message === 'function') {
+        message = params.message({ regex });
+      } else {
+        message = params.message;
+      }
+    } else {
+      message = `Value does not match to '${regex}' pattern.`;
+    }
+
+    const code = StringType.ErrorCodes.pattern;
+    const validator: StringValidator = (value) => {
+      if (!value.match(regex)) {
+        throw new RapidCheckError(code, message, {
+          params: { pattern: regex },
+        });
+      }
+      return value;
+    };
+
+    return new StringType(
+      { ...this.options },
+      { ...this.validators, [code]: validator },
+      this.mapper
+    );
   }
 }
