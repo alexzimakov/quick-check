@@ -1,64 +1,158 @@
-import { type TypeAlias, type TypeAliasOptions } from './type-alias.js';
+import { TypeAlias } from './type-alias.js';
 import { RapidCheckError } from './errors.js';
+import { Mapper } from './types.js';
 
-type StringTypeOptions = TypeAliasOptions;
+type StringTypeOptions = {
+  isOptional: boolean;
+  isNullable: boolean;
+  shouldTrimValue: boolean;
+  shouldCastValue: boolean;
+  requiredError?: string;
+  invalidTypeError?: string;
+};
+type StringValidator = (value: string) => string;
+type StringValidatorMap = Map<string, StringValidator>;
 
-export class StringType<T> implements TypeAlias<T> {
-  private readonly options: StringTypeOptions;
+export type StringTypeCreateParams = {
+  cast?: boolean;
+  trim?: boolean;
+  requiredError?: string;
+  invalidTypeError?: string;
+};
 
-  private constructor(options: StringTypeOptions) {
+export class StringType<
+  Result,
+  Cast extends boolean
+> extends TypeAlias<Result> {
+  protected readonly options: StringTypeOptions;
+  protected readonly validatorMap: StringValidatorMap;
+  protected readonly mapper?: Mapper;
+
+  protected constructor(
+    options: StringTypeOptions,
+    validatorMap: StringValidatorMap,
+    mapper?: Mapper
+  ) {
+    super();
     this.options = options;
+    this.validatorMap = validatorMap;
+    this.mapper = mapper;
   }
 
-  static create(): StringType<string> {
+  static errorCodes = {
+    ...TypeAlias.errorCodes,
+    invalidType: 'string_invalid_type',
+  } as const;
+
+  static errorMessages = {
+    ...TypeAlias.errorMessages,
+    invalidType: 'Must be a string.',
+  } as const;
+
+  static create<T extends StringTypeCreateParams>(params?: T): StringType<
+    string,
+    T extends { cast: true } ? true : false> {
     return new StringType({
       isOptional: false,
       isNullable: false,
-    });
+      shouldCastValue: params?.cast ?? false,
+      shouldTrimValue: params?.trim ?? false,
+      requiredError: params?.requiredError,
+      invalidTypeError: params?.invalidTypeError,
+    }, new Map());
   }
 
-  optional(): StringType<T | undefined> {
+  optional(): StringType<
+    Cast extends true ? Result : Result | undefined,
+    Cast> {
     return new StringType({
       ...this.options,
       isOptional: true,
-    });
+    }, new Map(this.validatorMap), this.mapper);
   }
 
-  nullable(): StringType<T | null> {
+  nullable(): StringType<
+    Cast extends true ? Result : Result | null,
+    Cast> {
     return new StringType({
       ...this.options,
       isNullable: true,
-    });
+    }, new Map(this.validatorMap), this.mapper);
   }
 
-  required(): StringType<NonNullable<T>> {
+  nullish(): StringType<
+    Cast extends true ? Result : Result | null | undefined,
+    Cast> {
+    return new StringType({
+      ...this.options,
+      isOptional: true,
+      isNullable: true,
+    }, new Map(this.validatorMap), this.mapper);
+  }
+
+  required(): StringType<
+    NonNullable<Result>,
+    Cast> {
     return new StringType({
       ...this.options,
       isOptional: false,
       isNullable: false,
-    });
+    }, new Map(this.validatorMap), this.mapper);
   }
 
-  parse(value: unknown): T;
+  map<U>(mapper: (value: Result) => U): StringType<U, Cast> {
+    return new StringType(
+      { ...this.options },
+      new Map(this.validatorMap),
+      mapper
+    );
+  }
+
+  parse(value: unknown): Result;
   parse(value: unknown): unknown {
-    const options = this.options;
-    if (value === undefined) {
-      if (options.isOptional) {
-        return value;
-      }
-      throw new RapidCheckError('required', 'value can not be `undefined`');
+    const { errorCodes, errorMessages } = StringType;
+    const { options, validatorMap, mapper } = this;
+
+    if (options.shouldCastValue) {
+      value = value == null ? '' : String(value);
     }
 
-    if (value === null) {
-      if (this.options.isNullable) {
+    if (value == null) {
+      if (value === undefined && options.isOptional) {
         return value;
       }
-      throw new RapidCheckError('required', 'value can not be `null`');
+      if (value === null && options.isNullable) {
+        return value;
+      }
+      throw new RapidCheckError(
+        errorCodes.required,
+        options.requiredError || errorMessages.required
+      );
     }
 
     if (typeof value !== 'string') {
-      throw new RapidCheckError('string.type', 'value must be a string');
+      throw new RapidCheckError(
+        errorCodes.invalidType,
+        options.invalidTypeError || errorMessages.invalidType
+      );
     }
-    return value;
+
+    let res = value;
+    if (options.shouldTrimValue) {
+      res = value.trim();
+    }
+    for (const validate of validatorMap.values()) {
+      res = validate(res);
+    }
+
+    if (typeof mapper === 'function') {
+      try {
+        return mapper(res);
+      } catch (err) {
+        throw RapidCheckError.of(err);
+      }
+    }
+
+    return res;
   }
 }

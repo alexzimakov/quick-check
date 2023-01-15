@@ -1,16 +1,17 @@
-export type TypeAliasOptions = {
-  isOptional: boolean;
-  isNullable: boolean;
-  requiredError?: string;
-  invalidTypeError?: string;
-};
+export abstract class TypeAlias<T> {
+  static errorCodes = {
+    required: 'required',
+  } as const;
 
-export interface TypeAlias<T> {
-  parse(value: unknown): T;
+  static errorMessages = {
+    required: 'Value is required.',
+  } as const;
 
-  optional(): TypeAlias<T | undefined>;
+  abstract parse(value: unknown): T;
 
-  nullable(): TypeAlias<T | null>;
+  abstract optional(): TypeAlias<T | undefined>;
 
-  required(): TypeAlias<NonNullable<T>>;
+  abstract nullable(): TypeAlias<T | null>;
+
+  abstract required(params: { message: string }): TypeAlias<NonNullable<T>>;
 }

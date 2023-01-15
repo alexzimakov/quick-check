@@ -23,6 +23,27 @@ export class RapidCheckError extends Error {
     this.cause = params?.cause ?? null;
   }
 
+  static unknownErrorCode = 'unknown_error';
+  static unknownErrorMessage = 'An unknown error occurred.';
+  static of(err: unknown): RapidCheckError {
+    if (err instanceof RapidCheckError) {
+      return err;
+    }
+
+    let code = RapidCheckError.unknownErrorCode;
+    let message = RapidCheckError.unknownErrorMessage;
+    if (typeof err === 'string') {
+      message = err;
+    } else if (err instanceof Error) {
+      message = err.message;
+      if ('code' in err && typeof err.code === 'string') {
+        code = err.code;
+      }
+    }
+
+    return new RapidCheckError(code, message, { cause: err });
+  }
+
   toString() {
     return `${this.name} [${this.code}]: ${this.message}`;
   }
