@@ -237,6 +237,32 @@ describe('pattern()', () => {
   });
 });
 
+describe('custom()', () => {
+  const weakPasswordError = new RapidCheckError(
+    'weakPassword',
+    'Password must contain at least 10 characters.'
+  );
+  const validatePassword = (value: string) => {
+    if (value.length < 10) {
+      throw weakPasswordError;
+    }
+    return value;
+  };
+  test('returns a value from custom validator', () => {
+    const schema = StringType.create().custom(validatePassword);
+    const value = 'Qwerty12345';
+    expect(schema.parse(value)).toBe(value);
+  });
+
+  test(
+    "throws an error when a passed value doesn't pass custom validator",
+    () => {
+      const schema = StringType.create().custom(validatePassword);
+      expect(() => schema.parse('Qwerty123')).toThrow(weakPasswordError);
+    }
+  );
+});
+
 describe('patterns', () => {
   describe('alphanumeric', () => {
     const schema = StringType.create().pattern(

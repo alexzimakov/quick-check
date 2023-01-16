@@ -51,6 +51,7 @@ export class StringType<
     minLength: 'string.minLength',
     maxLength: 'string.maxLength',
     pattern: 'string.pattern',
+    custom: 'string.custom',
   } as const;
 
   static Patterns = {
@@ -280,6 +281,15 @@ export class StringType<
       return value;
     };
 
+    return new StringType(
+      { ...this.options },
+      { ...this.validators, [code]: validator },
+      this.mapper
+    );
+  }
+
+  custom(validator: StringValidator): StringType<Result, Cast> {
+    const code = StringType.ErrorCodes.custom;
     return new StringType(
       { ...this.options },
       { ...this.validators, [code]: validator },
