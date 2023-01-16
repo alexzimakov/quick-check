@@ -107,7 +107,7 @@ export class StringType<
   }
 
   required(): StringType<
-    NonNullable<Result>,
+    Exclude<Result, null | undefined>,
     Cast> {
     return new StringType({
       ...this.options,

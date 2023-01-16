@@ -7,5 +7,7 @@ export abstract class TypeAlias<T> {
 
   abstract nullable(): TypeAlias<T | null>;
 
-  abstract required(params: { message: string }): TypeAlias<NonNullable<T>>;
+  abstract required(params: {
+    message: string;
+  }): TypeAlias<Exclude<T, null | undefined>>;
 }

@@ -96,7 +96,7 @@ export class NumberType<
   }
 
   required(): NumberType<
-    NonNullable<Result>,
+    Exclude<Result, null | undefined>,
     Cast> {
     return new NumberType({
       ...this.options,

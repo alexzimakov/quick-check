@@ -87,7 +87,7 @@ export class BooleanType<
   }
 
   required(): BooleanType<
-    NonNullable<Result>,
+    Exclude<Result, null | undefined>,
     Cast> {
     return new BooleanType({
       ...this.options,
