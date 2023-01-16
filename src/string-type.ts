@@ -1,4 +1,4 @@
-import { TypeAlias } from './type-alias.js';
+import { REQUIRED_ERROR, TypeAlias } from './type-alias.js';
 import { RapidCheckError } from './errors.js';
 import { FormatMessage, Mapper } from './types.js';
 
@@ -142,7 +142,7 @@ export class StringType<
       }
       throw new RapidCheckError(
         ErrorCodes.required,
-        options.requiredError || 'Value cannot be null or undefined.'
+        options.requiredError || REQUIRED_ERROR
       );
     }
 

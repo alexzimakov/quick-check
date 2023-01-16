@@ -1,3 +1,5 @@
+export const REQUIRED_ERROR = 'Value cannot be null or undefined.';
+
 export abstract class TypeAlias<T> {
   abstract parse(value: unknown): T;
 
