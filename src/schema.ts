@@ -1,19 +1,30 @@
-import { type StringParams, StringType } from './string-type.js';
-import { type NumberParams, NumberType } from './number-type.js';
-import { type BooleanParams, BooleanType } from './boolean-type.js';
+import { StringType } from './string-type.js';
+import { NumberType } from './number-type.js';
+import { BooleanType } from './boolean-type.js';
+import { EnumType } from './enum-type.js';
 
-export function string<T extends StringParams>(params?: T) {
-  return StringType.create(params);
-}
-string.ERROR_CODES = StringType.ErrorCodes;
-string.PATTERNS = StringType.Patterns;
+const STRING_PATTERNS = StringType.Patterns;
+const STRING_ERROR_CODES = StringType.ErrorCodes;
+const NUMBER_ERROR_CODES = NumberType.ErrorCodes;
+const BOOLEAN_ERROR_CODES = BooleanType.ErrorCodes;
+const ENUM_ERROR_CODES = EnumType.ErrorCodes;
 
-export function number<T extends NumberParams>(params?: T) {
-  return NumberType.create(params);
-}
-number.ERROR_CODES = NumberType.ErrorCodes;
+const createStringType = StringType.create;
+const createNumberType = NumberType.create;
+const createBooleanType = BooleanType.create;
+const createEnumType = EnumType.create;
 
-export function boolean<T extends BooleanParams>(params?: T) {
-  return BooleanType.create(params);
-}
-boolean.ERROR_CODES = BooleanType.ErrorCodes;
+export {
+  // Constants
+  STRING_PATTERNS,
+  STRING_ERROR_CODES,
+  NUMBER_ERROR_CODES,
+  BOOLEAN_ERROR_CODES,
+  ENUM_ERROR_CODES,
+
+  // Public methods
+  createStringType as string,
+  createNumberType as number,
+  createBooleanType as boolean,
+  createEnumType as enum,
+};
