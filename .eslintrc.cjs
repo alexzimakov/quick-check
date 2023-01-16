@@ -327,7 +327,7 @@ module.exports = {
     'multiline-ternary': 'off',
     'new-parens': 'error',
     'newline-per-chained-call': ['error', { ignoreChainWithDepth: 4 }],
-    'no-extra-parens': 'error',
+    'no-extra-parens': 'off',
     'no-mixed-spaces-and-tabs': 'error',
     'no-multi-spaces': 'error',
     'no-multiple-empty-lines': ['error', {
