@@ -236,3 +236,276 @@ describe('pattern()', () => {
     ).toThrow(message);
   });
 });
+
+describe('patterns', () => {
+  describe('alphanumeric', () => {
+    const schema = StringType.create().pattern(
+      StringType.Patterns.alphanumeric
+    );
+
+    describe('valid:', () => {
+      const values = ['0', 'a', 'a0', 'abc123xyz456'];
+      for (const value of values) {
+        test(format(value), () => {
+          expect(schema.parse(value)).toBe(value);
+        });
+      }
+    });
+
+    describe('invalid:', () => {
+      const values = ['', '-1', ' ', 'abc 123'];
+      for (const value of values) {
+        test(format(value), () => {
+          expect(() => schema.parse(value)).toThrow();
+        });
+      }
+    });
+  });
+
+  describe('positiveInteger', () => {
+    const schema = StringType.create().pattern(
+      StringType.Patterns.positiveInteger
+    );
+
+    describe('valid:', () => {
+      const values = ['0', '01', '1', '9876543210'];
+      for (const value of values) {
+        test(format(value), () => {
+          expect(schema.parse(value)).toBe(value);
+        });
+      }
+    });
+
+    describe('invalid:', () => {
+      const values = ['-1', '1.2', '1e5', 'one', ''];
+      for (const value of values) {
+        test(format(value), () => {
+          expect(() => schema.parse(value)).toThrow();
+        });
+      }
+    });
+  });
+
+  describe('integer', () => {
+    const schema = StringType.create().pattern(
+      StringType.Patterns.integer
+    );
+
+    describe('valid:', () => {
+      const values = ['0', '01', '1', '+1', '-1', '9876543210'];
+      for (const value of values) {
+        test(format(value), () => {
+          expect(schema.parse(value)).toBe(value);
+        });
+      }
+    });
+
+    describe('invalid:', () => {
+      const values = ['1.2', '1e5', 'one', ''];
+      for (const value of values) {
+        test(format(value), () => {
+          expect(() => schema.parse(value)).toThrow();
+        });
+      }
+    });
+  });
+
+  describe('float', () => {
+    const schema = StringType.create().pattern(
+      StringType.Patterns.float
+    );
+
+    describe('valid:', () => {
+      const values = ['0', '01', '1', '+1', '-1', '34', '34.76'];
+      for (const value of values) {
+        test(format(value), () => {
+          expect(schema.parse(value)).toBe(value);
+        });
+      }
+    });
+
+    describe('invalid:', () => {
+      const values = ['1e5', 'one', 'one.two', ''];
+      for (const value of values) {
+        test(format(value), () => {
+          expect(() => schema.parse(value)).toThrow();
+        });
+      }
+    });
+  });
+
+  describe('email', () => {
+    const schema = StringType.create().pattern(
+      StringType.Patterns.email
+    );
+
+    describe('valid:', () => {
+      const values = [
+        'JoHnDoE@test.local',
+        'john.doe@test.local.net',
+        'john.doe@local.agency',
+        'a@a.ac',
+        '$A12345@example.com',
+        '!foo!bar%abc@example.com',
+      ];
+      for (const value of values) {
+        test(format(value), () => {
+          expect(schema.parse(value)).toBe(value);
+        });
+      }
+    });
+
+    describe('invalid:', () => {
+      const values = [
+        'invalid@',
+        'invalid.com',
+        '@invalid.com',
+        'with@trailing.dot.',
+        'ends.with.dot.@example.com',
+        'multiple..dots@example.com',
+        'ShortTopLevel@domain.c',
+        'somename@ｇｍａｉｌ.com',
+        'ｍａｉｌ@gmail.com',
+        'white space@example.com',
+        'whitespace@example.co m',
+        'whitespace@exam\u2800ple.com',
+        'username@domain.©om',
+      ];
+      for (const value of values) {
+        test(format(value), () => {
+          expect(() => schema.parse(value)).toThrow();
+        });
+      }
+    });
+  });
+
+  describe('dateISO', () => {
+    const schema = StringType.create().pattern(
+      StringType.Patterns.dateISO
+    );
+
+    describe('valid:', () => {
+      const values = [
+        '0000-01-01',
+        '9999-12-31',
+        '2010-08-20',
+      ];
+      for (const value of values) {
+        test(format(value), () => {
+          expect(schema.parse(value)).toBe(value);
+        });
+      }
+    });
+
+    describe('invalid:', () => {
+      const values = [
+        '0000-00-00',
+        '20100-08-20',
+        '2010-13-20',
+        '2010-08-32',
+      ];
+      for (const value of values) {
+        test(format(value), () => {
+          expect(() => schema.parse(value)).toThrow();
+        });
+      }
+    });
+  });
+
+  describe('timeISO', () => {
+    const schema = StringType.create().pattern(
+      StringType.Patterns.timeISO
+    );
+
+    describe('valid:', () => {
+      const timeZones = [
+        'Z',
+        '+05',
+        '+05:30',
+        '-05',
+        '-05:30',
+      ];
+      const times = [
+        '17:21',
+        '17:21:59',
+        '17:21:59.914',
+      ];
+      for (const timeZone of timeZones) {
+        for (const time of times) {
+          const value = time + timeZone;
+          test(format(value), () => {
+            expect(schema.parse(value)).toBe(value);
+          });
+        }
+      }
+    });
+
+    describe('invalid:', () => {
+      const values = [
+        '24:00',
+        '1721',
+        '172159',
+        '24:21',
+        '17:60',
+        '17:21:60.914',
+        '17:21:59.1000',
+      ];
+      for (const value of values) {
+        test(format(value), () => {
+          expect(() => schema.parse(value)).toThrow();
+        });
+      }
+    });
+  });
+
+  describe('dateTimeISO', () => {
+    const schema = StringType.create().pattern(
+      StringType.Patterns.dateTimeISO
+    );
+
+    describe('valid:', () => {
+      const timeZones = [
+        'Z',
+        '+05',
+        '+05:30',
+        '-05',
+        '-05:30',
+      ];
+      const dateTimes = [
+        '2010-08-20T17:21',
+        '2010-08-20 17:21',
+        '2010-08-20T17:21:59',
+        '2010-08-20 17:21:59',
+        '2010-08-20T17:21:59.914',
+        '2010-08-20 17:21:59.914',
+      ];
+      for (const timeZone of timeZones) {
+        for (const dateTime of dateTimes) {
+          const value = dateTime + timeZone;
+          test(format(value), () => {
+            expect(schema.parse(value)).toBe(value);
+          });
+        }
+      }
+    });
+
+    describe('invalid:', () => {
+      const values = [
+        '201008201721',
+        '2010-08-20t17:21',
+        '20100-08-20T17:21',
+        '2010-13-20T17:21',
+        '2010-08-32T17:21',
+        '2010-08-20T24:21',
+        '2010-08-20T17:60',
+        '2010-08-20T17:21:60',
+        '2010-08-20T17:21:59.1000',
+      ];
+      for (const value of values) {
+        test(format(value), () => {
+          expect(() => schema.parse(value)).toThrow();
+        });
+      }
+    });
+  });
+});

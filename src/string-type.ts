@@ -53,6 +53,17 @@ export class StringType<
     pattern: 'string.pattern',
   } as const;
 
+  static Patterns = {
+    alphanumeric: /^[A-Z0-9]+$/i,
+    positiveInteger: /^[0-9]+$/,
+    integer: /^[+-]?[0-9]+$/,
+    float: /^[-+]?([0-9]+(\.[0-9]+)?|\.[0-9]+)$/,
+    email: /^[\w!#$%&'*+/=?`{|}~^-]+(?:\.[\w!#$%&'*+/=?`{|}~^-]+)*@(?:[A-Z0-9-]+\.)+[A-Z]{2,}$/i,
+    dateISO: /^([0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])$/,
+    timeISO: /^([01][0-9]|2[0-3]):([0-5][0-9])(:([0-5][0-9])(\.[0-9]{3})?)?(Z|[+-](?:2[0-3]|[01][0-9])(?::([0-5][0-9]))?)?$/,
+    dateTimeISO: /^([0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])[T ]([01][0-9]|2[0-3]):([0-5][0-9])(:([0-5][0-9])(\.[0-9]{3})?)?(Z|[+-](?:2[0-3]|[01][0-9])(?::([0-5][0-9]))?)?$/,
+  } as const;
+
   static create<T extends StringTypeCreateParams>(params?: T): StringType<
     string,
     T extends { cast: true } ? true : false> {
