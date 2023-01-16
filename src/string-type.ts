@@ -18,7 +18,7 @@ type MinLengthParams = { limit: number };
 type MaxLengthParams = { limit: number };
 type PatternParams = { regex: RegExp };
 
-export type StringTypeParams = {
+export type StringParams = {
   cast?: boolean;
   trim?: boolean;
   typeError?: string;
@@ -65,7 +65,7 @@ export class StringType<
     dateTimeISO: /^([0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])[T ]([01][0-9]|2[0-3]):([0-5][0-9])(:([0-5][0-9])(\.[0-9]{3})?)?(Z|[+-](?:2[0-3]|[01][0-9])(?::([0-5][0-9]))?)?$/,
   } as const;
 
-  static create<T extends StringTypeParams>(params?: T): StringType<
+  static create<T extends StringParams>(params?: T): StringType<
     string,
     T extends { cast: true } ? true : false> {
     return new StringType({
