@@ -172,7 +172,7 @@ module.exports = {
     'no-return-await': 'error',
     'no-script-url': 'error',
     'no-sequences': 'error',
-    'no-shadow': 'error',
+    'no-shadow': 'off',
     'no-shadow-restricted-names': 'error',
     'no-ternary': 'off',
     'no-throw-literal': 'error',
