@@ -1,7 +1,8 @@
-import { REQUIRED_ERROR, TypeAlias } from './type-alias.js';
-import { Mapper } from './types.js';
-import { RapidCheckError } from './error.js';
-import { pluralize } from './util.js';
+import { type MapTypeFn } from '../types.js';
+import { TypeAlias } from './type-alias.js';
+import { RapidCheckError } from '../error.js';
+import { requiredError } from './error-messages.js';
+import { pluralize } from '../util.js';
 
 type ArrayTypeOptions = {
   isOptional: boolean;
@@ -27,13 +28,13 @@ export class ArrayType<
   protected readonly itemSchema: TypeAlias<unknown>;
   protected readonly options: ArrayTypeOptions;
   protected readonly validators: ArrayValidators<Item>;
-  protected readonly mapper: Mapper | undefined;
+  protected readonly mapper: MapTypeFn | undefined;
 
   protected constructor(
     itemSchema: TypeAlias<unknown>,
     options: ArrayTypeOptions,
     validators: ArrayValidators<Item>,
-    mapper: Mapper | undefined
+    mapper: MapTypeFn | undefined
   ) {
     super();
     this.itemSchema = itemSchema;
@@ -151,7 +152,7 @@ export class ArrayType<
       }
       throw new RapidCheckError(
         ErrorCodes.required,
-        options.requiredError || REQUIRED_ERROR
+        options.requiredError || requiredError
       );
     }
 

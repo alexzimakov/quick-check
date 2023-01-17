@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { NumberType } from '../number-type.js';
+import { NumberType } from '../type-aliases/number-type.js';
 import { RapidCheckError } from '../error.js';
 import { format } from './test-util.js';
 

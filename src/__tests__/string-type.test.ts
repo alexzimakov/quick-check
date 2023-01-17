@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { StringType } from '../string-type.js';
+import { StringType } from '../type-aliases/string-type.js';
 import { RapidCheckError } from '../error.js';
 import { format } from './test-util.js';
 

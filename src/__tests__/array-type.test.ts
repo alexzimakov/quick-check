@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { ArrayType } from '../array-type.js';
-import { StringType } from '../string-type.js';
+import { ArrayType } from '../type-aliases/array-type.js';
+import { StringType } from '../type-aliases/string-type.js';
 import { RapidCheckError } from '../error.js';
 import { format } from './test-util.js';
 

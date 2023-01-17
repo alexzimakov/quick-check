@@ -1,6 +1,7 @@
-import { REQUIRED_ERROR, TypeAlias } from './type-alias.js';
-import { RapidCheckError } from './error.js';
-import { Mapper } from './types.js';
+import { type MapTypeFn } from '../types.js';
+import { TypeAlias } from './type-alias.js';
+import { RapidCheckError } from '../error.js';
+import { requiredError } from './error-messages.js';
 
 type EnumTypeOptions<T> = {
   values: readonly T[];
@@ -22,11 +23,11 @@ export class EnumType<
   Cast extends boolean
 > extends TypeAlias<Result> {
   protected readonly options: EnumTypeOptions<Value>;
-  protected readonly mapper: Mapper | undefined;
+  protected readonly mapper: MapTypeFn | undefined;
 
   protected constructor(
     options: EnumTypeOptions<Value>,
-    mapper: Mapper | undefined
+    mapper: MapTypeFn | undefined
   ) {
     super();
     this.options = options;
@@ -130,7 +131,7 @@ export class EnumType<
       }
       throw new RapidCheckError(
         ErrorCodes.required,
-        options.requiredError || REQUIRED_ERROR
+        options.requiredError || requiredError
       );
     }
 

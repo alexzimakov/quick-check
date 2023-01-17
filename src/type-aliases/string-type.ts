@@ -1,7 +1,8 @@
-import { REQUIRED_ERROR, TypeAlias } from './type-alias.js';
-import { RapidCheckError } from './error.js';
-import { Mapper } from './types.js';
-import { pluralize } from './util.js';
+import { type MapTypeFn } from '../types.js';
+import { TypeAlias } from './type-alias.js';
+import { RapidCheckError } from '../error.js';
+import { requiredError } from './error-messages.js';
+import { pluralize } from '../util.js';
 
 type StringTypeOptions = {
   isOptional: boolean;
@@ -28,12 +29,12 @@ export class StringType<
 > extends TypeAlias<Result> {
   protected readonly options: StringTypeOptions;
   protected readonly validators: StringValidators;
-  protected readonly mapper: Mapper | undefined;
+  protected readonly mapper: MapTypeFn | undefined;
 
   protected constructor(
     options: StringTypeOptions,
     validators: StringValidators,
-    mapper: Mapper | undefined
+    mapper: MapTypeFn | undefined
   ) {
     super();
     this.options = options;
@@ -139,7 +140,7 @@ export class StringType<
       }
       throw new RapidCheckError(
         ErrorCodes.required,
-        options.requiredError || REQUIRED_ERROR
+        options.requiredError || requiredError
       );
     }
 

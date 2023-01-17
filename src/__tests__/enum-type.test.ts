@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { EnumType } from '../enum-type.js';
+import { EnumType } from '../type-aliases/enum-type.js';
 import { RapidCheckError } from '../error.js';
 import { format } from './test-util.js';
 

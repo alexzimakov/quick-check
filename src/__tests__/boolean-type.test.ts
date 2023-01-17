@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { BooleanType } from '../boolean-type.js';
+import { BooleanType } from '../type-aliases/boolean-type.js';
 import { RapidCheckError } from '../error.js';
 import { format } from './test-util.js';
 

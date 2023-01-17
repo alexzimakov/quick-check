@@ -1,8 +1,8 @@
-import { StringType } from './string-type.js';
-import { NumberType } from './number-type.js';
-import { BooleanType } from './boolean-type.js';
-import { EnumType } from './enum-type.js';
-import { ArrayType } from './array-type.js';
+import { StringType } from './type-aliases/string-type.js';
+import { NumberType } from './type-aliases/number-type.js';
+import { BooleanType } from './type-aliases/boolean-type.js';
+import { EnumType } from './type-aliases/enum-type.js';
+import { ArrayType } from './type-aliases/array-type.js';
 
 const STRING_PATTERNS = StringType.Patterns;
 const STRING_ERROR_CODES = StringType.ErrorCodes;

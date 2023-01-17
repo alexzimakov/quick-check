@@ -1,6 +1,7 @@
-import { REQUIRED_ERROR, TypeAlias } from './type-alias.js';
-import { RapidCheckError } from './error.js';
-import { Mapper } from './types.js';
+import { type MapTypeFn } from '../types.js';
+import { TypeAlias } from './type-alias.js';
+import { RapidCheckError } from '../error.js';
+import { requiredError } from './error-messages.js';
 
 type BooleanTypeOptions = {
   isOptional: boolean;
@@ -25,12 +26,12 @@ export class BooleanType<
 > extends TypeAlias<Result> {
   protected readonly options: BooleanTypeOptions;
   protected readonly validators: BooleanValidators;
-  protected readonly mapper: Mapper | undefined;
+  protected readonly mapper: MapTypeFn | undefined;
 
   protected constructor(
     options: BooleanTypeOptions,
     validators: BooleanValidators,
-    mapper: Mapper | undefined
+    mapper: MapTypeFn | undefined
   ) {
     super();
     this.options = options;
@@ -139,7 +140,7 @@ export class BooleanType<
       }
       throw new RapidCheckError(
         ErrorCodes.required,
-        options.requiredError || REQUIRED_ERROR
+        options.requiredError || requiredError
       );
     }
 
