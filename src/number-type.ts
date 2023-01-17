@@ -1,6 +1,6 @@
 import { REQUIRED_ERROR, TypeAlias } from './type-alias.js';
-import { RapidCheckError } from './errors.js';
-import { FormatMessage, Mapper } from './types.js';
+import { RapidCheckError } from './error.js';
+import { Mapper } from './types.js';
 
 type NumberTypeOptions = {
   isOptional: boolean;
@@ -12,11 +12,6 @@ type NumberTypeOptions = {
 
 type NumberValidator = (value: number) => number;
 type NumberValidators = { [name: string]: NumberValidator };
-
-type MinParams = { limit: number };
-type MaxParams = { limit: number };
-type GreaterThanParams = { limit: number };
-type LessThanParams = { limit: number };
 
 export type NumberParams = {
   cast?: boolean;
@@ -105,7 +100,7 @@ export class NumberType<
     }, { ...this.validators }, this.mapper);
   }
 
-  map<U>(mapper: (value: Result) => U): NumberType<U, Cast> {
+  map<U>(mapper: (value: number) => U): NumberType<U, Cast> {
     return new NumberType(
       { ...this.options },
       { ...this.validators },
@@ -214,23 +209,23 @@ export class NumberType<
     );
   }
 
-  min(limit: number, params?: {
-    message?: string | FormatMessage<MinParams>,
+  min(min: number, params?: {
+    message?: string | ((params: { min: number }) => string);
   }): NumberType<Result, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
-        message = params.message({ limit });
+        message = params.message({ min });
       } else {
         message = params.message;
       }
     } else {
-      message = `Must be greater than or equal to ${limit}.`;
+      message = `The number must be greater than or equal to ${min}.`;
     }
 
     const code = NumberType.ErrorCodes.min;
     const validator: NumberValidator = (value) => {
-      if (value < limit) {
+      if (value < min) {
         throw new RapidCheckError(code, message);
       }
       return value;
@@ -243,23 +238,23 @@ export class NumberType<
     );
   }
 
-  max(limit: number, params?: {
-    message?: string | FormatMessage<MaxParams>,
+  max(max: number, params?: {
+    message?: string | ((params: { max: number }) => string);
   }): NumberType<Result, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
-        message = params.message({ limit });
+        message = params.message({ max });
       } else {
         message = params.message;
       }
     } else {
-      message = `Must be less than or equal to ${limit}.`;
+      message = `The number must be less than or equal to ${max}.`;
     }
 
     const code = NumberType.ErrorCodes.max;
     const validator: NumberValidator = (value) => {
-      if (value > limit) {
+      if (value > max) {
         throw new RapidCheckError(code, message);
       }
       return value;
@@ -272,23 +267,23 @@ export class NumberType<
     );
   }
 
-  greaterThan(limit: number, params?: {
-    message?: string | FormatMessage<GreaterThanParams>,
+  greaterThan(min: number, params?: {
+    message?: string | ((params: { min: number }) => string);
   }): NumberType<Result, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
-        message = params.message({ limit });
+        message = params.message({ min });
       } else {
         message = params.message;
       }
     } else {
-      message = `Must be greater than ${limit}.`;
+      message = `The value must be greater than ${min}.`;
     }
 
     const code = NumberType.ErrorCodes.lessThan;
     const validator: NumberValidator = (value) => {
-      if (value <= limit) {
+      if (value <= min) {
         throw new RapidCheckError(code, message);
       }
       return value;
@@ -301,23 +296,23 @@ export class NumberType<
     );
   }
 
-  lessThan(limit: number, params?: {
-    message?: string | FormatMessage<LessThanParams>,
+  lessThan(max: number, params?: {
+    message?: string | ((params: { max: number }) => string);
   }): NumberType<Result, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
-        message = params.message({ limit });
+        message = params.message({ max });
       } else {
         message = params.message;
       }
     } else {
-      message = `Must be less than ${limit}.`;
+      message = `The value must be less than ${max}.`;
     }
 
     const code = NumberType.ErrorCodes.lessThan;
     const validator: NumberValidator = (value) => {
-      if (value >= limit) {
+      if (value >= max) {
         throw new RapidCheckError(code, message);
       }
       return value;

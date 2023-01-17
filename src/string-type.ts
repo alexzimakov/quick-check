@@ -1,6 +1,7 @@
 import { REQUIRED_ERROR, TypeAlias } from './type-alias.js';
-import { RapidCheckError } from './errors.js';
-import { FormatMessage, Mapper } from './types.js';
+import { RapidCheckError } from './error.js';
+import { Mapper } from './types.js';
+import { pluralize } from './util.js';
 
 type StringTypeOptions = {
   isOptional: boolean;
@@ -13,10 +14,6 @@ type StringTypeOptions = {
 
 type StringValidator = (value: string) => string;
 type StringValidators = { [name: string]: StringValidator };
-
-type MinLengthParams = { limit: number };
-type MaxLengthParams = { limit: number };
-type PatternParams = { regex: RegExp };
 
 export type StringParams = {
   cast?: boolean;
@@ -116,7 +113,7 @@ export class StringType<
     }, { ...this.validators }, this.mapper);
   }
 
-  map<U>(mapper: (value: Result) => U): StringType<U, Cast> {
+  map<U>(mapper: (value: string) => U): StringType<U, Cast> {
     return new StringType(
       { ...this.options },
       { ...this.validators },
@@ -196,7 +193,7 @@ export class StringType<
   }
 
   minLength(limit: number, params?: {
-    message?: string | FormatMessage<MinLengthParams>;
+    message?: string | ((params: { limit: number }) => string);
   }): StringType<Result, Cast> {
     let message: string;
     if (params?.message) {
@@ -206,7 +203,9 @@ export class StringType<
         message = params.message;
       }
     } else {
-      message = `Must be at least ${limit} characters long.`;
+      message = `The string must be at least ${
+        pluralize(limit, 'character', 'characters')
+      } long.`;
     }
 
     const code = StringType.ErrorCodes.minLength;
@@ -227,7 +226,7 @@ export class StringType<
   }
 
   maxLength(limit: number, params?: {
-    message?: string | FormatMessage<MaxLengthParams>;
+    message?: string | ((params: { limit: number }) => string);
   }): StringType<Result, Cast> {
     let message: string;
     if (params?.message) {
@@ -237,7 +236,9 @@ export class StringType<
         message = params.message;
       }
     } else {
-      message = `Must be at most ${limit} characters long.`;
+      message = `The string must be at most ${
+        pluralize(limit, 'character', 'characters')
+      } long.`;
     }
 
     const code = StringType.ErrorCodes.maxLength;
@@ -258,7 +259,7 @@ export class StringType<
   }
 
   pattern(regex: RegExp, params?: {
-    message?: string | FormatMessage<PatternParams>;
+    message?: string | ((params: { regex: RegExp }) => string);
   }): StringType<Result, Cast> {
     let message: string;
     if (params?.message) {
@@ -268,7 +269,7 @@ export class StringType<
         message = params.message;
       }
     } else {
-      message = `Value does not match to '${regex}' pattern.`;
+      message = `The string does not match to \`${regex}\` pattern.`;
     }
 
     const code = StringType.ErrorCodes.pattern;

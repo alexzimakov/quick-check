@@ -1,5 +1,5 @@
 import { REQUIRED_ERROR, TypeAlias } from './type-alias.js';
-import { RapidCheckError } from './errors.js';
+import { RapidCheckError } from './error.js';
 import { Mapper } from './types.js';
 
 type BooleanTypeOptions = {
@@ -96,7 +96,7 @@ export class BooleanType<
     }, { ...this.validators }, this.mapper);
   }
 
-  map<U>(mapper: (value: Result) => U): BooleanType<U, Cast> {
+  map<U>(mapper: (value: boolean) => U): BooleanType<U, Cast> {
     return new BooleanType(
       { ...this.options },
       { ...this.validators },

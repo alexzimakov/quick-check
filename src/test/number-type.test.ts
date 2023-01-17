@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
-import { RapidCheckError } from '../errors.js';
 import { NumberType } from '../number-type.js';
-import { format } from './util.js';
+import { RapidCheckError } from '../error.js';
+import { format } from './test-util.js';
 
 describe('positive cases', () => {
   const valid = [0, 1, -1, 0.189, 1e3];

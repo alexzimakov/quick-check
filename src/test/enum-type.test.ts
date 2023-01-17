@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
-import { RapidCheckError } from '../errors.js';
 import { EnumType } from '../enum-type.js';
-import { format } from './util.js';
+import { RapidCheckError } from '../error.js';
+import { format } from './test-util.js';
 
 describe('positive cases', () => {
   const values = ['north', 'south', 'east', 'west'] as const;

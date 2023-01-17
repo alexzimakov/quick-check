@@ -1,10 +1,9 @@
 import { REQUIRED_ERROR, TypeAlias } from './type-alias.js';
-import { RapidCheckError } from './errors.js';
+import { RapidCheckError } from './error.js';
 import { Mapper } from './types.js';
 
-type EnumTypeOptions = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  values: readonly any[];
+type EnumTypeOptions<T> = {
+  values: readonly T[];
   isOptional: boolean;
   isNullable: boolean;
   typeError?: string;
@@ -18,14 +17,15 @@ export type EnumParams = {
 };
 
 export class EnumType<
+  Value,
   Result,
   Cast extends boolean
 > extends TypeAlias<Result> {
-  protected readonly options: EnumTypeOptions;
+  protected readonly options: EnumTypeOptions<Value>;
   protected readonly mapper: Mapper | undefined;
 
   protected constructor(
-    options: EnumTypeOptions,
+    options: EnumTypeOptions<Value>,
     mapper: Mapper | undefined
   ) {
     super();
@@ -39,10 +39,11 @@ export class EnumType<
   } as const;
 
   static create<
-    Values extends readonly unknown[],
+    Value,
     Params extends EnumParams
-  >(values: Values, params?: Params): EnumType<
-    Values[number],
+  >(values: readonly Value[], params?: Params): EnumType<
+    Value,
+    Value,
     Params extends { cast: true } ? true : false> {
     return new EnumType({
       values,
@@ -70,6 +71,7 @@ export class EnumType<
   }
 
   optional(): EnumType<
+    Value,
     Cast extends true ? Result : Result | undefined,
     Cast> {
     return new EnumType({
@@ -79,6 +81,7 @@ export class EnumType<
   }
 
   nullable(): EnumType<
+    Value,
     Cast extends true ? Result : Result | null,
     Cast> {
     return new EnumType({
@@ -88,6 +91,7 @@ export class EnumType<
   }
 
   nullish(): EnumType<
+    Value,
     Cast extends true ? Result : Result | null | undefined,
     Cast> {
     return new EnumType({
@@ -98,6 +102,7 @@ export class EnumType<
   }
 
   required(): EnumType<
+    Value,
     Exclude<Result, | null | undefined>,
     Cast> {
     return new EnumType({
@@ -107,7 +112,7 @@ export class EnumType<
     }, this.mapper);
   }
 
-  map<U>(mapper: (value: Result) => U): EnumType<U, Cast> {
+  map<U>(mapper: (value: Value) => U): EnumType<Value, U, Cast> {
     return new EnumType({ ...this.options }, mapper);
   }
 
@@ -130,7 +135,7 @@ export class EnumType<
     }
 
     const values = options.values;
-    if (!options.values.includes(value)) {
+    if (!options.values.includes(value as Value)) {
       throw new RapidCheckError(
         ErrorCodes.type,
         options.typeError || `Must be one of ${EnumType.formatValues(values)}`

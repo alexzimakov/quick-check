@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
-import { RapidCheckError } from '../errors.js';
 import { BooleanType } from '../boolean-type.js';
-import { format } from './util.js';
+import { RapidCheckError } from '../error.js';
+import { format } from './test-util.js';
 
 describe('positive cases', () => {
   const valid = [true];
