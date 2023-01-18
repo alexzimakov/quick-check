@@ -15,10 +15,12 @@
   "types": "./cjs/index.d.ts",
   "scripts": {
     "prepare": "husky install",
+    "preversion": "npm run build",
     "lint": "eslint '**/*.{js,ts}'",
     "check-types": "tsc --p tsconfig.json --noEmit",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
+    "prebuild": "npm run lint && npm run coverage",
     "build": "npm run build-esm && npm run build-cjs",
     "build-esm": "node scripts/rm.js esm && npx tsc --p tsconfig.json",
     "build-cjs": "node scripts/rm.js cjs && npx tsc --p tsconfig.cjs.json"
