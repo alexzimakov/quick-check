@@ -1,8 +1,8 @@
 {
-  "name": "rapid-check",
+  "name": "safe-data",
   "version": "0.0.0",
   "description": "A simple schema-based validation library for typescript and javascript.",
-  "homepage": "https://github.com/alexzimakov/rapid-check#readme",
+  "homepage": "https://github.com/alexzimakov/safe-data#readme",
   "license": "MIT",
   "type": "module",
   "engines": {
@@ -34,10 +34,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/alexzimakov/rapid-check.git"
+    "url": "https://github.com/alexzimakov/safe-data.git"
   },
   "bugs": {
-    "url": "https://github.com/alexzimakov/rapid-check/issues"
+    "url": "https://github.com/alexzimakov/safe-data/issues"
   },
   "author": {
     "name": "Alexander Zimakov",
