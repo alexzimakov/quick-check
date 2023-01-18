@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { NumberType } from '../type-aliases/number-type.js';
-import { RapidCheckError } from '../error.js';
+import { ParseError } from '../parse-error.js';
 import { format } from './test-util.js';
 
 describe('positive cases', () => {
@@ -31,7 +31,7 @@ describe('negative cases', () => {
   const schema = NumberType.create();
   invalid.forEach((value) => {
     test(`should throw an error when value is ${format(value)}`, () => {
-      expect(() => schema.parse(value)).toThrow(RapidCheckError);
+      expect(() => schema.parse(value)).toThrow(ParseError);
     });
   });
 });
@@ -70,7 +70,7 @@ describe('optional()', () => {
   });
 
   test('throws an error when a passed value is null', () => {
-    expect(() => schema.parse(null)).toThrow(RapidCheckError);
+    expect(() => schema.parse(null)).toThrow(ParseError);
   });
 });
 
@@ -82,7 +82,7 @@ describe('nullable()', () => {
   });
 
   test('throws an error when a passed value is undefined', () => {
-    expect(() => schema.parse(undefined)).toThrow(RapidCheckError);
+    expect(() => schema.parse(undefined)).toThrow(ParseError);
   });
 });
 
@@ -103,11 +103,11 @@ describe('required()', () => {
   const schema = optionalSchema.required();
 
   test('throws an error when a passed value is undefined', () => {
-    expect(() => schema.parse(undefined)).toThrow(RapidCheckError);
+    expect(() => schema.parse(undefined)).toThrow(ParseError);
   });
 
   test('throws an error when a passed value is null', () => {
-    expect(() => schema.parse(null)).toThrow(RapidCheckError);
+    expect(() => schema.parse(null)).toThrow(ParseError);
   });
 });
 
@@ -118,7 +118,7 @@ describe('map()', () => {
   });
 
   test('rethrows any error from the `mapper` function', () => {
-    const error = new RapidCheckError('invalid_state', 'Invalid state.');
+    const error = new ParseError('invalid_state', 'Invalid state.');
     const schema = NumberType.create().map((value) => {
       if (value < 10) {
         throw error;
@@ -138,7 +138,7 @@ describe('int()', () => {
 
   test('throws an error when a passed value is not an integer', () => {
     const schema = NumberType.create().int();
-    expect(() => schema.parse(10.5)).toThrow(RapidCheckError);
+    expect(() => schema.parse(10.5)).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
@@ -158,7 +158,7 @@ describe('positive()', () => {
 
   test('throws an error when the a passed value is less than 0', () => {
     const schema = NumberType.create().positive();
-    expect(() => schema.parse(-1)).toThrow(RapidCheckError);
+    expect(() => schema.parse(-1)).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
@@ -181,7 +181,7 @@ describe('min()', () => {
 
   test('throws an error when the a passed value < limit', () => {
     const schema = NumberType.create().min(1);
-    expect(() => schema.parse(0)).toThrow(RapidCheckError);
+    expect(() => schema.parse(0)).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
@@ -209,7 +209,7 @@ describe('max()', () => {
 
   test('throws an error when the a passed value > limit', () => {
     const schema = NumberType.create().max(10);
-    expect(() => schema.parse(11)).toThrow(RapidCheckError);
+    expect(() => schema.parse(11)).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
@@ -236,8 +236,8 @@ describe('greaterThan()', () => {
 
   test('throws an error when the a passed value <= limit', () => {
     const schema = NumberType.create().greaterThan(10);
-    expect(() => schema.parse(10)).toThrow(RapidCheckError);
-    expect(() => schema.parse(9)).toThrow(RapidCheckError);
+    expect(() => schema.parse(10)).toThrow(ParseError);
+    expect(() => schema.parse(9)).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
@@ -264,8 +264,8 @@ describe('lessThan()', () => {
 
   test('throws an error when the a passed value >= limit', () => {
     const schema = NumberType.create().lessThan(10);
-    expect(() => schema.parse(10)).toThrow(RapidCheckError);
-    expect(() => schema.parse(11)).toThrow(RapidCheckError);
+    expect(() => schema.parse(10)).toThrow(ParseError);
+    expect(() => schema.parse(11)).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
@@ -284,7 +284,7 @@ describe('lessThan()', () => {
 });
 
 describe('custom()', () => {
-  const rangeError = new RapidCheckError(
+  const rangeError = new ParseError(
     'range',
     'The number must be between 0 to 10.'
   );

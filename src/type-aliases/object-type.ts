@@ -1,6 +1,6 @@
 import { type MapTypeFn } from '../types.js';
 import { TypeAlias } from './type-alias.js';
-import { RapidCheckError } from '../error.js';
+import { ParseError } from '../parse-error.js';
 import { requiredError } from './error-messages.js';
 
 type ObjectTypeOptions = {
@@ -162,14 +162,14 @@ export class ObjectType<
       if (value === null && options.isNullable) {
         return value;
       }
-      throw new RapidCheckError(
+      throw new ParseError(
         ErrorCodes.required,
         options.requiredError || requiredError
       );
     }
 
     if (!ObjectType.isObject(value)) {
-      throw new RapidCheckError(
+      throw new ParseError(
         ErrorCodes.type,
         options.typeError || 'Must be an object.'
       );
@@ -177,7 +177,7 @@ export class ObjectType<
 
     const result = options.shouldOmitUnknownProps ? {} : { ...value };
     const propsSchema = this.propsSchema;
-    const propsError = new RapidCheckError(
+    const propsError = new ParseError(
       ObjectType.ErrorCodes.invalidProps,
       'The object has one or more invalid properties. ' +
       'See details for more info.'
@@ -188,20 +188,20 @@ export class ObjectType<
       try {
         result[key] = schema.parse(property);
       } catch (err) {
-        let errors: RapidCheckError[];
-        if (err instanceof RapidCheckError && err.hasErrors()) {
-          errors = err.getErrors().map(RapidCheckError.of);
+        let errors: ParseError[];
+        if (err instanceof ParseError && err.details.length > 0) {
+          errors = err.details.map(ParseError.of);
         } else {
-          errors = [RapidCheckError.of(err)];
+          errors = [ParseError.of(err)];
         }
 
         for (const error of errors) {
           error.path.unshift(key);
-          propsError.addError(error);
+          propsError.details.push(error);
         }
       }
     }
-    if (propsError.hasErrors()) {
+    if (propsError.details.length > 0) {
       throw propsError;
     }
 
@@ -214,7 +214,7 @@ export class ObjectType<
       try {
         return mapper(props);
       } catch (err) {
-        throw RapidCheckError.of(err);
+        throw ParseError.of(err);
       }
     }
 
@@ -251,7 +251,7 @@ export class ObjectType<
             'Unknown properties: ' +
             ObjectType.formatProps(unknownProps);
         }
-        throw new RapidCheckError(code, message, {
+        throw new ParseError(code, message, {
           params: { unknownProps },
         });
       }

@@ -1,6 +1,6 @@
 import { type MapTypeFn } from '../types.js';
 import { TypeAlias } from './type-alias.js';
-import { RapidCheckError } from '../error.js';
+import { ParseError } from '../parse-error.js';
 import { requiredError } from './error-messages.js';
 
 type EnumTypeOptions<T> = {
@@ -129,7 +129,7 @@ export class EnumType<
       if (value === null && options.isNullable) {
         return value;
       }
-      throw new RapidCheckError(
+      throw new ParseError(
         ErrorCodes.required,
         options.requiredError || requiredError
       );
@@ -137,7 +137,7 @@ export class EnumType<
 
     const values = options.values;
     if (!options.values.includes(value as Value)) {
-      throw new RapidCheckError(
+      throw new ParseError(
         ErrorCodes.type,
         options.typeError || `Must be one of ${EnumType.formatValues(values)}`,
         { params: { values } }
@@ -148,7 +148,7 @@ export class EnumType<
       try {
         return mapper(value);
       } catch (err) {
-        throw RapidCheckError.of(err);
+        throw ParseError.of(err);
       }
     }
 

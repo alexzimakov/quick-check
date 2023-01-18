@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { StringType } from '../type-aliases/string-type.js';
-import { RapidCheckError } from '../error.js';
+import { ParseError } from '../parse-error.js';
 import { format } from './test-util.js';
 
 describe('positive cases', () => {
@@ -19,7 +19,7 @@ describe('negative cases', () => {
   const schema = StringType.create();
   invalid.forEach((value) => {
     test(`should throw an error when value is ${format(value)}`, () => {
-      expect(() => schema.parse(value)).toThrow(RapidCheckError);
+      expect(() => schema.parse(value)).toThrow(ParseError);
     });
   });
 });
@@ -54,7 +54,7 @@ describe('optional()', () => {
   });
 
   test('throws an error when a passed value is null', () => {
-    expect(() => schema.parse(null)).toThrow(RapidCheckError);
+    expect(() => schema.parse(null)).toThrow(ParseError);
   });
 });
 
@@ -66,7 +66,7 @@ describe('nullable()', () => {
   });
 
   test('throws an error when a passed value is undefined', () => {
-    expect(() => schema.parse(undefined)).toThrow(RapidCheckError);
+    expect(() => schema.parse(undefined)).toThrow(ParseError);
   });
 });
 
@@ -87,11 +87,11 @@ describe('required()', () => {
   const schema = optionalSchema.required();
 
   test('throws an error when a passed value is undefined', () => {
-    expect(() => schema.parse(undefined)).toThrow(RapidCheckError);
+    expect(() => schema.parse(undefined)).toThrow(ParseError);
   });
 
   test('throws an error when a passed value is null', () => {
-    expect(() => schema.parse(null)).toThrow(RapidCheckError);
+    expect(() => schema.parse(null)).toThrow(ParseError);
   });
 });
 
@@ -102,7 +102,7 @@ describe('map()', () => {
   });
 
   test('rethrows any error from the `mapper` function', () => {
-    const error = new RapidCheckError('integer', 'Must be an integer.');
+    const error = new ParseError('integer', 'Must be an integer.');
     const schema = StringType.create().map((value) => {
       const int = parseInt(value, 10);
       if (Number.isNaN(int)) {
@@ -123,7 +123,7 @@ describe('notEmpty()', () => {
 
   test('throws an error when a passed value is an empty string', () => {
     const schema = StringType.create().notEmpty();
-    expect(() => schema.parse('')).toThrow(RapidCheckError);
+    expect(() => schema.parse('')).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
@@ -152,7 +152,7 @@ describe('minLength()', () => {
     'throws an error when the length of a passed value is less than limit',
     () => {
       const schema = StringType.create().minLength(3);
-      expect(() => schema.parse('12')).toThrow(RapidCheckError);
+      expect(() => schema.parse('12')).toThrow(ParseError);
     }
   );
 
@@ -191,7 +191,7 @@ describe('maxLength()', () => {
     'throws an error when the length of a passed value is greater than limit',
     () => {
       const schema = StringType.create().maxLength(2);
-      expect(() => schema.parse('123')).toThrow(RapidCheckError);
+      expect(() => schema.parse('123')).toThrow(ParseError);
     }
   );
 
@@ -219,7 +219,7 @@ describe('pattern()', () => {
 
   test("throws an error when a passed value doesn't matches to pattern", () => {
     const schema = StringType.create().pattern(/^test$/);
-    expect(() => schema.parse('foo')).toThrow(RapidCheckError);
+    expect(() => schema.parse('foo')).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
@@ -238,7 +238,7 @@ describe('pattern()', () => {
 });
 
 describe('custom()', () => {
-  const weakPasswordError = new RapidCheckError(
+  const weakPasswordError = new ParseError(
     'weakPassword',
     'Password must contain at least 10 characters.'
   );

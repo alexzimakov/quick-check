@@ -1,6 +1,6 @@
 import { type MapTypeFn } from '../types.js';
 import { TypeAlias } from './type-alias.js';
-import { RapidCheckError } from '../error.js';
+import { ParseError } from '../parse-error.js';
 import { requiredError } from './error-messages.js';
 import { pluralize } from '../util.js';
 
@@ -150,14 +150,14 @@ export class ArrayType<
       if (value === null && options.isNullable) {
         return value;
       }
-      throw new RapidCheckError(
+      throw new ParseError(
         ErrorCodes.required,
         options.requiredError || requiredError
       );
     }
 
     if (!Array.isArray(value)) {
-      throw new RapidCheckError(
+      throw new ParseError(
         ErrorCodes.type,
         options.typeError || 'Must be an array.'
       );
@@ -165,7 +165,7 @@ export class ArrayType<
 
     let items: Item[] = [];
     const itemSchema = this.itemSchema;
-    const itemsError = new RapidCheckError(
+    const itemsError = new ParseError(
       ArrayType.ErrorCodes.invalidItems,
       'The array contains one or more invalid items. ' +
       'See details for more info.'
@@ -175,20 +175,20 @@ export class ArrayType<
       try {
         items[i] = itemSchema.parse(item) as Item;
       } catch (err) {
-        let errors: RapidCheckError[];
-        if (err instanceof RapidCheckError && err.hasErrors()) {
-          errors = err.getErrors().map(RapidCheckError.of);
+        let errors: ParseError[];
+        if (err instanceof ParseError && err.details.length > 0) {
+          errors = err.details.map(ParseError.of);
         } else {
-          errors = [RapidCheckError.of(err)];
+          errors = [ParseError.of(err)];
         }
 
         for (const error of errors) {
           error.path.unshift(i);
-          itemsError.addError(error);
+          itemsError.details.push(error);
         }
       }
     }
-    if (itemsError.hasErrors()) {
+    if (itemsError.details.length > 0) {
       throw itemsError;
     }
 
@@ -200,7 +200,7 @@ export class ArrayType<
       try {
         return mapper(items);
       } catch (err) {
-        throw RapidCheckError.of(err);
+        throw ParseError.of(err);
       }
     }
 
@@ -219,7 +219,7 @@ export class ArrayType<
     const validator: ArrayValidator<Item> = (items) => {
       const itemSet = new Set(items);
       if (items.length !== itemSet.size) {
-        throw new RapidCheckError(code, message);
+        throw new ParseError(code, message);
       }
       return items;
     };
@@ -249,7 +249,7 @@ export class ArrayType<
     const code = ArrayType.ErrorCodes.length;
     const validator: ArrayValidator<Item> = (items) => {
       if (items.length !== limit) {
-        throw new RapidCheckError(code, message, {
+        throw new ParseError(code, message, {
           params: { limit },
         });
       }
@@ -283,7 +283,7 @@ export class ArrayType<
     const code = ArrayType.ErrorCodes.minItems;
     const validator: ArrayValidator<Item> = (items) => {
       if (items.length < limit) {
-        throw new RapidCheckError(code, message, {
+        throw new ParseError(code, message, {
           params: { limit },
         });
       }
@@ -317,7 +317,7 @@ export class ArrayType<
     const code = ArrayType.ErrorCodes.maxItems;
     const validator: ArrayValidator<Item> = (items) => {
       if (items.length > limit) {
-        throw new RapidCheckError(code, message, {
+        throw new ParseError(code, message, {
           params: { limit },
         });
       }

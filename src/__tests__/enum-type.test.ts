@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { EnumType } from '../type-aliases/enum-type.js';
-import { RapidCheckError } from '../error.js';
+import { ParseError } from '../parse-error.js';
 import { format } from './test-util.js';
 
 describe('positive cases', () => {
@@ -21,7 +21,7 @@ describe('negative cases', () => {
   const schema = EnumType.create(values);
   invalid.forEach((value) => {
     test(`should throw an error when value is ${format(value)}`, () => {
-      expect(() => schema.parse(value)).toThrow(RapidCheckError);
+      expect(() => schema.parse(value)).toThrow(ParseError);
     });
   });
 });
@@ -43,7 +43,7 @@ describe('optional()', () => {
   });
 
   test('throws an error when a passed value is null', () => {
-    expect(() => schema.parse(null)).toThrow(RapidCheckError);
+    expect(() => schema.parse(null)).toThrow(ParseError);
   });
 });
 
@@ -56,7 +56,7 @@ describe('nullable()', () => {
   });
 
   test('throws an error when a passed value is undefined', () => {
-    expect(() => schema.parse(undefined)).toThrow(RapidCheckError);
+    expect(() => schema.parse(undefined)).toThrow(ParseError);
   });
 });
 
@@ -79,11 +79,11 @@ describe('required()', () => {
   const schema = optionalSchema.required();
 
   test('throws an error when a passed value is undefined', () => {
-    expect(() => schema.parse(undefined)).toThrow(RapidCheckError);
+    expect(() => schema.parse(undefined)).toThrow(ParseError);
   });
 
   test('throws an error when a passed value is null', () => {
-    expect(() => schema.parse(null)).toThrow(RapidCheckError);
+    expect(() => schema.parse(null)).toThrow(ParseError);
   });
 });
 
@@ -97,7 +97,7 @@ describe('map()', () => {
   });
 
   test('rethrows any error from the `mapper` function', () => {
-    const error = new RapidCheckError('invalid_state', 'Invalid state.');
+    const error = new ParseError('invalid_state', 'Invalid state.');
     const values = ['north', 'south', 'east', 'west'] as const;
     const schema = EnumType.create(values).map((value) => {
       if (value !== 'north' && value !== 'south') {

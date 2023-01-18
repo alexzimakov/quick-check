@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { ArrayType } from '../type-aliases/array-type.js';
 import { StringType } from '../type-aliases/string-type.js';
-import { RapidCheckError } from '../error.js';
+import { ParseError } from '../parse-error.js';
 import { format } from './test-util.js';
 
 describe('positive cases', () => {
@@ -32,7 +32,7 @@ describe('negative cases', () => {
   const schema = ArrayType.create(StringType.create());
   invalid.forEach((value) => {
     test(`should throw an error when value is ${format(value)}`, () => {
-      expect(() => schema.parse(value)).toThrow(RapidCheckError);
+      expect(() => schema.parse(value)).toThrow(ParseError);
     });
   });
 });
@@ -47,10 +47,8 @@ test(
     try {
       schema.parse(values);
     } catch (error) {
-      expect(error).toBeInstanceOf(RapidCheckError);
-      expect(
-        (error as RapidCheckError).getErrors()
-      ).toHaveLength(invalidItemsCount);
+      expect(error).toBeInstanceOf(ParseError);
+      expect((error as ParseError).details).toHaveLength(invalidItemsCount);
     }
 
     expect.assertions(2);
@@ -68,16 +66,14 @@ test('validate and parses nested arrays', () => {
   try {
     schema.parse(items);
   } catch (error) {
-    expect(error).toBeInstanceOf(RapidCheckError);
-    expect(
-      (error as RapidCheckError).getErrors()
-    ).toHaveLength(2);
+    expect(error).toBeInstanceOf(ParseError);
 
-    const [error1, error2] = (error as RapidCheckError).getErrors();
-    expect(error1).toBeInstanceOf(RapidCheckError);
-    expect(error1).toHaveProperty('path', [0]);
-    expect(error2).toBeInstanceOf(RapidCheckError);
-    expect(error2).toHaveProperty('path', [2, 1]);
+    const errors = (error as ParseError).details;
+    expect(errors).toHaveLength(2);
+    expect(errors[0]).toBeInstanceOf(ParseError);
+    expect(errors[0]).toHaveProperty('path', [0]);
+    expect(errors[1]).toBeInstanceOf(ParseError);
+    expect(errors[1]).toHaveProperty('path', [2, 1]);
   }
   expect.assertions(6);
 });
@@ -106,7 +102,7 @@ describe('optional()', () => {
   });
 
   test('throws an error when a passed value is null', () => {
-    expect(() => schema.parse(null)).toThrow(RapidCheckError);
+    expect(() => schema.parse(null)).toThrow(ParseError);
   });
 });
 
@@ -118,7 +114,7 @@ describe('nullable()', () => {
   });
 
   test('throws an error when a passed value is undefined', () => {
-    expect(() => schema.parse(undefined)).toThrow(RapidCheckError);
+    expect(() => schema.parse(undefined)).toThrow(ParseError);
   });
 });
 
@@ -141,11 +137,11 @@ describe('required()', () => {
   const schema = optionalSchema.required();
 
   test('throws an error when a passed value is undefined', () => {
-    expect(() => schema.parse(undefined)).toThrow(RapidCheckError);
+    expect(() => schema.parse(undefined)).toThrow(ParseError);
   });
 
   test('throws an error when a passed value is null', () => {
-    expect(() => schema.parse(null)).toThrow(RapidCheckError);
+    expect(() => schema.parse(null)).toThrow(ParseError);
   });
 });
 
@@ -159,7 +155,7 @@ describe('map()', () => {
   });
 
   test('rethrows any error from the `mapper` function', () => {
-    const error = new RapidCheckError('invalid_state', 'Invalid state.');
+    const error = new ParseError('invalid_state', 'Invalid state.');
     const schema = ArrayType.create(StringType.create()).map(() => {
       throw error;
     });
@@ -177,7 +173,7 @@ describe('unique()', () => {
   test("throws an error when a passed items aren't unique", () => {
     const schema = ArrayType.create(StringType.create()).unique();
     const items = ['a', 'b', 'a'];
-    expect(() => schema.parse(items)).toThrow(RapidCheckError);
+    expect(() => schema.parse(items)).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
@@ -200,7 +196,7 @@ describe('length()', () => {
     () => {
       const schema = ArrayType.create(StringType.create()).length(2);
       const items = ['a', 'b', 'a'];
-      expect(() => schema.parse(items)).toThrow(RapidCheckError);
+      expect(() => schema.parse(items)).toThrow(ParseError);
     }
   );
 
@@ -230,7 +226,7 @@ describe('maxItems()', () => {
   test('throws an error when a passed array length > limit', () => {
     const schema = ArrayType.create(StringType.create()).maxItems(3);
     const items = ['a', 'b', 'c', 'd'];
-    expect(() => schema.parse(items)).toThrow(RapidCheckError);
+    expect(() => schema.parse(items)).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
@@ -259,7 +255,7 @@ describe('minItems()', () => {
   test('throws an error when a passed array length < limit', () => {
     const schema = ArrayType.create(StringType.create()).minItems(3);
     const items = ['a', 'b'];
-    expect(() => schema.parse(items)).toThrow(RapidCheckError);
+    expect(() => schema.parse(items)).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
@@ -279,7 +275,7 @@ describe('minItems()', () => {
 });
 
 describe('custom()', () => {
-  const lengthError = new RapidCheckError(
+  const lengthError = new ParseError(
     'invalid_length',
     'must contain 3 items'
   );

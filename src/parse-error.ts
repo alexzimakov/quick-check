@@ -1,7 +1,7 @@
 type ErrorPath = (string | number)[];
 type ErrorParams = { [param: string]: unknown; };
 
-export class RapidCheckError extends Error {
+export class ParseError extends Error {
   /**
    * The short string that indicates the reason for the error. Use it for
    * programmatically error handling.
@@ -35,8 +35,8 @@ export class RapidCheckError extends Error {
     params?: ErrorParams;
     details?: Error[];
   }) {
-    super(message, { cause: params?.cause });
-    this.name = 'RapidCheckError';
+    super(message);
+    this.name = 'ParseError';
     this.code = code;
     this.message = message;
     this.cause = params?.cause ?? null;
@@ -49,12 +49,12 @@ export class RapidCheckError extends Error {
     unknown: 'UNKNOWN_ERROR',
   };
 
-  static of(err: unknown): RapidCheckError {
-    if (err instanceof RapidCheckError) {
+  static of(err: unknown): ParseError {
+    if (err instanceof ParseError) {
       return err;
     }
 
-    let code = RapidCheckError.Codes.unknown;
+    let code = ParseError.Codes.unknown;
     let message = '';
     if (typeof err === 'string') {
       message = err;
@@ -67,20 +67,7 @@ export class RapidCheckError extends Error {
       }
     }
 
-    return new RapidCheckError(code, message, { cause: err });
-  }
-
-  hasErrors(): boolean {
-    return this.details.length !== 0;
-  }
-
-  getErrors(): Error[] {
-    return this.details;
-  }
-
-  addError(error: Error): this {
-    this.details.push(error);
-    return this;
+    return new ParseError(code, message, { cause: err });
   }
 
   toString() {

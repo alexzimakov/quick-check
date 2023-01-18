@@ -1,6 +1,6 @@
 import { type MapTypeFn } from '../types.js';
 import { TypeAlias } from './type-alias.js';
-import { RapidCheckError } from '../error.js';
+import { ParseError } from '../parse-error.js';
 import { requiredError } from './error-messages.js';
 import { pluralize } from '../util.js';
 
@@ -138,14 +138,14 @@ export class StringType<
       if (value === null && options.isNullable) {
         return value;
       }
-      throw new RapidCheckError(
+      throw new ParseError(
         ErrorCodes.required,
         options.requiredError || requiredError
       );
     }
 
     if (typeof value !== 'string') {
-      throw new RapidCheckError(
+      throw new ParseError(
         ErrorCodes.type,
         options.typeError || 'Must be a string.'
       );
@@ -163,7 +163,7 @@ export class StringType<
       try {
         return mapper(res);
       } catch (err) {
-        throw RapidCheckError.of(err);
+        throw ParseError.of(err);
       }
     }
 
@@ -181,7 +181,7 @@ export class StringType<
     const code = StringType.ErrorCodes.notEmpty;
     const validator: StringValidator = (value) => {
       if (value === '') {
-        throw new RapidCheckError(code, message);
+        throw new ParseError(code, message);
       }
       return value;
     };
@@ -212,7 +212,7 @@ export class StringType<
     const code = StringType.ErrorCodes.minLength;
     const validator: StringValidator = (value) => {
       if (value.length < limit) {
-        throw new RapidCheckError(code, message, {
+        throw new ParseError(code, message, {
           params: { limit },
         });
       }
@@ -245,7 +245,7 @@ export class StringType<
     const code = StringType.ErrorCodes.maxLength;
     const validator: StringValidator = (value) => {
       if (value.length > limit) {
-        throw new RapidCheckError(code, message, {
+        throw new ParseError(code, message, {
           params: { limit },
         });
       }
@@ -276,7 +276,7 @@ export class StringType<
     const code = StringType.ErrorCodes.pattern;
     const validator: StringValidator = (value) => {
       if (!value.match(regex)) {
-        throw new RapidCheckError(code, message, {
+        throw new ParseError(code, message, {
           params: { pattern: regex },
         });
       }

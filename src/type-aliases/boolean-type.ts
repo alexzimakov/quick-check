@@ -1,6 +1,6 @@
 import { type MapTypeFn } from '../types.js';
 import { TypeAlias } from './type-alias.js';
-import { RapidCheckError } from '../error.js';
+import { ParseError } from '../parse-error.js';
 import { requiredError } from './error-messages.js';
 
 type BooleanTypeOptions = {
@@ -138,14 +138,14 @@ export class BooleanType<
       if (value === null && options.isNullable) {
         return value;
       }
-      throw new RapidCheckError(
+      throw new ParseError(
         ErrorCodes.required,
         options.requiredError || requiredError
       );
     }
 
     if (typeof value !== 'boolean') {
-      throw new RapidCheckError(
+      throw new ParseError(
         ErrorCodes.type,
         options.typeError || 'Must be a boolean.'
       );
@@ -160,7 +160,7 @@ export class BooleanType<
       try {
         return mapper(res);
       } catch (err) {
-        throw RapidCheckError.of(err);
+        throw ParseError.of(err);
       }
     }
 
@@ -178,7 +178,7 @@ export class BooleanType<
     const code = BooleanType.ErrorCodes.truthy;
     const validator: BooleanValidator = (value) => {
       if (!value) {
-        throw new RapidCheckError(code, message);
+        throw new ParseError(code, message);
       }
       return value;
     };
@@ -201,7 +201,7 @@ export class BooleanType<
     const code = BooleanType.ErrorCodes.falsy;
     const validator: BooleanValidator = (value) => {
       if (value) {
-        throw new RapidCheckError(code, message);
+        throw new ParseError(code, message);
       }
       return value;
     };

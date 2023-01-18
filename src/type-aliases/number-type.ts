@@ -1,6 +1,6 @@
 import { type MapTypeFn } from '../types.js';
 import { TypeAlias } from './type-alias.js';
-import { RapidCheckError } from '../error.js';
+import { ParseError } from '../parse-error.js';
 import { requiredError } from './error-messages.js';
 
 type NumberTypeOptions = {
@@ -135,14 +135,14 @@ export class NumberType<
       if (value === null && options.isNullable) {
         return value;
       }
-      throw new RapidCheckError(
+      throw new ParseError(
         ErrorCodes.required,
         options.requiredError || requiredError
       );
     }
 
     if (typeof value !== 'number' || !Number.isFinite(value)) {
-      throw new RapidCheckError(
+      throw new ParseError(
         ErrorCodes.type,
         options.typeError || 'Must be a number.'
       );
@@ -157,7 +157,7 @@ export class NumberType<
       try {
         return mapper(res);
       } catch (err) {
-        throw RapidCheckError.of(err);
+        throw ParseError.of(err);
       }
     }
 
@@ -175,7 +175,7 @@ export class NumberType<
     const code = NumberType.ErrorCodes.int;
     const validator: NumberValidator = (value) => {
       if (!Number.isInteger(value)) {
-        throw new RapidCheckError(code, message);
+        throw new ParseError(code, message);
       }
       return value;
     };
@@ -198,7 +198,7 @@ export class NumberType<
     const code = NumberType.ErrorCodes.positive;
     const validator: NumberValidator = (value) => {
       if (value < 0) {
-        throw new RapidCheckError(code, message);
+        throw new ParseError(code, message);
       }
       return value;
     };
@@ -227,7 +227,7 @@ export class NumberType<
     const code = NumberType.ErrorCodes.min;
     const validator: NumberValidator = (value) => {
       if (value < min) {
-        throw new RapidCheckError(code, message, {
+        throw new ParseError(code, message, {
           params: { min },
         });
       }
@@ -258,7 +258,7 @@ export class NumberType<
     const code = NumberType.ErrorCodes.max;
     const validator: NumberValidator = (value) => {
       if (value > max) {
-        throw new RapidCheckError(code, message, {
+        throw new ParseError(code, message, {
           params: { max },
         });
       }
@@ -289,7 +289,7 @@ export class NumberType<
     const code = NumberType.ErrorCodes.lessThan;
     const validator: NumberValidator = (value) => {
       if (value <= min) {
-        throw new RapidCheckError(code, message, {
+        throw new ParseError(code, message, {
           params: { min },
         });
       }
@@ -320,7 +320,7 @@ export class NumberType<
     const code = NumberType.ErrorCodes.lessThan;
     const validator: NumberValidator = (value) => {
       if (value >= max) {
-        throw new RapidCheckError(code, message, {
+        throw new ParseError(code, message, {
           params: { max },
         });
       }

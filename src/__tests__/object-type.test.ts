@@ -5,7 +5,7 @@ import { NumberType } from '../type-aliases/number-type.js';
 import { BooleanType } from '../type-aliases/boolean-type.js';
 import { EnumType } from '../type-aliases/enum-type.js';
 import { ArrayType } from '../type-aliases/array-type.js';
-import { RapidCheckError } from '../error.js';
+import { ParseError } from '../parse-error.js';
 import { format } from './test-util.js';
 
 describe('positive cases', () => {
@@ -58,7 +58,7 @@ describe('negative cases', () => {
   const schema = ObjectType.create({});
   invalid.forEach((value) => {
     test(`should throw an error when value is ${format(value)}`, () => {
-      expect(() => schema.parse(value)).toThrow(RapidCheckError);
+      expect(() => schema.parse(value)).toThrow(ParseError);
     });
   });
 });
@@ -102,21 +102,21 @@ test(
     try {
       schema.parse(value);
     } catch (error) {
-      expect(error).toBeInstanceOf(RapidCheckError);
+      expect(error).toBeInstanceOf(ParseError);
 
-      const errors = (error as RapidCheckError).getErrors();
+      const errors = (error as ParseError).details;
       expect(errors).toHaveLength(4);
 
-      expect(errors[0]).toBeInstanceOf(RapidCheckError);
+      expect(errors[0]).toBeInstanceOf(ParseError);
       expect(errors[0]).toHaveProperty('path', ['num']);
 
-      expect(errors[1]).toBeInstanceOf(RapidCheckError);
+      expect(errors[1]).toBeInstanceOf(ParseError);
       expect(errors[1]).toHaveProperty('path', ['enum']);
 
-      expect(errors[2]).toBeInstanceOf(RapidCheckError);
+      expect(errors[2]).toBeInstanceOf(ParseError);
       expect(errors[2]).toHaveProperty('path', ['arr', 3]);
 
-      expect(errors[3]).toBeInstanceOf(RapidCheckError);
+      expect(errors[3]).toBeInstanceOf(ParseError);
       expect(errors[3]).toHaveProperty('path', ['nested', 'foo']);
     }
 
@@ -148,7 +148,7 @@ describe('optional()', () => {
   });
 
   test('throws an error when a passed value is null', () => {
-    expect(() => schema.parse(null)).toThrow(RapidCheckError);
+    expect(() => schema.parse(null)).toThrow(ParseError);
   });
 });
 
@@ -160,7 +160,7 @@ describe('nullable()', () => {
   });
 
   test('throws an error when a passed value is undefined', () => {
-    expect(() => schema.parse(undefined)).toThrow(RapidCheckError);
+    expect(() => schema.parse(undefined)).toThrow(ParseError);
   });
 });
 
@@ -183,11 +183,11 @@ describe('required()', () => {
   const schema = optionalSchema.required();
 
   test('throws an error when a passed value is undefined', () => {
-    expect(() => schema.parse(undefined)).toThrow(RapidCheckError);
+    expect(() => schema.parse(undefined)).toThrow(ParseError);
   });
 
   test('throws an error when a passed value is null', () => {
-    expect(() => schema.parse(null)).toThrow(RapidCheckError);
+    expect(() => schema.parse(null)).toThrow(ParseError);
   });
 });
 
@@ -201,7 +201,7 @@ describe('map()', () => {
   });
 
   test('rethrows any error from the `mapper` function', () => {
-    const error = new RapidCheckError('invalid_state', 'Invalid state.');
+    const error = new ParseError('invalid_state', 'Invalid state.');
     const schema = ObjectType.create({}).map(() => {
       throw error;
     });
@@ -230,7 +230,7 @@ describe('onlyKnownProps()', () => {
       a: 1,
       b: 2,
       c: 3,
-    })).toThrow(RapidCheckError);
+    })).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
@@ -260,7 +260,7 @@ describe('custom()', () => {
     a: NumberType.create(),
     b: NumberType.create(),
   };
-  const sumError = new RapidCheckError('invalid_sum', 'Invalid sum');
+  const sumError = new ParseError('invalid_sum', 'Invalid sum');
   const validateSum = (value: { a: number, b: number }) => {
     if (value.a + value.b !== 10) {
       throw sumError;
