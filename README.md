@@ -1,5 +1,15 @@
 # SafeData
 
+<a href="https://www.npmjs.com/package/safe-data">
+  <img alt="npm" src="https://badgen.net/npm/node/next" />
+</a>
+<a href="https://www.npmjs.com/package/safe-data">
+  <img alt="npm" src="https://badgen.net/npm/v/safe-data" />
+</a>
+<a href="https://www.npmjs.com/package/safe-data">
+  <img alt="npm" src="https://badgen.net/npm/types/safe-data" />
+</a>
+
 A simple schema-based validation library for typescript and javascript.
 
 ## Getting started
