@@ -54,12 +54,12 @@ export class ArrayType<
     custom: 'array.custom',
   } as const;
 
-  static create<
-    Item,
-    Params extends ArrayParams
-  >(itemSchema: TypeAlias<Item>, params?: Params): ArrayType<
-    Item,
-    Item[],
+  static create<T, Params extends ArrayParams>(
+    itemSchema: TypeAlias<T>,
+    params?: Params
+  ): ArrayType<
+    T,
+    T[],
     Params extends { cast: true } ? true : false> {
     return new ArrayType(
       itemSchema,

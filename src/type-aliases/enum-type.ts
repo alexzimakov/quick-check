@@ -39,12 +39,12 @@ export class EnumType<
     required: 'enum.required',
   } as const;
 
-  static create<
-    Value,
-    Params extends EnumParams
-  >(values: readonly Value[], params?: Params): EnumType<
-    Value,
-    Value,
+  static create<T, Params extends EnumParams>(
+    values: readonly T[],
+    params?: Params
+  ): EnumType<
+    T,
+    T,
     Params extends { cast: true } ? true : false> {
     return new EnumType({
       values,
