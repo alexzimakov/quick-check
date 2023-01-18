@@ -227,7 +227,9 @@ export class NumberType<
     const code = NumberType.ErrorCodes.min;
     const validator: NumberValidator = (value) => {
       if (value < min) {
-        throw new RapidCheckError(code, message);
+        throw new RapidCheckError(code, message, {
+          params: { min },
+        });
       }
       return value;
     };
@@ -256,7 +258,9 @@ export class NumberType<
     const code = NumberType.ErrorCodes.max;
     const validator: NumberValidator = (value) => {
       if (value > max) {
-        throw new RapidCheckError(code, message);
+        throw new RapidCheckError(code, message, {
+          params: { max },
+        });
       }
       return value;
     };
@@ -285,7 +289,9 @@ export class NumberType<
     const code = NumberType.ErrorCodes.lessThan;
     const validator: NumberValidator = (value) => {
       if (value <= min) {
-        throw new RapidCheckError(code, message);
+        throw new RapidCheckError(code, message, {
+          params: { min },
+        });
       }
       return value;
     };
@@ -314,7 +320,9 @@ export class NumberType<
     const code = NumberType.ErrorCodes.lessThan;
     const validator: NumberValidator = (value) => {
       if (value >= max) {
-        throw new RapidCheckError(code, message);
+        throw new RapidCheckError(code, message, {
+          params: { max },
+        });
       }
       return value;
     };

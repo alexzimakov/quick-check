@@ -139,7 +139,8 @@ export class EnumType<
     if (!options.values.includes(value as Value)) {
       throw new RapidCheckError(
         ErrorCodes.type,
-        options.typeError || `Must be one of ${EnumType.formatValues(values)}`
+        options.typeError || `Must be one of ${EnumType.formatValues(values)}`,
+        { params: { values } }
       );
     }
 

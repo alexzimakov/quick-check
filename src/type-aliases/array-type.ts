@@ -249,7 +249,9 @@ export class ArrayType<
     const code = ArrayType.ErrorCodes.length;
     const validator: ArrayValidator<Item> = (items) => {
       if (items.length !== limit) {
-        throw new RapidCheckError(code, message);
+        throw new RapidCheckError(code, message, {
+          params: { limit },
+        });
       }
       return items;
     };
@@ -281,7 +283,9 @@ export class ArrayType<
     const code = ArrayType.ErrorCodes.minItems;
     const validator: ArrayValidator<Item> = (items) => {
       if (items.length < limit) {
-        throw new RapidCheckError(code, message);
+        throw new RapidCheckError(code, message, {
+          params: { limit },
+        });
       }
       return items;
     };
@@ -313,7 +317,9 @@ export class ArrayType<
     const code = ArrayType.ErrorCodes.maxItems;
     const validator: ArrayValidator<Item> = (items) => {
       if (items.length > limit) {
-        throw new RapidCheckError(code, message);
+        throw new RapidCheckError(code, message, {
+          params: { limit },
+        });
       }
       return items;
     };
