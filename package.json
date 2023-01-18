@@ -5,12 +5,19 @@
   "homepage": "https://github.com/alexzimakov/rapid-check#readme",
   "license": "MIT",
   "type": "module",
+  "engines": {
+    "node": ">=14.16"
+  },
   "exports": {
     ".": {
       "import": "./esm/index.js",
       "require": "./cjs/index.js"
     }
   },
+  "files": [
+    "./esm",
+    "./cjs"
+  ],
   "main": "./cjs/index.js",
   "types": "./cjs/index.d.ts",
   "scripts": {
