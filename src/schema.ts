@@ -1,9 +1,12 @@
+import { TypeAlias } from './type-aliases/type-alias.js';
 import { StringType } from './type-aliases/string-type.js';
 import { NumberType } from './type-aliases/number-type.js';
 import { BooleanType } from './type-aliases/boolean-type.js';
 import { EnumType } from './type-aliases/enum-type.js';
 import { ArrayType } from './type-aliases/array-type.js';
 import { ObjectType } from './type-aliases/object-type.js';
+
+type infer<T extends TypeAlias<unknown>> = ReturnType<T['parse']>;
 
 const STRING_PATTERNS = StringType.Patterns;
 const STRING_ERROR_CODES = StringType.ErrorCodes;
@@ -22,6 +25,9 @@ const createObjectType = ObjectType.create;
 
 // noinspection ReservedWordAsName
 export {
+  // Types
+  type infer,
+
   // Constants
   STRING_PATTERNS,
   STRING_ERROR_CODES,
