@@ -40,15 +40,15 @@ export class NumberType<
   }
 
   static ErrorCodes = {
-    type: 'number.type',
-    required: 'number.required',
-    int: 'number.int',
-    positive: 'number.positive',
-    min: 'number.min',
-    max: 'number.max',
-    greaterThan: 'number.greaterThan',
-    lessThan: 'number.lessThan',
-    custom: 'number.custom',
+    type: 'NUMBER_TYPE',
+    required: 'NUMBER_REQUIRED',
+    int: 'NUMBER_INT',
+    positive: 'NUMBER_POSITIVE',
+    min: 'NUMBER_MIN',
+    max: 'NUMBER_MAX',
+    greaterThan: 'NUMBER_GREATER_THAN',
+    lessThan: 'NUMBER_LESS_THAN',
+    custom: 'NUMBER_CUSTOM',
   } as const;
 
   static create<T extends NumberParams>(params?: T): NumberType<

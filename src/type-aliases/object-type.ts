@@ -47,11 +47,11 @@ export class ObjectType<
   }
 
   static ErrorCodes = {
-    required: 'object.required',
-    type: 'object.type',
-    invalidProps: 'object.invalidProps',
-    unknownProps: 'object.unknownProps',
-    custom: 'array.custom',
+    required: 'OBJECT_REQUIRED',
+    type: 'OBJECT_TYPE',
+    invalidProps: 'OBJECT_INVALID_PROPS',
+    unknownProps: 'OBJECT_UNKNOWN_PROPS',
+    custom: 'ARRAY_CUSTOM',
   } as const;
 
   static create<

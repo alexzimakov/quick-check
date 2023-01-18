@@ -43,13 +43,13 @@ export class StringType<
   }
 
   static ErrorCodes = {
-    type: 'string.type',
-    required: 'string.required',
-    notEmpty: 'string.notEmpty',
-    minLength: 'string.minLength',
-    maxLength: 'string.maxLength',
-    pattern: 'string.pattern',
-    custom: 'string.custom',
+    type: 'STRING_TYPE',
+    required: 'STRING_REQUIRED',
+    notEmpty: 'STRING_NOT_EMPTY',
+    minLength: 'STRING_MIN_LENGTH',
+    maxLength: 'STRING_MAX_LENGTH',
+    pattern: 'STRING_PATTERN',
+    custom: 'STRING_CUSTOM',
   } as const;
 
   static Patterns = {

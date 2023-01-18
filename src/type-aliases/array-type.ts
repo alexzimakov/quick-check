@@ -44,14 +44,14 @@ export class ArrayType<
   }
 
   static ErrorCodes = {
-    required: 'array.required',
-    type: 'array.type',
-    itemsInvalid: 'array.itemsInvalid',
-    length: 'array.length',
-    unique: 'array.unique',
-    minItems: 'array.minItems',
-    maxItems: 'array.maxItems',
-    custom: 'array.custom',
+    required: 'ARRAY_REQUIRED',
+    type: 'ARRAY_TYPE',
+    invalidItems: 'ARRAY_INVALID_ITEMS',
+    length: 'ARRAY_LENGTH',
+    unique: 'ARRAY_UNIQUE',
+    minItems: 'ARRAY_MIN_ITEMS',
+    maxItems: 'ARRAY_MAX_ITEMS',
+    custom: 'ARRAY_CUSTOM',
   } as const;
 
   static create<T, Params extends ArrayParams>(
@@ -166,7 +166,7 @@ export class ArrayType<
     let items: Item[] = [];
     const itemSchema = this.itemSchema;
     const itemsError = new RapidCheckError(
-      ArrayType.ErrorCodes.itemsInvalid,
+      ArrayType.ErrorCodes.invalidItems,
       'The array contains one or more invalid items. ' +
       'See details for more info.'
     );

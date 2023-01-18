@@ -40,11 +40,11 @@ export class BooleanType<
   }
 
   static ErrorCodes = {
-    type: 'boolean.type',
-    required: 'boolean.required',
-    truthy: 'boolean.truthy',
-    falsy: 'boolean.falsy',
-    custom: 'boolean.custom',
+    type: 'BOOLEAN_TYPE',
+    required: 'BOOLEAN_REQUIRED',
+    truthy: 'BOOLEAN_TRUTHY',
+    falsy: 'BOOLEAN_FALSY',
+    custom: 'BOOLEAN_CUSTOM',
   } as const;
 
   static create<T extends BooleanParams>(params?: T): BooleanType<

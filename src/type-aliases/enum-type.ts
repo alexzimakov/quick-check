@@ -35,8 +35,8 @@ export class EnumType<
   }
 
   static ErrorCodes = {
-    type: 'enum.type',
-    required: 'enum.required',
+    type: 'ENUM_TYPE',
+    required: 'ENUM_REQUIRED',
   } as const;
 
   static create<T, Params extends EnumParams>(
