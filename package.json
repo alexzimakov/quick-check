@@ -43,6 +43,15 @@
     "name": "Alexander Zimakov",
     "email": "alexzmdev@gmail.com"
   },
+  "keywords": [
+    "schema",
+    "validate",
+    "parse",
+    "check",
+    "typescript",
+    "type",
+    "inference"
+  ],
   "lint-staged": {
     "*.ts": "eslint --fix"
   },
