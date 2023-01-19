@@ -59,6 +59,7 @@
     "*.ts": "eslint --fix"
   },
   "devDependencies": {
+    "@alexzimakov/eslint-config": "1.0.0",
     "@typescript-eslint/eslint-plugin": "5.48.1",
     "@typescript-eslint/parser": "5.48.1",
     "@vitest/coverage-c8": "0.27.1",
