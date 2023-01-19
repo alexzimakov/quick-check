@@ -27,10 +27,8 @@
     "check-types": "tsc --p tsconfig.json --noEmit",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
-    "prebuild": "npm run lint && npm run coverage",
-    "build": "npm run build-esm && npm run build-cjs",
-    "build-esm": "node scripts/rm.js esm && npx tsc --p tsconfig.json",
-    "build-cjs": "node scripts/rm.js cjs && npx tsc --p tsconfig.cjs.json && node scripts/change-files-extenstion.js --dir cjs --from .js --to .cjs"
+    "prebuild": "npm run lint && npm run test",
+    "build": "rollup --config rollup.config.js"
   },
   "engines": {
     "node": ">=14.16"
@@ -60,12 +58,15 @@
   },
   "devDependencies": {
     "@alexzimakov/eslint-config": "1.0.0",
+    "@rollup/plugin-typescript": "11.0.0",
     "@typescript-eslint/eslint-plugin": "5.48.1",
     "@typescript-eslint/parser": "5.48.1",
     "@vitest/coverage-c8": "0.27.1",
     "eslint": "8.31.0",
     "husky": "8.0.3",
     "lint-staged": "13.1.0",
+    "rollup": "3.10.0",
+    "rollup-plugin-delete": "2.0.0",
     "typescript": "4.9.4",
     "vitest": "0.27.1"
   }
