@@ -1,3 +1,4 @@
-esm
-cjs
-coverage
+/types
+/esm
+/cjs
+/coverage

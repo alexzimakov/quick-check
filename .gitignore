@@ -1,7 +1,4 @@
 node_modules
-coverage
-esm
-cjs
 *.log
 .*
 !.gitignore
@@ -11,3 +8,9 @@ cjs
 !.eslintignore
 !.editorconfig
 !.husky
+
+# Build artifacts
+/coverage
+/types
+/esm
+/cjs
