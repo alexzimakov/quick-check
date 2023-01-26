@@ -1,7 +1,6 @@
 import { type ResultMapper } from '../types.js';
 import { TypeAlias } from './type-alias.js';
 import { ParseError } from '../parse-error.js';
-import { requiredError } from './error-messages.js';
 
 type EnumTypeOptions = {
   isOptional: boolean;
@@ -103,8 +102,13 @@ export class EnumType<
 
   parse(value: unknown): Result;
   parse(value: unknown): unknown {
-    const { ErrorCodes } = EnumType;
-    const { options, mapper } = this;
+    const ErrorCodes = EnumType.ErrorCodes;
+    const options = this.options;
+    const mapper = this.mapper;
+    const values = this.values;
+    const typeError = `The value must be one of ${
+      EnumType.formatValues(values)
+    }`;
 
     if (value == null) {
       if (value === undefined && options.isOptional) {
@@ -115,15 +119,14 @@ export class EnumType<
       }
       throw new ParseError(
         ErrorCodes.required,
-        options.requiredError || requiredError
+        options.requiredError || typeError
       );
     }
 
-    const values = this.values;
     if (!values.includes(value as Value)) {
       throw new ParseError(
         ErrorCodes.type,
-        options.typeError || `Must be one of ${EnumType.formatValues(values)}`,
+        options.typeError || typeError,
         { params: { values } }
       );
     }

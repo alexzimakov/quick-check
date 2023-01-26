@@ -1,7 +1,6 @@
 import { type ResultMapper } from '../types.js';
 import { TypeAlias } from './type-alias.js';
 import { ParseError } from '../parse-error.js';
-import { requiredError } from './error-messages.js';
 import { pluralize } from '../util.js';
 
 type StringTypeOptions = {
@@ -121,54 +120,6 @@ export class StringType<
       { ...this.validators },
       mapper
     );
-  }
-
-  parse(value: unknown): Result;
-  parse(value: unknown): unknown {
-    const { ErrorCodes } = StringType;
-    const { options, validators, mapper } = this;
-
-    if (options.cast) {
-      value = value == null ? '' : String(value);
-    }
-
-    if (value == null) {
-      if (value === undefined && options.isOptional) {
-        return value;
-      }
-      if (value === null && options.isNullable) {
-        return value;
-      }
-      throw new ParseError(
-        ErrorCodes.required,
-        options.requiredError || requiredError
-      );
-    }
-
-    if (typeof value !== 'string') {
-      throw new ParseError(
-        ErrorCodes.type,
-        options.typeError || 'Must be a string.'
-      );
-    }
-
-    let res = value;
-    if (options.trim) {
-      res = value.trim();
-    }
-    for (const validate of Object.values(validators)) {
-      res = validate(res);
-    }
-
-    if (typeof mapper === 'function') {
-      try {
-        return mapper(res);
-      } catch (err) {
-        throw ParseError.of(err);
-      }
-    }
-
-    return res;
   }
 
   notEmpty(params?: { message?: string }): StringType<Result, Cast> {
@@ -298,5 +249,56 @@ export class StringType<
       { ...this.validators, [code]: validator },
       this.mapper
     );
+  }
+
+  parse(value: unknown): Result;
+  parse(value: unknown): unknown {
+    const ErrorCodes = StringType.ErrorCodes;
+    const options = this.options;
+    const validators = this.validators;
+    const mapper = this.mapper;
+    const typeError = 'The value must be a string.';
+
+    if (options.cast) {
+      value = value == null ? '' : String(value);
+    }
+
+    if (value == null) {
+      if (value === undefined && options.isOptional) {
+        return value;
+      }
+      if (value === null && options.isNullable) {
+        return value;
+      }
+      throw new ParseError(
+        ErrorCodes.required,
+        options.requiredError || typeError
+      );
+    }
+
+    if (typeof value !== 'string') {
+      throw new ParseError(
+        ErrorCodes.type,
+        options.typeError || typeError
+      );
+    }
+
+    let res = value;
+    if (options.trim) {
+      res = value.trim();
+    }
+    for (const validate of Object.values(validators)) {
+      res = validate(res);
+    }
+
+    if (typeof mapper === 'function') {
+      try {
+        return mapper(res);
+      } catch (err) {
+        throw ParseError.of(err);
+      }
+    }
+
+    return res;
   }
 }

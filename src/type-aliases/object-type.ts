@@ -2,7 +2,6 @@ import { type InputType, type OutputType, type ResultMapper } from '../types.js'
 import { TypeAlias } from './type-alias.js';
 import { ParseError } from '../parse-error.js';
 import { isObject } from '../guards.js';
-import { requiredError } from './error-messages.js';
 
 type ObjectTypeOptions = {
   isOptional: boolean;
@@ -64,7 +63,12 @@ export class ObjectType<
     Params extends { cast: true } ? true : false> {
     return new ObjectType(
       propsSchema,
-      { ...params, isOptional: false, isNullable: false },
+      {
+        ...params,
+        isOptional: false,
+        isNullable: false,
+        omitUnknownProps: params?.omitUnknownProps ?? true,
+      },
       {},
       undefined
     );
@@ -142,83 +146,6 @@ export class ObjectType<
     );
   }
 
-  parse(value: unknown): Result;
-  parse(value: unknown): unknown {
-    const { ErrorCodes } = ObjectType;
-    const { options, validators, mapper } = this;
-
-    if (options.cast) {
-      if (value == null) {
-        value = {};
-      }
-    }
-
-    if (value == null) {
-      if (value === undefined && options.isOptional) {
-        return value;
-      }
-      if (value === null && options.isNullable) {
-        return value;
-      }
-      throw new ParseError(
-        ErrorCodes.required,
-        options.requiredError || requiredError
-      );
-    }
-
-    if (!isObject(value) || Array.isArray(value)) {
-      throw new ParseError(
-        ErrorCodes.type,
-        options.typeError || 'Must be an object.'
-      );
-    }
-
-    const result = options.omitUnknownProps ? {} : { ...value };
-    const propsSchema = this.propsSchema;
-    const propsError = new ParseError(
-      ObjectType.ErrorCodes.invalidProps,
-      'The object has one or more invalid properties. ' +
-      'See details for more info.'
-    );
-    for (const key of Object.keys(propsSchema)) {
-      const schema = propsSchema[key];
-      const property = value[key];
-      try {
-        result[key] = schema.parse(property);
-      } catch (err) {
-        let errors: ParseError[];
-        if (err instanceof ParseError && err.details.length > 0) {
-          errors = err.details.map(ParseError.of);
-        } else {
-          errors = [ParseError.of(err)];
-        }
-
-        for (const error of errors) {
-          error.path.unshift(key);
-          propsError.details.push(error);
-        }
-      }
-    }
-    if (propsError.details.length > 0) {
-      throw propsError;
-    }
-
-    let props = result as Props;
-    for (const validate of Object.values(validators)) {
-      props = validate(props);
-    }
-
-    if (typeof mapper === 'function') {
-      try {
-        return mapper(props);
-      } catch (err) {
-        throw ParseError.of(err);
-      }
-    }
-
-    return props;
-  }
-
   onlyKnownProps(params?: {
     message?: string | ((params: { unknownProps: string[] }) => string)
   }): ObjectType<Input, Props, Result, Cast> {
@@ -277,5 +204,85 @@ export class ObjectType<
       { ...this.validators, [code]: validator },
       this.mapper
     );
+  }
+
+  parse(value: unknown): Result;
+  parse(value: unknown): unknown {
+    const ErrorCodes = ObjectType.ErrorCodes;
+    const options = this.options;
+    const validators = this.validators;
+    const mapper = this.mapper;
+    const typeError = 'The value must be an object.';
+
+    if (options.cast) {
+      if (value == null) {
+        value = {};
+      }
+    }
+
+    if (value == null) {
+      if (value === undefined && options.isOptional) {
+        return value;
+      }
+      if (value === null && options.isNullable) {
+        return value;
+      }
+      throw new ParseError(
+        ErrorCodes.required,
+        options.requiredError || typeError
+      );
+    }
+
+    if (!isObject(value) || Array.isArray(value)) {
+      throw new ParseError(
+        ErrorCodes.type,
+        options.typeError || typeError
+      );
+    }
+
+    const result = options.omitUnknownProps ? {} : { ...value };
+    const propsSchema = this.propsSchema;
+    const propsError = new ParseError(
+      ObjectType.ErrorCodes.invalidProps,
+      'The object has one or more invalid properties. ' +
+      'See details for more info.'
+    );
+    for (const key of Object.keys(propsSchema)) {
+      const schema = propsSchema[key];
+      const property = value[key];
+      try {
+        result[key] = schema.parse(property);
+      } catch (err) {
+        let errors: ParseError[];
+        if (err instanceof ParseError && err.details.length > 0) {
+          errors = err.details.map(ParseError.of);
+        } else {
+          errors = [ParseError.of(err)];
+        }
+
+        for (const error of errors) {
+          error.path.unshift(key);
+          propsError.details.push(error);
+        }
+      }
+    }
+    if (propsError.details.length > 0) {
+      throw propsError;
+    }
+
+    let props = result as Props;
+    for (const validate of Object.values(validators)) {
+      props = validate(props);
+    }
+
+    if (typeof mapper === 'function') {
+      try {
+        return mapper(props);
+      } catch (err) {
+        throw ParseError.of(err);
+      }
+    }
+
+    return props;
   }
 }

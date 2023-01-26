@@ -1,7 +1,6 @@
 import { type ResultMapper } from '../types.js';
 import { TypeAlias } from './type-alias.js';
 import { ParseError } from '../parse-error.js';
-import { requiredError } from './error-messages.js';
 
 type NumberTypeOptions = {
   isOptional: boolean;
@@ -106,61 +105,6 @@ export class NumberType<
       { ...this.validators },
       mapper
     );
-  }
-
-  parse(value: unknown): Result;
-  parse(value: unknown): unknown {
-    const { ErrorCodes } = NumberType;
-    const { options, validators, mapper } = this;
-
-    if (options.cast) {
-      if (value == null) {
-        value = 0;
-      } else if (
-        typeof value === 'bigint' ||
-        typeof value === 'string' ||
-        typeof value === 'boolean'
-      ) {
-        value = Number(value);
-      } else if (value instanceof Date) {
-        value = value.getTime();
-      }
-    }
-
-    if (value == null) {
-      if (value === undefined && options.isOptional) {
-        return value;
-      }
-      if (value === null && options.isNullable) {
-        return value;
-      }
-      throw new ParseError(
-        ErrorCodes.required,
-        options.requiredError || requiredError
-      );
-    }
-
-    if (typeof value !== 'number' || !Number.isFinite(value)) {
-      throw new ParseError(
-        ErrorCodes.type,
-        options.typeError || 'Must be a number.'
-      );
-    }
-
-    let res = value;
-    for (const validate of Object.values(validators)) {
-      res = validate(res);
-    }
-
-    if (typeof mapper === 'function') {
-      try {
-        return mapper(res);
-      } catch (err) {
-        throw ParseError.of(err);
-      }
-    }
-
-    return res;
   }
 
   int(params?: { message?: string }): NumberType<Result, Cast> {
@@ -340,5 +284,63 @@ export class NumberType<
       { ...this.validators, [code]: validator },
       this.mapper
     );
+  }
+
+  parse(value: unknown): Result;
+  parse(value: unknown): unknown {
+    const ErrorCodes = NumberType.ErrorCodes;
+    const options = this.options;
+    const validators = this.validators;
+    const mapper = this.mapper;
+    const typeError = 'The value must be a number.';
+
+    if (options.cast) {
+      if (value == null) {
+        value = 0;
+      } else if (
+        typeof value === 'bigint' ||
+        typeof value === 'string' ||
+        typeof value === 'boolean'
+      ) {
+        value = Number(value);
+      } else if (value instanceof Date) {
+        value = value.getTime();
+      }
+    }
+
+    if (value == null) {
+      if (value === undefined && options.isOptional) {
+        return value;
+      }
+      if (value === null && options.isNullable) {
+        return value;
+      }
+      throw new ParseError(
+        ErrorCodes.required,
+        options.requiredError || typeError
+      );
+    }
+
+    if (typeof value !== 'number' || !Number.isFinite(value)) {
+      throw new ParseError(
+        ErrorCodes.type,
+        options.typeError || typeError
+      );
+    }
+
+    let res = value;
+    for (const validate of Object.values(validators)) {
+      res = validate(res);
+    }
+
+    if (typeof mapper === 'function') {
+      try {
+        return mapper(res);
+      } catch (err) {
+        throw ParseError.of(err);
+      }
+    }
+
+    return res;
   }
 }

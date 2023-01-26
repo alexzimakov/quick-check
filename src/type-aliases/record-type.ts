@@ -128,6 +128,7 @@ export class RecordType<Obj, Result> extends TypeAlias<Obj, Result> {
     const ErrorCodes = RecordType.ErrorCodes;
     const options = this.options;
     const mapper = this.mapper;
+    const typeError = 'The value must be an object.';
 
     if (value == null) {
       if (value === undefined && options.isOptional) {
@@ -138,14 +139,14 @@ export class RecordType<Obj, Result> extends TypeAlias<Obj, Result> {
       }
       throw new ParseError(
         ErrorCodes.required,
-        options.requiredError || `Expected object, but received ${value}.`
+        options.requiredError || typeError
       );
     }
 
     if (!isObject(value) || Array.isArray(value)) {
       throw new ParseError(
         ErrorCodes.type,
-        options.typeError || 'The value must be an object.'
+        options.typeError || typeError
       );
     }
 

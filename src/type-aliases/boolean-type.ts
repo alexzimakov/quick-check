@@ -1,7 +1,6 @@
 import { type ResultMapper } from '../types.js';
 import { TypeAlias } from './type-alias.js';
 import { ParseError } from '../parse-error.js';
-import { requiredError } from './error-messages.js';
 
 type BooleanTypeOptions = {
   isOptional: boolean;
@@ -104,68 +103,6 @@ export class BooleanType<
     );
   }
 
-  parse(value: unknown): Result;
-  parse(value: unknown): unknown {
-    const { ErrorCodes } = BooleanType;
-    const { options, validators, mapper } = this;
-
-    if (options.cast) {
-      if (
-        value === 'true' ||
-        value === 'yes' ||
-        value === '1' ||
-        value === 1n ||
-        value === 1
-      ) {
-        value = true;
-      } else if (
-        value === 'false' ||
-        value === 'no' ||
-        value === '0' ||
-        value === 0n ||
-        value === 0 ||
-        value == null
-      ) {
-        value = false;
-      }
-    }
-
-    if (value == null) {
-      if (value === undefined && options.isOptional) {
-        return value;
-      }
-      if (value === null && options.isNullable) {
-        return value;
-      }
-      throw new ParseError(
-        ErrorCodes.required,
-        options.requiredError || requiredError
-      );
-    }
-
-    if (typeof value !== 'boolean') {
-      throw new ParseError(
-        ErrorCodes.type,
-        options.typeError || 'Must be a boolean.'
-      );
-    }
-
-    let res = value;
-    for (const validate of Object.values(validators)) {
-      res = validate(res);
-    }
-
-    if (typeof mapper === 'function') {
-      try {
-        return mapper(res);
-      } catch (err) {
-        throw ParseError.of(err);
-      }
-    }
-
-    return res;
-  }
-
   truthy(params?: { message?: string }): BooleanType<Result, Cast> {
     let message: string;
     if (params?.message) {
@@ -219,5 +156,70 @@ export class BooleanType<
       { ...this.validators, [code]: validator },
       this.mapper
     );
+  }
+
+  parse(value: unknown): Result;
+  parse(value: unknown): unknown {
+    const ErrorCodes = BooleanType.ErrorCodes;
+    const options = this.options;
+    const validators = this.validators;
+    const mapper = this.mapper;
+    const typeError = 'The value must be a boolean.';
+
+    if (options.cast) {
+      if (
+        value === 'true' ||
+        value === 'yes' ||
+        value === '1' ||
+        value === 1n ||
+        value === 1
+      ) {
+        value = true;
+      } else if (
+        value === 'false' ||
+        value === 'no' ||
+        value === '0' ||
+        value === 0n ||
+        value === 0 ||
+        value == null
+      ) {
+        value = false;
+      }
+    }
+
+    if (value == null) {
+      if (value === undefined && options.isOptional) {
+        return value;
+      }
+      if (value === null && options.isNullable) {
+        return value;
+      }
+      throw new ParseError(
+        ErrorCodes.required,
+        options.requiredError || typeError
+      );
+    }
+
+    if (typeof value !== 'boolean') {
+      throw new ParseError(
+        ErrorCodes.type,
+        options.typeError || typeError
+      );
+    }
+
+    let res = value;
+    for (const validate of Object.values(validators)) {
+      res = validate(res);
+    }
+
+    if (typeof mapper === 'function') {
+      try {
+        return mapper(res);
+      } catch (err) {
+        throw ParseError.of(err);
+      }
+    }
+
+    return res;
   }
 }
