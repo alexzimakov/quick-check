@@ -12,7 +12,6 @@ type EnumTypeOptions<T> = {
 };
 
 export type EnumParams = {
-  cast?: boolean;
   typeError?: string;
   requiredError?: string;
 };
@@ -20,7 +19,6 @@ export type EnumParams = {
 export class EnumType<
   Value,
   Result,
-  Cast extends boolean
 > extends TypeAlias<Value, Result> {
   protected readonly options: EnumTypeOptions<Value>;
   protected readonly mapper: ResultMapper | undefined;
@@ -42,10 +40,7 @@ export class EnumType<
   static create<Value, Params extends EnumParams>(
     values: readonly Value[],
     params?: Params
-  ): EnumType<
-    Value,
-    Value,
-    Params extends { cast: true } ? true : false> {
+  ): EnumType<Value, Value> {
     return new EnumType({
       values,
       isOptional: false,
@@ -71,47 +66,35 @@ export class EnumType<
     return `[${formatted.join(', ')}]`;
   }
 
-  optional(): EnumType<
-    Value,
-    Cast extends true ? Result : Result | undefined,
-    Cast> {
+  optional(): EnumType<Value, Result | undefined> {
     return new EnumType(
       { ...this.options, isOptional: true },
       this.mapper
     );
   }
 
-  nullable(): EnumType<
-    Value,
-    Cast extends true ? Result : Result | null,
-    Cast> {
+  nullable(): EnumType<Value, Result | null> {
     return new EnumType(
       { ...this.options, isNullable: true },
       this.mapper
     );
   }
 
-  nullish(): EnumType<
-    Value,
-    Cast extends true ? Result : Result | null | undefined,
-    Cast> {
+  nullish(): EnumType<Value, Result | null | undefined> {
     return new EnumType(
       { ...this.options, isOptional: true, isNullable: true },
       this.mapper
     );
   }
 
-  required(): EnumType<
-    Value,
-    Exclude<Result, | null | undefined>,
-    Cast> {
+  required(): EnumType<Value, Exclude<Result, null | undefined>> {
     return new EnumType(
       { ...this.options, isOptional: false, isNullable: false },
       this.mapper
     );
   }
 
-  map<Mapped>(mapper: (value: Value) => Mapped): EnumType<Value, Mapped, Cast> {
+  map<Mapped>(mapper: (value: Value) => Mapped): EnumType<Value, Mapped> {
     return new EnumType({ ...this.options }, mapper);
   }
 
