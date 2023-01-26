@@ -32,19 +32,12 @@ export {
 
   // Constants
   StringErrorCodes,
-  StringErrorCodes as STRING_ERROR_CODES,
   NumberErrorCodes,
-  NumberErrorCodes as NUMBER_ERROR_CODES,
   BooleanErrorCodes,
-  BooleanErrorCodes as BOOLEAN_ERROR_CODES,
   EnumErrorCodes,
-  EnumErrorCodes as ENUM_ERROR_CODES,
   ArrayErrorCodes,
-  ArrayErrorCodes as ARRAY_ERROR_CODES,
   ShapeErrorCodes,
-  ShapeErrorCodes as SHAPE_ERROR_CODES,
   ObjectErrorCodes,
-  ObjectErrorCodes as OBJECT_ERROR_CODES,
 
   // Public methods
   stringFactory as string,
