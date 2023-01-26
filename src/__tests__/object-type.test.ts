@@ -6,7 +6,7 @@ import { BooleanType } from '../type-aliases/boolean-type.js';
 import { EnumType } from '../type-aliases/enum-type.js';
 import { ArrayType } from '../type-aliases/array-type.js';
 import { ParseError } from '../parse-error.js';
-import { format } from './test-util.js';
+import { format } from '../util.js';
 
 describe('positive cases', () => {
   class TestObject {
@@ -283,29 +283,6 @@ describe('custom()', () => {
         .create(propsSchema)
         .custom(validateSum);
       expect(() => schema.parse({ a: 5, b: 3 })).toThrow(sumError);
-    }
-  );
-});
-
-describe('ObjectType.formatProperties()', () => {
-  test('returns empty string when the props count is 0', () => {
-    expect(ObjectType.formatProps([])).toBe('');
-  });
-
-  test('returns first property when the props count is 1', () => {
-    expect(ObjectType.formatProps(['sum'])).toBe('sum');
-  });
-
-  test('returns props joined using " and " when the props count is 2', () => {
-    expect(ObjectType.formatProps(['a', 'b'])).toBe('a and b');
-  });
-
-  test(
-    'returns props conjunction when the props count is greater than 2',
-    () => {
-      expect(
-        ObjectType.formatProps(['a', 'b', 'c', 'd'])
-      ).toBe('a, b, c, and d');
     }
   );
 });

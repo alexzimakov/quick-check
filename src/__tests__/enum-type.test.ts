@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { EnumType } from '../type-aliases/enum-type.js';
 import { ParseError } from '../parse-error.js';
-import { format } from './test-util.js';
+import { format } from '../util.js';
 
 describe('positive cases', () => {
   const values = ['north', 'south', 'east', 'west'] as const;
@@ -106,31 +106,5 @@ describe('map()', () => {
       return value;
     });
     expect(() => schema.parse(values[2])).toThrow(error);
-  });
-});
-
-describe('EnumType.formatValues()', () => {
-  test('returns formatted values', () => {
-    expect(EnumType.formatValues([
-      null,
-      undefined,
-      true,
-      'foo',
-      10,
-      20n,
-      [1, 2, 3],
-      { foo: 'bar' },
-    ])).toBe(
-      '[' +
-        'null, ' +
-        'undefined, ' +
-        'true, ' +
-        "'foo', " +
-        '10, ' +
-        '20n, ' +
-        '[1,2,3], ' +
-        '{"foo":"bar"}' +
-      ']'
-    );
   });
 });

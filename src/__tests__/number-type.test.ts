@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { NumberType } from '../type-aliases/number-type.js';
 import { ParseError } from '../parse-error.js';
-import { format } from './test-util.js';
+import { format } from '../util.js';
 
 describe('positive cases', () => {
   const valid = [0, 1, -1, 0.189, 1e3];

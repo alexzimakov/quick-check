@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { ArrayType } from '../type-aliases/array-type.js';
 import { StringType } from '../type-aliases/string-type.js';
 import { ParseError } from '../parse-error.js';
-import { format } from './test-util.js';
+import { format } from '../util.js';
 
 describe('positive cases', () => {
   const valid = [

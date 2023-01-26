@@ -1,6 +1,7 @@
 import { type ResultMapper } from '../types.js';
 import { TypeAlias } from './type-alias.js';
 import { ParseError } from '../parse-error.js';
+import { formatList } from '../util.js';
 
 type EnumTypeOptions = {
   isOptional: boolean;
@@ -48,22 +49,6 @@ export class EnumType<
     }, undefined);
   }
 
-  static formatValues(values: unknown[] | readonly unknown[]): string {
-    const formatted: string[] = [];
-    for (const value of values) {
-      if (typeof value === 'string') {
-        formatted.push(`'${value}'`);
-      } else if (typeof value === 'bigint') {
-        formatted.push(`${value}n`);
-      } else if (Array.isArray(value) || typeof value === 'object') {
-        formatted.push(JSON.stringify(value));
-      } else {
-        formatted.push(String(value));
-      }
-    }
-    return `[${formatted.join(', ')}]`;
-  }
-
   optional(): EnumType<Value, Result | undefined> {
     return new EnumType(
       this.values,
@@ -107,7 +92,7 @@ export class EnumType<
     const mapper = this.mapper;
     const values = this.values;
     const typeError = `The value must be one of ${
-      EnumType.formatValues(values)
+      formatList(values, { type: 'or' })
     }`;
 
     if (value == null) {

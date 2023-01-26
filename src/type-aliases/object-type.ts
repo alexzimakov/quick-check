@@ -2,6 +2,7 @@ import { type InputType, type OutputType, type ResultMapper } from '../types.js'
 import { TypeAlias } from './type-alias.js';
 import { ParseError } from '../parse-error.js';
 import { isObject } from '../guards.js';
+import { formatList } from '../util.js';
 
 type ObjectTypeOptions = {
   isOptional: boolean;
@@ -72,13 +73,6 @@ export class ObjectType<
       {},
       undefined
     );
-  }
-
-  static formatProps(props: string[]): string {
-    if (props.length <= 2) {
-      return props.join(' and ');
-    }
-    return [...props.slice(0, -2), props.slice(-2).join(', and ')].join(', ');
   }
 
   optional(): ObjectType<
@@ -174,7 +168,7 @@ export class ObjectType<
         } else {
           message = 'The object must have only known properties. ' +
             'Unknown properties: ' +
-            ObjectType.formatProps(unknownProps);
+            formatList(unknownProps, { type: 'and' });
         }
         throw new ParseError(code, message, {
           params: { unknownProps },

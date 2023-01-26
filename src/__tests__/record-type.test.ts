@@ -4,7 +4,7 @@ import { NumberType } from '../type-aliases/number-type.js';
 import { StringType } from '../type-aliases/string-type.js';
 import { EnumType } from '../type-aliases/enum-type.js';
 import { ParseError } from '../parse-error.js';
-import { format } from './test-util.js';
+import { format } from '../util.js';
 
 describe('positive cases', () => {
   const valid = [
