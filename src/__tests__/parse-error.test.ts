@@ -21,7 +21,8 @@ test('creates a new ParseError', () => {
 test('creates ParseError instance from an any argument type', () => {
   const code = 'INVALID_TYPE';
   const message = 'Invalid type: expected string, received number.';
-  const errorLikeObject = { code, message, foo: 'bar' };
+  const params = { required: true };
+  const errorLikeObject = { code, message, params, foo: 'bar' };
   const typeError = new TypeError(message);
   const parseError = new ParseError(code, message);
 
@@ -34,7 +35,7 @@ test('creates ParseError instance from an any argument type', () => {
   expect(ParseError.of(errorLikeObject)).toEqual(new ParseError(
     code,
     message,
-    { cause: errorLikeObject }
+    { cause: errorLikeObject, params }
   ));
 
   expect(ParseError.of(typeError)).toEqual(new ParseError(
@@ -75,8 +76,8 @@ test('returns a JSON representation of the error', () => {
 test('can store additional errors', () => {
   const code = 'INVALID_ITEMS';
   const message = 'The array contain invalid items';
-  const error1 = new TypeError('type error 1');
-  const error2 = new TypeError('type error 2');
+  const error1 = ParseError.of('type error 1');
+  const error2 = ParseError.of('type error 2');
 
   const parseError = new ParseError(code, message, {
     details: [error1, error2],

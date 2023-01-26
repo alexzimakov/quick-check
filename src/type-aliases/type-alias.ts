@@ -8,7 +8,9 @@ export abstract class TypeAlias<Result, Mapped = Result> {
 
   abstract nullable(): TypeAlias<Result, Mapped | null>;
 
-  abstract required(params: { message: string }): TypeAlias<
+  abstract nullish(): TypeAlias<Result, Mapped | null | undefined>;
+
+  abstract required(params?: { message: string }): TypeAlias<
     Result,
     Exclude<Mapped, null | undefined>
   >;

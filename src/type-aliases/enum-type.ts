@@ -3,8 +3,7 @@ import { TypeAlias } from './type-alias.js';
 import { ParseError } from '../parse-error.js';
 import { requiredError } from './error-messages.js';
 
-type EnumTypeOptions<T> = {
-  values: readonly T[];
+type EnumTypeOptions = {
   isOptional: boolean;
   isNullable: boolean;
   typeError?: string;
@@ -20,14 +19,17 @@ export class EnumType<
   Value,
   Result,
 > extends TypeAlias<Value, Result> {
-  protected readonly options: EnumTypeOptions<Value>;
+  readonly values: readonly Value[];
+  protected readonly options: EnumTypeOptions;
   protected readonly mapper: ResultMapper | undefined;
 
   protected constructor(
-    options: EnumTypeOptions<Value>,
+    values: readonly Value[],
+    options: EnumTypeOptions,
     mapper: ResultMapper | undefined
   ) {
     super();
+    this.values = values;
     this.options = options;
     this.mapper = mapper;
   }
@@ -41,8 +43,7 @@ export class EnumType<
     values: readonly Value[],
     params?: Params
   ): EnumType<Value, Value> {
-    return new EnumType({
-      values,
+    return new EnumType(values, {
       isOptional: false,
       isNullable: false,
       typeError: params?.typeError,
@@ -68,6 +69,7 @@ export class EnumType<
 
   optional(): EnumType<Value, Result | undefined> {
     return new EnumType(
+      this.values,
       { ...this.options, isOptional: true },
       this.mapper
     );
@@ -75,6 +77,7 @@ export class EnumType<
 
   nullable(): EnumType<Value, Result | null> {
     return new EnumType(
+      this.values,
       { ...this.options, isNullable: true },
       this.mapper
     );
@@ -82,6 +85,7 @@ export class EnumType<
 
   nullish(): EnumType<Value, Result | null | undefined> {
     return new EnumType(
+      this.values,
       { ...this.options, isOptional: true, isNullable: true },
       this.mapper
     );
@@ -89,13 +93,14 @@ export class EnumType<
 
   required(): EnumType<Value, Exclude<Result, null | undefined>> {
     return new EnumType(
+      this.values,
       { ...this.options, isOptional: false, isNullable: false },
       this.mapper
     );
   }
 
   map<Mapped>(mapper: (value: Value) => Mapped): EnumType<Value, Mapped> {
-    return new EnumType({ ...this.options }, mapper);
+    return new EnumType(this.values, { ...this.options }, mapper);
   }
 
   parse(value: unknown): Result;
@@ -116,8 +121,8 @@ export class EnumType<
       );
     }
 
-    const values = options.values;
-    if (!options.values.includes(value as Value)) {
+    const values = this.values;
+    if (!values.includes(value as Value)) {
       throw new ParseError(
         ErrorCodes.type,
         options.typeError || `Must be one of ${EnumType.formatValues(values)}`,

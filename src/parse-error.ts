@@ -1,3 +1,5 @@
+import { hasCode, hasMessage, hasParams } from './guards.js';
+
 type ErrorPath = (string | number)[];
 type ErrorParams = { [param: string]: unknown; };
 
@@ -67,7 +69,7 @@ export class ParseError extends Error {
         message = err.message;
       }
       if (hasParams(err)) {
-        params = err.params || {};
+        params = err.params;
       }
     }
 
@@ -88,28 +90,4 @@ export class ParseError extends Error {
       details: this.details,
     };
   }
-}
-
-function hasMessage(value: unknown): value is { message: string } {
-  return (
-    value != null &&
-    typeof value === 'object' &&
-    typeof (value as Record<string, unknown>).message === 'string'
-  );
-}
-
-function hasCode(value: unknown): value is { code: string } {
-  return (
-    value != null &&
-    typeof value === 'object' &&
-    typeof (value as Record<string, unknown>).code === 'string'
-  );
-}
-
-function hasParams(value: unknown): value is { params: ErrorParams } {
-  return (
-    value != null &&
-    typeof value === 'object' &&
-    typeof (value as Record<string, unknown>).params === 'object'
-  );
 }

@@ -287,26 +287,6 @@ describe('custom()', () => {
   );
 });
 
-describe('ObjectType.isObject', () => {
-  test('returns true when the value is an object', () => {
-    expect(ObjectType.isObject({})).toBe(true);
-    expect(ObjectType.isObject(Object.create(null))).toBe(true);
-    expect(ObjectType.isObject({ foo: 'bar' })).toBe(true);
-    expect(ObjectType.isObject(new Date())).toBe(true);
-  });
-
-  test('returns false when the value is not an object', () => {
-    expect(ObjectType.isObject(null)).toBe(false);
-    expect(ObjectType.isObject(undefined)).toBe(false);
-    expect(ObjectType.isObject('foo')).toBe(false);
-    expect(ObjectType.isObject(1)).toBe(false);
-    expect(ObjectType.isObject(1n)).toBe(false);
-    expect(ObjectType.isObject(true)).toBe(false);
-    expect(ObjectType.isObject([])).toBe(false);
-    expect(ObjectType.isObject(Symbol('test'))).toBe(false);
-  });
-});
-
 describe('ObjectType.formatProperties()', () => {
   test('returns empty string when the props count is 0', () => {
     expect(ObjectType.formatProps([])).toBe('');

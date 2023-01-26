@@ -5,6 +5,7 @@ import { BooleanType } from './type-aliases/boolean-type.js';
 import { EnumType } from './type-aliases/enum-type.js';
 import { ArrayType } from './type-aliases/array-type.js';
 import { ObjectType } from './type-aliases/object-type.js';
+import { RecordType } from './type-aliases/record-type.js';
 
 const StringPatterns = StringType.Patterns;
 const StringErrorCodes = StringType.ErrorCodes;
@@ -13,6 +14,7 @@ const BooleanErrorCodes = BooleanType.ErrorCodes;
 const EnumErrorCodes = EnumType.ErrorCodes;
 const ArrayErrorCodes = ArrayType.ErrorCodes;
 const ObjectErrorCodes = ObjectType.ErrorCodes;
+const RecordErrorCodes = RecordType.ErrorCodes;
 
 const stringFactory = StringType.create;
 const numberFactory = NumberType.create;
@@ -20,6 +22,7 @@ const booleanFactory = BooleanType.create;
 const enumFactory = EnumType.create;
 const arrayFactory = ArrayType.create;
 const objectFactory = ObjectType.create;
+const recordFactory = RecordType.create;
 
 // noinspection ReservedWordAsName
 export {
@@ -43,6 +46,8 @@ export {
   ArrayErrorCodes as ARRAY_ERROR_CODES,
   ObjectErrorCodes,
   ObjectErrorCodes as OBJECT_ERROR_CODES,
+  RecordErrorCodes,
+  RecordErrorCodes as RECORD_ERROR_CODES,
 
   // Public methods
   stringFactory as string,
@@ -51,4 +56,5 @@ export {
   enumFactory as enum,
   arrayFactory as array,
   objectFactory as object,
+  recordFactory as record,
 };

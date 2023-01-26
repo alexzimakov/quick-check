@@ -1,6 +1,7 @@
 import { type InputType, type OutputType, type ResultMapper } from '../types.js';
 import { TypeAlias } from './type-alias.js';
 import { ParseError } from '../parse-error.js';
+import { isObject } from '../guards.js';
 import { requiredError } from './error-messages.js';
 
 type ObjectTypeOptions = {
@@ -76,10 +77,6 @@ export class ObjectType<
       {},
       undefined
     );
-  }
-
-  static isObject(value: unknown): value is Record<string, unknown> {
-    return value != null && typeof value === 'object' && !Array.isArray(value);
   }
 
   static formatProps(props: string[]): string {
@@ -178,7 +175,7 @@ export class ObjectType<
       );
     }
 
-    if (!ObjectType.isObject(value)) {
+    if (!isObject(value) || Array.isArray(value)) {
       throw new ParseError(
         ErrorCodes.type,
         options.typeError || 'Must be an object.'
