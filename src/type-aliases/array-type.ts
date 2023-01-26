@@ -7,18 +7,17 @@ import { pluralize } from '../util.js';
 type ArrayTypeOptions = {
   isOptional: boolean;
   isNullable: boolean;
-  shouldCastValue: boolean;
+  cast?: boolean;
   typeError?: string;
   requiredError?: string;
 };
 type ArrayValidator<T> = (array: T) => T;
 type ArrayValidators<T> = { [name: string]: ArrayValidator<T> };
 
-export type ArrayParams = {
-  cast?: boolean;
-  typeError?: string;
-  requiredError?: string;
-};
+export type ArrayParams = Pick<ArrayTypeOptions,
+  | 'cast'
+  | 'typeError'
+  | 'requiredError'>
 
 export class ArrayType<
   Items extends unknown[],
@@ -63,13 +62,7 @@ export class ArrayType<
     Params extends { cast: true } ? true : false> {
     return new ArrayType(
       itemSchema,
-      {
-        isOptional: false,
-        isNullable: false,
-        shouldCastValue: params?.cast ?? false,
-        requiredError: params?.requiredError,
-        typeError: params?.typeError,
-      },
+      { ...params, isOptional: false, isNullable: false },
       {},
       undefined
     );
@@ -140,7 +133,7 @@ export class ArrayType<
     const { ErrorCodes } = ArrayType;
     const { options, validators, mapper } = this;
 
-    if (options.shouldCastValue) {
+    if (options.cast) {
       if (value == null) {
         value = [];
       }

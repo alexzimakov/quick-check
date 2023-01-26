@@ -6,7 +6,7 @@ import { requiredError } from './error-messages.js';
 type BooleanTypeOptions = {
   isOptional: boolean;
   isNullable: boolean;
-  shouldCastValue: boolean;
+  cast?: boolean;
   typeError?: string;
   requiredError?: string;
 };
@@ -14,11 +14,10 @@ type BooleanTypeOptions = {
 type BooleanValidator = (value: boolean) => boolean;
 type BooleanValidators = { [name: string]: BooleanValidator };
 
-export type BooleanParams = {
-  cast?: boolean;
-  typeError?: string;
-  requiredError?: string;
-};
+export type BooleanParams = Pick<BooleanTypeOptions,
+  | 'cast'
+  | 'typeError'
+  | 'requiredError'>;
 
 export class BooleanType<
   Result,
@@ -51,11 +50,9 @@ export class BooleanType<
     boolean,
     Params extends { cast: true } ? true : false> {
     return new BooleanType({
+      ...params,
       isOptional: false,
       isNullable: false,
-      shouldCastValue: params?.cast ?? false,
-      requiredError: params?.requiredError,
-      typeError: params?.typeError,
     }, {}, undefined);
   }
 
@@ -112,7 +109,7 @@ export class BooleanType<
     const { ErrorCodes } = BooleanType;
     const { options, validators, mapper } = this;
 
-    if (options.shouldCastValue) {
+    if (options.cast) {
       if (
         value === 'true' ||
         value === 'yes' ||

@@ -10,10 +10,9 @@ type EnumTypeOptions = {
   requiredError?: string;
 };
 
-export type EnumParams = {
-  typeError?: string;
-  requiredError?: string;
-};
+export type EnumParams = Pick<EnumTypeOptions,
+  | 'typeError'
+  | 'requiredError'>;
 
 export class EnumType<
   Value,
@@ -44,10 +43,9 @@ export class EnumType<
     params?: Params
   ): EnumType<Value, Value> {
     return new EnumType(values, {
+      ...params,
       isOptional: false,
       isNullable: false,
-      typeError: params?.typeError,
-      requiredError: params?.requiredError,
     }, undefined);
   }
 

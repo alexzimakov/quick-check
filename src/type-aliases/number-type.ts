@@ -6,7 +6,7 @@ import { requiredError } from './error-messages.js';
 type NumberTypeOptions = {
   isOptional: boolean;
   isNullable: boolean;
-  shouldCastValue: boolean;
+  cast?: boolean;
   typeError?: string;
   requiredError?: string;
 };
@@ -14,11 +14,10 @@ type NumberTypeOptions = {
 type NumberValidator = (value: number) => number;
 type NumberValidators = { [name: string]: NumberValidator };
 
-export type NumberParams = {
-  cast?: boolean;
-  typeError?: string;
-  requiredError?: string;
-};
+export type NumberParams = Pick<NumberTypeOptions,
+  | 'cast'
+  | 'typeError'
+  | 'requiredError'>;
 
 export class NumberType<
   Result,
@@ -55,11 +54,9 @@ export class NumberType<
     number,
     Params extends { cast: true } ? true : false> {
     return new NumberType({
+      ...params,
       isOptional: false,
       isNullable: false,
-      shouldCastValue: params?.cast ?? false,
-      requiredError: params?.requiredError,
-      typeError: params?.typeError,
     }, {}, undefined);
   }
 
@@ -116,7 +113,7 @@ export class NumberType<
     const { ErrorCodes } = NumberType;
     const { options, validators, mapper } = this;
 
-    if (options.shouldCastValue) {
+    if (options.cast) {
       if (value == null) {
         value = 0;
       } else if (

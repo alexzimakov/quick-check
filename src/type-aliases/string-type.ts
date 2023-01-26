@@ -7,8 +7,8 @@ import { pluralize } from '../util.js';
 type StringTypeOptions = {
   isOptional: boolean;
   isNullable: boolean;
-  shouldTrimValue: boolean;
-  shouldCastValue: boolean;
+  cast?: boolean;
+  trim?: boolean;
   typeError?: string;
   requiredError?: string;
 };
@@ -16,12 +16,11 @@ type StringTypeOptions = {
 type StringValidator = (value: string) => string;
 type StringValidators = { [name: string]: StringValidator };
 
-export type StringParams = {
-  cast?: boolean;
-  trim?: boolean;
-  typeError?: string;
-  requiredError?: string;
-};
+export type StringParams = Pick<StringTypeOptions,
+  | 'cast'
+  | 'trim'
+  | 'typeError'
+  | 'requiredError'>;
 
 export class StringType<
   Result,
@@ -69,8 +68,8 @@ export class StringType<
     return new StringType({
       isOptional: false,
       isNullable: false,
-      shouldCastValue: params?.cast ?? false,
-      shouldTrimValue: params?.trim ?? false,
+      cast: params?.cast ?? false,
+      trim: params?.trim ?? false,
       requiredError: params?.requiredError,
       typeError: params?.typeError,
     }, {}, undefined);
@@ -129,7 +128,7 @@ export class StringType<
     const { ErrorCodes } = StringType;
     const { options, validators, mapper } = this;
 
-    if (options.shouldCastValue) {
+    if (options.cast) {
       value = value == null ? '' : String(value);
     }
 
@@ -154,7 +153,7 @@ export class StringType<
     }
 
     let res = value;
-    if (options.shouldTrimValue) {
+    if (options.trim) {
       res = value.trim();
     }
     for (const validate of Object.values(validators)) {

@@ -7,8 +7,8 @@ import { requiredError } from './error-messages.js';
 type ObjectTypeOptions = {
   isOptional: boolean;
   isNullable: boolean;
-  shouldCastValue: boolean;
-  shouldOmitUnknownProps: boolean;
+  cast?: boolean;
+  omitUnknownProps?: boolean;
   typeError?: string;
   requiredError?: string;
 };
@@ -16,13 +16,11 @@ type PropsSchema = { [property: string]: TypeAlias<unknown> };
 type ObjectValidator<T> = (props: T) => T;
 type ObjectValidators<T> = { [validator: string]: ObjectValidator<T> };
 
-export type ObjectParams = {
-  cast?: boolean;
-  omitUnknownProps?: boolean;
-  typeError?: string;
-  requiredError?: string;
-  unknownPropsError?: string;
-};
+export type ObjectParams = Pick<ObjectTypeOptions,
+  | 'cast'
+  | 'omitUnknownProps'
+  | 'typeError'
+  | 'requiredError'>;
 
 export class ObjectType<
   Input extends { [key: string]: unknown },
@@ -66,14 +64,7 @@ export class ObjectType<
     Params extends { cast: true } ? true : false> {
     return new ObjectType(
       propsSchema,
-      {
-        isOptional: false,
-        isNullable: false,
-        shouldCastValue: params?.cast ?? false,
-        shouldOmitUnknownProps: params?.omitUnknownProps ?? true,
-        requiredError: params?.requiredError,
-        typeError: params?.typeError,
-      },
+      { ...params, isOptional: false, isNullable: false },
       {},
       undefined
     );
@@ -156,7 +147,7 @@ export class ObjectType<
     const { ErrorCodes } = ObjectType;
     const { options, validators, mapper } = this;
 
-    if (options.shouldCastValue) {
+    if (options.cast) {
       if (value == null) {
         value = {};
       }
@@ -182,7 +173,7 @@ export class ObjectType<
       );
     }
 
-    const result = options.shouldOmitUnknownProps ? {} : { ...value };
+    const result = options.omitUnknownProps ? {} : { ...value };
     const propsSchema = this.propsSchema;
     const propsError = new ParseError(
       ObjectType.ErrorCodes.invalidProps,
