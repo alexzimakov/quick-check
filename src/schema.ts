@@ -7,7 +7,6 @@ import { ArraySchema } from './type-schemas/array-schema.js';
 import { ShapeSchema } from './type-schemas/shape-schema.js';
 import { ObjectSchema } from './type-schemas/object-schema.js';
 
-const StringPatterns = StringSchema.Patterns;
 const StringErrorCodes = StringSchema.ErrorCodes;
 const NumberErrorCodes = NumberSchema.ErrorCodes;
 const BooleanErrorCodes = BooleanSchema.ErrorCodes;
@@ -32,8 +31,6 @@ export {
   type OutputType as infer,
 
   // Constants
-  StringPatterns,
-  StringPatterns as STRING_PATTERNS,
   StringErrorCodes,
   StringErrorCodes as STRING_ERROR_CODES,
   NumberErrorCodes,
