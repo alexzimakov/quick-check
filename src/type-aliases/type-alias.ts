@@ -1,11 +1,15 @@
-export abstract class TypeAlias<T> {
-  abstract parse(value: unknown): T;
+export abstract class TypeAlias<Result, Mapped = Result> {
+  readonly __result!: Result;
+  readonly __mapped!: Mapped;
 
-  abstract optional(): TypeAlias<T | undefined>;
+  abstract parse(value: unknown): Mapped;
 
-  abstract nullable(): TypeAlias<T | null>;
+  abstract optional(): TypeAlias<Result, Mapped | undefined>;
 
-  abstract required(params: {
-    message: string;
-  }): TypeAlias<Exclude<T, null | undefined>>;
+  abstract nullable(): TypeAlias<Result, Mapped | null>;
+
+  abstract required(params: { message: string }): TypeAlias<
+    Result,
+    Exclude<Mapped, null | undefined>
+  >;
 }

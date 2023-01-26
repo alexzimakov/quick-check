@@ -1,4 +1,4 @@
-import { type MapTypeFn } from '../types.js';
+import { type InputType, type OutputType, type ResultMapper } from '../types.js';
 import { TypeAlias } from './type-alias.js';
 import { ParseError } from '../parse-error.js';
 import { requiredError } from './error-messages.js';
@@ -11,16 +11,9 @@ type ObjectTypeOptions = {
   typeError?: string;
   requiredError?: string;
 };
-
-type PropsSchema = Record<string, TypeAlias<unknown>>;
-type TypeOf<T extends PropsSchema> = {
-  [P in keyof T]: ReturnType<T[P]['parse']>;
-};
-
+type PropsSchema = { [property: string]: TypeAlias<unknown> };
 type ObjectValidator<T> = (props: T) => T;
-type ObjectValidators<T> = {
-  [name: string]: ObjectValidator<T>;
-};
+type ObjectValidators<T> = { [validator: string]: ObjectValidator<T> };
 
 export type ObjectParams = {
   cast?: boolean;
@@ -31,23 +24,24 @@ export type ObjectParams = {
 };
 
 export class ObjectType<
-  Props extends PropsSchema,
+  Input extends { [key: string]: unknown },
+  Props extends { [key: string]: unknown },
   Result,
   Cast extends boolean
-> extends TypeAlias<Result> {
-  readonly props: Props;
+> extends TypeAlias<Input, Result> {
+  readonly propsSchema: PropsSchema;
   protected readonly options: ObjectTypeOptions;
-  protected readonly validators: ObjectValidators<TypeOf<Props>>;
-  protected readonly mapper: MapTypeFn | undefined;
+  protected readonly validators: ObjectValidators<Props>;
+  protected readonly mapper: ResultMapper | undefined;
 
   protected constructor(
-    itemSchema: Props,
+    propsSchema: PropsSchema,
     options: ObjectTypeOptions,
-    validators: ObjectValidators<TypeOf<Props>>,
-    mapper: MapTypeFn | undefined
+    validators: ObjectValidators<Props>,
+    mapper: ResultMapper | undefined
   ) {
     super();
-    this.props = itemSchema;
+    this.propsSchema = propsSchema;
     this.options = options;
     this.validators = validators;
     this.mapper = mapper;
@@ -62,11 +56,12 @@ export class ObjectType<
   } as const;
 
   static create<
-    T extends PropsSchema,
+    Schema extends PropsSchema,
     Params extends ObjectParams
-  >(propsSchema: T, params?: Params): ObjectType<
-    T,
-    { [P in keyof T]: ReturnType<T[P]['parse']> },
+  >(propsSchema: Schema, params?: Params): ObjectType<
+    { [P in keyof Schema]: InputType<Schema[P]> },
+    { [P in keyof Schema]: OutputType<Schema[P]> },
+    { [P in keyof Schema]: OutputType<Schema[P]> },
     Params extends { cast: true } ? true : false> {
     return new ObjectType(
       propsSchema,
@@ -95,11 +90,12 @@ export class ObjectType<
   }
 
   optional(): ObjectType<
+    Input,
     Props,
     Cast extends true ? Result : Result | undefined,
     Cast> {
     return new ObjectType(
-      this.props,
+      this.propsSchema,
       { ...this.options, isOptional: true },
       { ...this.validators },
       this.mapper
@@ -107,11 +103,12 @@ export class ObjectType<
   }
 
   nullable(): ObjectType<
+    Input,
     Props,
     Cast extends true ? Result : Result | null,
     Cast> {
     return new ObjectType(
-      this.props,
+      this.propsSchema,
       { ...this.options, isNullable: true },
       { ...this.validators },
       this.mapper
@@ -119,11 +116,12 @@ export class ObjectType<
   }
 
   nullish(): ObjectType<
+    Input,
     Props,
     Cast extends true ? Result : Result | null | undefined,
     Cast> {
     return new ObjectType(
-      this.props,
+      this.propsSchema,
       { ...this.options, isOptional: true, isNullable: true },
       { ...this.validators },
       this.mapper
@@ -131,22 +129,25 @@ export class ObjectType<
   }
 
   required(): ObjectType<
+    Input,
     Props,
     Exclude<Result, null | undefined>,
     Cast> {
     return new ObjectType(
-      this.props,
+      this.propsSchema,
       { ...this.options, isOptional: false, isNullable: false },
       { ...this.validators },
       this.mapper
     );
   }
 
-  map<U>(mapper: (value: {
-    [P in keyof Props]: ReturnType<Props[P]['parse']>
-  }) => U): ObjectType<Props, U, Cast> {
+  map<Mapped>(mapper: (value: Props) => Mapped): ObjectType<
+    Input,
+    Props,
+    Mapped,
+    Cast> {
     return new ObjectType(
-      this.props,
+      this.propsSchema,
       { ...this.options },
       { ...this.validators },
       mapper
@@ -185,7 +186,7 @@ export class ObjectType<
     }
 
     const result = options.shouldOmitUnknownProps ? {} : { ...value };
-    const propsSchema = this.props;
+    const propsSchema = this.propsSchema;
     const propsError = new ParseError(
       ObjectType.ErrorCodes.invalidProps,
       'The object has one or more invalid properties. ' +
@@ -214,7 +215,7 @@ export class ObjectType<
       throw propsError;
     }
 
-    let props = result as TypeOf<Props>;
+    let props = result as Props;
     for (const validate of Object.values(validators)) {
       props = validate(props);
     }
@@ -232,17 +233,17 @@ export class ObjectType<
 
   onlyKnownProps(params?: {
     message?: string | ((params: { unknownProps: string[] }) => string)
-  }): ObjectType<Props, Result, Cast> {
+  }): ObjectType<Input, Props, Result, Cast> {
     const code = ObjectType.ErrorCodes.unknownProps;
-    const validator = (props: TypeOf<Props>) => {
-      const allowedKeys: Record<string, true> = {};
-      for (const key of Object.keys(this.props)) {
-        allowedKeys[key] = true;
+    const validator: ObjectValidator<Props> = (props) => {
+      const allowedProps: Record<string, true> = {};
+      for (const key of Object.keys(this.propsSchema)) {
+        allowedProps[key] = true;
       }
 
       const unknownProps: string[] = [];
       for (const key of Object.keys(props)) {
-        if (!allowedKeys[key]) {
+        if (!allowedProps[key]) {
           unknownProps.push(key);
         }
       }
@@ -269,22 +270,21 @@ export class ObjectType<
     };
 
     return new ObjectType(
-      this.props,
+      this.propsSchema,
       { ...this.options },
       { ...this.validators, [code]: validator },
       this.mapper
     );
   }
 
-  custom(validator: ObjectValidator<{
-    [P in keyof Props]: ReturnType<Props[P]['parse']>
-  }>): ObjectType<
+  custom(validator: ObjectValidator<Props>): ObjectType<
+    Input,
     Props,
     Result,
     Cast> {
     const code = ObjectType.ErrorCodes.custom;
     return new ObjectType(
-      this.props,
+      this.propsSchema,
       { ...this.options },
       { ...this.validators, [code]: validator },
       this.mapper

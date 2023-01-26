@@ -27,13 +27,13 @@ export class ParseError extends Error {
    * The array of nested errors, e.g., may be used to store object
    * property-specific errors.
    */
-  details: Error[] = [];
+  details: ParseError[] = []; // eslint-disable-line no-use-before-define
 
   constructor(code: string, message: string, params?: {
     cause?: unknown;
     path?: ErrorPath;
     params?: ErrorParams;
-    details?: Error[];
+    details?: ParseError[];
   }) {
     super(message);
     this.name = 'ParseError';
@@ -56,6 +56,7 @@ export class ParseError extends Error {
 
     let code = ParseError.Codes.unknown;
     let message = '';
+    let params: ErrorParams = {};
     if (typeof err === 'string') {
       message = err;
     } else {
@@ -65,9 +66,12 @@ export class ParseError extends Error {
       if (hasMessage(err)) {
         message = err.message;
       }
+      if (hasParams(err)) {
+        params = err.params || {};
+      }
     }
 
-    return new ParseError(code, message, { cause: err });
+    return new ParseError(code, message, { cause: err, params });
   }
 
   toString() {
@@ -99,5 +103,13 @@ function hasCode(value: unknown): value is { code: string } {
     value != null &&
     typeof value === 'object' &&
     typeof (value as Record<string, unknown>).code === 'string'
+  );
+}
+
+function hasParams(value: unknown): value is { params: ErrorParams } {
+  return (
+    value != null &&
+    typeof value === 'object' &&
+    typeof (value as Record<string, unknown>).params === 'object'
   );
 }

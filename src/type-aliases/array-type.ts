@@ -1,4 +1,4 @@
-import { type MapTypeFn } from '../types.js';
+import { type ResultMapper } from '../types.js';
 import { TypeAlias } from './type-alias.js';
 import { ParseError } from '../parse-error.js';
 import { requiredError } from './error-messages.js';
@@ -11,7 +11,7 @@ type ArrayTypeOptions = {
   typeError?: string;
   requiredError?: string;
 };
-type ArrayValidator<T> = (array: T[]) => T[];
+type ArrayValidator<T> = (array: T) => T;
 type ArrayValidators<T> = { [name: string]: ArrayValidator<T> };
 
 export type ArrayParams = {
@@ -21,20 +21,20 @@ export type ArrayParams = {
 };
 
 export class ArrayType<
-  Item,
+  Items extends unknown[],
   Result,
   Cast extends boolean
-> extends TypeAlias<Result> {
+> extends TypeAlias<Items, Result> {
   protected readonly itemSchema: TypeAlias<unknown>;
   protected readonly options: ArrayTypeOptions;
-  protected readonly validators: ArrayValidators<Item>;
-  protected readonly mapper: MapTypeFn | undefined;
+  protected readonly validators: ArrayValidators<Items>;
+  protected readonly mapper: ResultMapper | undefined;
 
   protected constructor(
     itemSchema: TypeAlias<unknown>,
     options: ArrayTypeOptions,
-    validators: ArrayValidators<Item>,
-    mapper: MapTypeFn | undefined
+    validators: ArrayValidators<Items>,
+    mapper: ResultMapper | undefined
   ) {
     super();
     this.itemSchema = itemSchema;
@@ -54,12 +54,12 @@ export class ArrayType<
     custom: 'ARRAY_CUSTOM',
   } as const;
 
-  static create<T, Params extends ArrayParams>(
-    itemSchema: TypeAlias<T>,
+  static create<Item, Params extends ArrayParams>(
+    itemSchema: TypeAlias<Item>,
     params?: Params
   ): ArrayType<
-    T,
-    T[],
+    Item[],
+    Item[],
     Params extends { cast: true } ? true : false> {
     return new ArrayType(
       itemSchema,
@@ -76,7 +76,7 @@ export class ArrayType<
   }
 
   optional(): ArrayType<
-    Item,
+    Items,
     Cast extends true ? Result : Result | undefined,
     Cast> {
     return new ArrayType(
@@ -88,7 +88,7 @@ export class ArrayType<
   }
 
   nullable(): ArrayType<
-    Item,
+    Items,
     Cast extends true ? Result : Result | null,
     Cast> {
     return new ArrayType(
@@ -100,7 +100,7 @@ export class ArrayType<
   }
 
   nullish(): ArrayType<
-    Item,
+    Items,
     Cast extends true ? Result : Result | null | undefined,
     Cast> {
     return new ArrayType(
@@ -112,7 +112,7 @@ export class ArrayType<
   }
 
   required(): ArrayType<
-    Item,
+    Items,
     Exclude<Result, null | undefined>,
     Cast> {
     return new ArrayType(
@@ -123,7 +123,10 @@ export class ArrayType<
     );
   }
 
-  map<U>(mapper: (value: Item[]) => U): ArrayType<Item, U, Cast> {
+  map<Mapped>(mapper: (value: Items) => Mapped): ArrayType<
+    Items,
+    Mapped,
+    Cast> {
     return new ArrayType(
       this.itemSchema,
       { ...this.options },
@@ -163,7 +166,7 @@ export class ArrayType<
       );
     }
 
-    let items: Item[] = [];
+    let items: unknown[] = [];
     const itemSchema = this.itemSchema;
     const itemsError = new ParseError(
       ArrayType.ErrorCodes.invalidItems,
@@ -173,7 +176,7 @@ export class ArrayType<
     for (let i = 0; i < value.length; i += 1) {
       const item = value[i];
       try {
-        items[i] = itemSchema.parse(item) as Item;
+        items[i] = itemSchema.parse(item);
       } catch (err) {
         let errors: ParseError[];
         if (err instanceof ParseError && err.details.length > 0) {
@@ -193,7 +196,7 @@ export class ArrayType<
     }
 
     for (const validate of Object.values(validators)) {
-      items = validate(items);
+      items = validate(items as Items);
     }
 
     if (typeof mapper === 'function') {
@@ -207,7 +210,7 @@ export class ArrayType<
     return items;
   }
 
-  unique(params?: { message?: string }): ArrayType<Item, Result, Cast> {
+  unique(params?: { message?: string }): ArrayType<Items, Result, Cast> {
     let message: string;
     if (params?.message) {
       message = params.message;
@@ -216,7 +219,7 @@ export class ArrayType<
     }
 
     const code = ArrayType.ErrorCodes.unique;
-    const validator: ArrayValidator<Item> = (items) => {
+    const validator: ArrayValidator<Items> = (items) => {
       const itemSet = new Set(items);
       if (items.length !== itemSet.size) {
         throw new ParseError(code, message);
@@ -234,7 +237,7 @@ export class ArrayType<
 
   length(limit: number, params?: {
     message?: string | ((params: { limit: number }) => string),
-  }): ArrayType<Item, Result, Cast> {
+  }): ArrayType<Items, Result, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -247,7 +250,7 @@ export class ArrayType<
     }
 
     const code = ArrayType.ErrorCodes.length;
-    const validator: ArrayValidator<Item> = (items) => {
+    const validator: ArrayValidator<Items> = (items) => {
       if (items.length !== limit) {
         throw new ParseError(code, message, {
           params: { limit },
@@ -266,7 +269,7 @@ export class ArrayType<
 
   minItems(limit: number, params?: {
     message?: string | ((params: { limit: number }) => string),
-  }): ArrayType<Item, Result, Cast> {
+  }): ArrayType<Items, Result, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -281,7 +284,7 @@ export class ArrayType<
     }
 
     const code = ArrayType.ErrorCodes.minItems;
-    const validator: ArrayValidator<Item> = (items) => {
+    const validator: ArrayValidator<Items> = (items) => {
       if (items.length < limit) {
         throw new ParseError(code, message, {
           params: { limit },
@@ -300,7 +303,7 @@ export class ArrayType<
 
   maxItems(limit: number, params?: {
     message?: string | ((params: { limit: number }) => string),
-  }): ArrayType<Item, Result, Cast> {
+  }): ArrayType<Items, Result, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -315,7 +318,7 @@ export class ArrayType<
     }
 
     const code = ArrayType.ErrorCodes.maxItems;
-    const validator: ArrayValidator<Item> = (items) => {
+    const validator: ArrayValidator<Items> = (items) => {
       if (items.length > limit) {
         throw new ParseError(code, message, {
           params: { limit },
@@ -332,7 +335,7 @@ export class ArrayType<
     );
   }
 
-  custom(validator: ArrayValidator<Item>): ArrayType<Item, Result, Cast> {
+  custom(validator: ArrayValidator<Items>): ArrayType<Items, Result, Cast> {
     const code = ArrayType.ErrorCodes.custom;
     return new ArrayType(
       this.itemSchema,

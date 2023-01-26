@@ -1,4 +1,4 @@
-import { type MapTypeFn } from '../types.js';
+import { type ResultMapper } from '../types.js';
 import { TypeAlias } from './type-alias.js';
 import { ParseError } from '../parse-error.js';
 import { requiredError } from './error-messages.js';
@@ -23,15 +23,15 @@ export type BooleanParams = {
 export class BooleanType<
   Result,
   Cast extends boolean
-> extends TypeAlias<Result> {
+> extends TypeAlias<boolean, Result> {
   protected readonly options: BooleanTypeOptions;
   protected readonly validators: BooleanValidators;
-  protected readonly mapper: MapTypeFn | undefined;
+  protected readonly mapper: ResultMapper | undefined;
 
   protected constructor(
     options: BooleanTypeOptions,
     validators: BooleanValidators,
-    mapper: MapTypeFn | undefined
+    mapper: ResultMapper | undefined
   ) {
     super();
     this.options = options;
@@ -47,9 +47,9 @@ export class BooleanType<
     custom: 'BOOLEAN_CUSTOM',
   } as const;
 
-  static create<T extends BooleanParams>(params?: T): BooleanType<
+  static create<Params extends BooleanParams>(params?: Params): BooleanType<
     boolean,
-    T extends { cast: true } ? true : false> {
+    Params extends { cast: true } ? true : false> {
     return new BooleanType({
       isOptional: false,
       isNullable: false,
@@ -62,42 +62,44 @@ export class BooleanType<
   optional(): BooleanType<
     Cast extends true ? Result : Result | undefined,
     Cast> {
-    return new BooleanType({
-      ...this.options,
-      isOptional: true,
-    }, { ...this.validators }, this.mapper);
+    return new BooleanType(
+      { ...this.options, isOptional: true },
+      { ...this.validators },
+      this.mapper
+    );
   }
 
   nullable(): BooleanType<
     Cast extends true ? Result : Result | null,
     Cast> {
-    return new BooleanType({
-      ...this.options,
-      isNullable: true,
-    }, { ...this.validators }, this.mapper);
+    return new BooleanType(
+      { ...this.options, isNullable: true },
+      { ...this.validators },
+      this.mapper
+    );
   }
 
   nullish(): BooleanType<
     Cast extends true ? Result : Result | null | undefined,
     Cast> {
-    return new BooleanType({
-      ...this.options,
-      isOptional: true,
-      isNullable: true,
-    }, { ...this.validators }, this.mapper);
+    return new BooleanType(
+      { ...this.options, isOptional: true, isNullable: true },
+      { ...this.validators },
+      this.mapper
+    );
   }
 
   required(): BooleanType<
     Exclude<Result, null | undefined>,
     Cast> {
-    return new BooleanType({
-      ...this.options,
-      isOptional: false,
-      isNullable: false,
-    }, { ...this.validators }, this.mapper);
+    return new BooleanType(
+      { ...this.options, isOptional: false, isNullable: false },
+      { ...this.validators },
+      this.mapper
+    );
   }
 
-  map<U>(mapper: (value: boolean) => U): BooleanType<U, Cast> {
+  map<Mapped>(mapper: (value: boolean) => Mapped): BooleanType<Mapped, Cast> {
     return new BooleanType(
       { ...this.options },
       { ...this.validators },

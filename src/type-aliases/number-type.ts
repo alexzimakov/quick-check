@@ -1,4 +1,4 @@
-import { type MapTypeFn } from '../types.js';
+import { type ResultMapper } from '../types.js';
 import { TypeAlias } from './type-alias.js';
 import { ParseError } from '../parse-error.js';
 import { requiredError } from './error-messages.js';
@@ -23,15 +23,15 @@ export type NumberParams = {
 export class NumberType<
   Result,
   Cast extends boolean
-> extends TypeAlias<Result> {
+> extends TypeAlias<number, Result> {
   protected readonly options: NumberTypeOptions;
   protected readonly validators: NumberValidators;
-  protected readonly mapper: MapTypeFn | undefined;
+  protected readonly mapper: ResultMapper | undefined;
 
   protected constructor(
     options: NumberTypeOptions,
     validators: NumberValidators,
-    mapper: MapTypeFn | undefined
+    mapper: ResultMapper | undefined
   ) {
     super();
     this.options = options;
@@ -51,9 +51,9 @@ export class NumberType<
     custom: 'NUMBER_CUSTOM',
   } as const;
 
-  static create<T extends NumberParams>(params?: T): NumberType<
+  static create<Params extends NumberParams>(params?: Params): NumberType<
     number,
-    T extends { cast: true } ? true : false> {
+    Params extends { cast: true } ? true : false> {
     return new NumberType({
       isOptional: false,
       isNullable: false,
@@ -66,42 +66,44 @@ export class NumberType<
   optional(): NumberType<
     Cast extends true ? Result : Result | undefined,
     Cast> {
-    return new NumberType({
-      ...this.options,
-      isOptional: true,
-    }, { ...this.validators }, this.mapper);
+    return new NumberType(
+      { ...this.options, isOptional: true },
+      { ...this.validators },
+      this.mapper
+    );
   }
 
   nullable(): NumberType<
     Cast extends true ? Result : Result | null,
     Cast> {
-    return new NumberType({
-      ...this.options,
-      isNullable: true,
-    }, { ...this.validators }, this.mapper);
+    return new NumberType(
+      { ...this.options, isNullable: true },
+      { ...this.validators },
+      this.mapper
+    );
   }
 
   nullish(): NumberType<
     Cast extends true ? Result : Result | null | undefined,
     Cast> {
-    return new NumberType({
-      ...this.options,
-      isOptional: true,
-      isNullable: true,
-    }, { ...this.validators }, this.mapper);
+    return new NumberType(
+      { ...this.options, isOptional: true, isNullable: true },
+      { ...this.validators },
+      this.mapper
+    );
   }
 
   required(): NumberType<
     Exclude<Result, null | undefined>,
     Cast> {
-    return new NumberType({
-      ...this.options,
-      isOptional: false,
-      isNullable: false,
-    }, { ...this.validators }, this.mapper);
+    return new NumberType(
+      { ...this.options, isOptional: false, isNullable: false },
+      { ...this.validators },
+      this.mapper
+    );
   }
 
-  map<U>(mapper: (value: number) => U): NumberType<U, Cast> {
+  map<Mapped>(mapper: (value: number) => Mapped): NumberType<Mapped, Cast> {
     return new NumberType(
       { ...this.options },
       { ...this.validators },

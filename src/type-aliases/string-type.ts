@@ -1,4 +1,4 @@
-import { type MapTypeFn } from '../types.js';
+import { type ResultMapper } from '../types.js';
 import { TypeAlias } from './type-alias.js';
 import { ParseError } from '../parse-error.js';
 import { requiredError } from './error-messages.js';
@@ -26,15 +26,15 @@ export type StringParams = {
 export class StringType<
   Result,
   Cast extends boolean
-> extends TypeAlias<Result> {
+> extends TypeAlias<string, Result> {
   protected readonly options: StringTypeOptions;
   protected readonly validators: StringValidators;
-  protected readonly mapper: MapTypeFn | undefined;
+  protected readonly mapper: ResultMapper | undefined;
 
   protected constructor(
     options: StringTypeOptions,
     validators: StringValidators,
-    mapper: MapTypeFn | undefined
+    mapper: ResultMapper | undefined
   ) {
     super();
     this.options = options;
@@ -63,9 +63,9 @@ export class StringType<
     dateTimeISO: /^([0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])[T ]([01][0-9]|2[0-3]):([0-5][0-9])(:([0-5][0-9])(\.[0-9]{3})?)?(Z|[+-](?:2[0-3]|[01][0-9])(?::([0-5][0-9]))?)?$/,
   } as const;
 
-  static create<T extends StringParams>(params?: T): StringType<
+  static create<Params extends StringParams>(params?: Params): StringType<
     string,
-    T extends { cast: true } ? true : false> {
+    Params extends { cast: true } ? true : false> {
     return new StringType({
       isOptional: false,
       isNullable: false,
@@ -79,42 +79,44 @@ export class StringType<
   optional(): StringType<
     Cast extends true ? Result : Result | undefined,
     Cast> {
-    return new StringType({
-      ...this.options,
-      isOptional: true,
-    }, { ...this.validators }, this.mapper);
+    return new StringType(
+      { ...this.options, isOptional: true },
+      { ...this.validators },
+      this.mapper
+    );
   }
 
   nullable(): StringType<
     Cast extends true ? Result : Result | null,
     Cast> {
-    return new StringType({
-      ...this.options,
-      isNullable: true,
-    }, { ...this.validators }, this.mapper);
+    return new StringType(
+      { ...this.options, isNullable: true },
+      { ...this.validators },
+      this.mapper
+    );
   }
 
   nullish(): StringType<
     Cast extends true ? Result : Result | null | undefined,
     Cast> {
-    return new StringType({
-      ...this.options,
-      isOptional: true,
-      isNullable: true,
-    }, { ...this.validators }, this.mapper);
+    return new StringType(
+      { ...this.options, isOptional: true, isNullable: true },
+      { ...this.validators },
+      this.mapper
+    );
   }
 
   required(): StringType<
     Exclude<Result, null | undefined>,
     Cast> {
-    return new StringType({
-      ...this.options,
-      isOptional: false,
-      isNullable: false,
-    }, { ...this.validators }, this.mapper);
+    return new StringType(
+      { ...this.options, isOptional: false, isNullable: false },
+      { ...this.validators },
+      this.mapper
+    );
   }
 
-  map<U>(mapper: (value: string) => U): StringType<U, Cast> {
+  map<Mapped>(mapper: (value: string) => Mapped): StringType<Mapped, Cast> {
     return new StringType(
       { ...this.options },
       { ...this.validators },

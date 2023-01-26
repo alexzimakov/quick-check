@@ -1,4 +1,4 @@
-import { type MapTypeFn } from '../types.js';
+import { type ResultMapper } from '../types.js';
 import { TypeAlias } from './type-alias.js';
 import { ParseError } from '../parse-error.js';
 import { requiredError } from './error-messages.js';
@@ -21,13 +21,13 @@ export class EnumType<
   Value,
   Result,
   Cast extends boolean
-> extends TypeAlias<Result> {
+> extends TypeAlias<Value, Result> {
   protected readonly options: EnumTypeOptions<Value>;
-  protected readonly mapper: MapTypeFn | undefined;
+  protected readonly mapper: ResultMapper | undefined;
 
   protected constructor(
     options: EnumTypeOptions<Value>,
-    mapper: MapTypeFn | undefined
+    mapper: ResultMapper | undefined
   ) {
     super();
     this.options = options;
@@ -39,12 +39,12 @@ export class EnumType<
     required: 'ENUM_REQUIRED',
   } as const;
 
-  static create<T, Params extends EnumParams>(
-    values: readonly T[],
+  static create<Value, Params extends EnumParams>(
+    values: readonly Value[],
     params?: Params
   ): EnumType<
-    T,
-    T,
+    Value,
+    Value,
     Params extends { cast: true } ? true : false> {
     return new EnumType({
       values,
@@ -75,45 +75,43 @@ export class EnumType<
     Value,
     Cast extends true ? Result : Result | undefined,
     Cast> {
-    return new EnumType({
-      ...this.options,
-      isOptional: true,
-    }, this.mapper);
+    return new EnumType(
+      { ...this.options, isOptional: true },
+      this.mapper
+    );
   }
 
   nullable(): EnumType<
     Value,
     Cast extends true ? Result : Result | null,
     Cast> {
-    return new EnumType({
-      ...this.options,
-      isNullable: true,
-    }, this.mapper);
+    return new EnumType(
+      { ...this.options, isNullable: true },
+      this.mapper
+    );
   }
 
   nullish(): EnumType<
     Value,
     Cast extends true ? Result : Result | null | undefined,
     Cast> {
-    return new EnumType({
-      ...this.options,
-      isOptional: true,
-      isNullable: true,
-    }, this.mapper);
+    return new EnumType(
+      { ...this.options, isOptional: true, isNullable: true },
+      this.mapper
+    );
   }
 
   required(): EnumType<
     Value,
     Exclude<Result, | null | undefined>,
     Cast> {
-    return new EnumType({
-      ...this.options,
-      isOptional: false,
-      isNullable: false,
-    }, this.mapper);
+    return new EnumType(
+      { ...this.options, isOptional: false, isNullable: false },
+      this.mapper
+    );
   }
 
-  map<U>(mapper: (value: Value) => U): EnumType<Value, U, Cast> {
+  map<Mapped>(mapper: (value: Value) => Mapped): EnumType<Value, Mapped, Cast> {
     return new EnumType({ ...this.options }, mapper);
   }
 
