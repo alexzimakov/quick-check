@@ -23,16 +23,17 @@ npm install safe-data
 ```ts
 import { schema } from 'safe-data';
 
-const repositorySchema = schema.object({
+const repositorySchema = schema.shape({
   id: schema.number().int().min(1),
   name: schema.string().notEmpty(),
   description: schema.string().optional(),
   environment: schema.enum(['prod', 'dev', 'test'] as const),
   isPrivate: schema.boolean(),
-  issues: schema.array(schema.object({
+  issues: schema.array(schema.shape({
     author: schema.string(),
     body: schema.string(),
   })),
+  permissions: schema.object(schema.boolean(), schema.string()),
 });
 
 type Repository = schema.infer<typeof repositorySchema>;
@@ -46,7 +47,8 @@ type Repository = schema.infer<typeof repositorySchema>;
 //     issues: {
 //       author: string;
 //       body: string;
-//     }[]
+//     }[];
+//     permissions: { [key: string]: boolean };
 //   }
 
 try {
@@ -57,6 +59,7 @@ try {
     environment: 'dev',
     isPrivate: false,
     issues: [],
+    permissionns: { read: true, write: false },
   });
 } catch (err) {}
 ```
