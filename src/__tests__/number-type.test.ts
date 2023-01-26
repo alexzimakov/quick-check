@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'vitest';
-import { NumberType } from '../type-aliases/number-type.js';
+import { NumberSchema } from '../type-schemas/number-schema.js';
 import { ParseError } from '../parse-error.js';
 import { format } from '../util.js';
 
 describe('positive cases', () => {
   const valid = [0, 1, -1, 0.189, 1e3];
-  const schema = NumberType.create();
+  const schema = NumberSchema.create();
   valid.forEach((value) => {
     test(
       `should return ${format(value)} when value is ${format(value)}`,
@@ -28,7 +28,7 @@ describe('negative cases', () => {
     [],
     {},
   ];
-  const schema = NumberType.create();
+  const schema = NumberSchema.create();
   invalid.forEach((value) => {
     test(`should throw an error when value is ${format(value)}`, () => {
       expect(() => schema.parse(value)).toThrow(ParseError);
@@ -37,7 +37,7 @@ describe('negative cases', () => {
 });
 
 test('casts to number a passed value', () => {
-  const schema = NumberType.create({ cast: true });
+  const schema = NumberSchema.create({ cast: true });
   const date = new Date(2023, 0, 1);
 
   expect(schema.parse(null)).toBe(0);
@@ -58,13 +58,13 @@ test('casts to number a passed value', () => {
 test('throws errors with custom messages', () => {
   const requiredError = 'is required';
   const typeError = 'must be string';
-  const schema = NumberType.create({ requiredError, typeError });
+  const schema = NumberSchema.create({ requiredError, typeError });
   expect(() => schema.parse(null)).toThrow(requiredError);
   expect(() => schema.parse('1')).toThrow(typeError);
 });
 
 describe('optional()', () => {
-  const schema = NumberType.create().optional();
+  const schema = NumberSchema.create().optional();
   test('returns undefined when a passed value is undefined', () => {
     expect(schema.parse(undefined)).toBe(undefined);
   });
@@ -75,7 +75,7 @@ describe('optional()', () => {
 });
 
 describe('nullable()', () => {
-  const schema = NumberType.create().nullable();
+  const schema = NumberSchema.create().nullable();
 
   test('returns null when a passed value is null', () => {
     expect(schema.parse(null)).toBe(null);
@@ -87,7 +87,7 @@ describe('nullable()', () => {
 });
 
 describe('nullish()', () => {
-  const schema = NumberType.create().nullish();
+  const schema = NumberSchema.create().nullish();
 
   test('returns null when a passed value is null', () => {
     expect(schema.parse(undefined)).toBe(undefined);
@@ -99,7 +99,7 @@ describe('nullish()', () => {
 });
 
 describe('required()', () => {
-  const optionalSchema = NumberType.create().optional().nullable();
+  const optionalSchema = NumberSchema.create().optional().nullable();
   const schema = optionalSchema.required();
 
   test('throws an error when a passed value is undefined', () => {
@@ -113,13 +113,13 @@ describe('required()', () => {
 
 describe('map()', () => {
   test('returns a value from the `mapper` function', () => {
-    const schema = NumberType.create().map((value) => String(value));
+    const schema = NumberSchema.create().map((value) => String(value));
     expect(schema.parse(105)).toBe('105');
   });
 
   test('rethrows any error from the `mapper` function', () => {
     const error = new ParseError('invalid_state', 'Invalid state.');
-    const schema = NumberType.create().map((value) => {
+    const schema = NumberSchema.create().map((value) => {
       if (value < 10) {
         throw error;
       }
@@ -131,40 +131,40 @@ describe('map()', () => {
 
 describe('int()', () => {
   test('returns a passed value when it is an integer', () => {
-    const schema = NumberType.create().int();
+    const schema = NumberSchema.create().int();
     const value = 10;
     expect(schema.parse(value)).toBe(value);
   });
 
   test('throws an error when a passed value is not an integer', () => {
-    const schema = NumberType.create().int();
+    const schema = NumberSchema.create().int();
     expect(() => schema.parse(10.5)).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
     const message = 'integer required';
-    const schema = NumberType.create().int({ message });
+    const schema = NumberSchema.create().int({ message });
     expect(() => schema.parse(10.5)).toThrow(message);
   });
 });
 
 describe('positive()', () => {
   test('returns a passed value when it is a positive number', () => {
-    const schema = NumberType.create().positive();
+    const schema = NumberSchema.create().positive();
     expect(schema.parse(0)).toBe(0);
     expect(schema.parse(1)).toBe(1);
     expect(schema.parse(1.5)).toBe(1.5);
   });
 
   test('throws an error when the a passed value is less than 0', () => {
-    const schema = NumberType.create().positive();
+    const schema = NumberSchema.create().positive();
     expect(() => schema.parse(-1)).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
     const message = 'invalid value';
     expect(
-      () => NumberType.create()
+      () => NumberSchema.create()
         .positive({ message })
         .parse(-1)
     ).toThrow(message);
@@ -173,26 +173,26 @@ describe('positive()', () => {
 
 describe('min()', () => {
   test('returns a passed value when it >= limit', () => {
-    const schema = NumberType.create().min(1);
+    const schema = NumberSchema.create().min(1);
     expect(schema.parse(1)).toBe(1);
     expect(schema.parse(2)).toBe(2);
     expect(schema.parse(1.5)).toBe(1.5);
   });
 
   test('throws an error when the a passed value < limit', () => {
-    const schema = NumberType.create().min(1);
+    const schema = NumberSchema.create().min(1);
     expect(() => schema.parse(0)).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
     const message = 'invalid value';
     expect(
-      () => NumberType.create()
+      () => NumberSchema.create()
         .min(10, { message })
         .parse(5)
     ).toThrow(message);
     expect(
-      () => NumberType.create()
+      () => NumberSchema.create()
         .min(10, { message: () => message })
         .parse(5)
     ).toThrow(message);
@@ -201,26 +201,26 @@ describe('min()', () => {
 
 describe('max()', () => {
   test('returns a passed value when it <= limit', () => {
-    const schema = NumberType.create().max(10);
+    const schema = NumberSchema.create().max(10);
     expect(schema.parse(10)).toBe(10);
     expect(schema.parse(8)).toBe(8);
     expect(schema.parse(5.5)).toBe(5.5);
   });
 
   test('throws an error when the a passed value > limit', () => {
-    const schema = NumberType.create().max(10);
+    const schema = NumberSchema.create().max(10);
     expect(() => schema.parse(11)).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
     const message = 'invalid value';
     expect(
-      () => NumberType.create()
+      () => NumberSchema.create()
         .max(10, { message })
         .parse(15)
     ).toThrow(message);
     expect(
-      () => NumberType.create()
+      () => NumberSchema.create()
         .max(10, { message: () => message })
         .parse(15)
     ).toThrow(message);
@@ -229,13 +229,13 @@ describe('max()', () => {
 
 describe('greaterThan()', () => {
   test('returns a passed value when it > limit', () => {
-    const schema = NumberType.create().greaterThan(5);
+    const schema = NumberSchema.create().greaterThan(5);
     expect(schema.parse(8)).toBe(8);
     expect(schema.parse(5.5)).toBe(5.5);
   });
 
   test('throws an error when the a passed value <= limit', () => {
-    const schema = NumberType.create().greaterThan(10);
+    const schema = NumberSchema.create().greaterThan(10);
     expect(() => schema.parse(10)).toThrow(ParseError);
     expect(() => schema.parse(9)).toThrow(ParseError);
   });
@@ -243,12 +243,12 @@ describe('greaterThan()', () => {
   test('throws an error with custom error message', () => {
     const message = 'invalid value';
     expect(
-      () => NumberType.create()
+      () => NumberSchema.create()
         .greaterThan(10, { message })
         .parse(5)
     ).toThrow(message);
     expect(
-      () => NumberType.create()
+      () => NumberSchema.create()
         .greaterThan(10, { message: () => message })
         .parse(5)
     ).toThrow(message);
@@ -257,13 +257,13 @@ describe('greaterThan()', () => {
 
 describe('lessThan()', () => {
   test('returns a passed value when it < limit', () => {
-    const schema = NumberType.create().lessThan(10);
+    const schema = NumberSchema.create().lessThan(10);
     expect(schema.parse(5)).toBe(5);
     expect(schema.parse(9.5)).toBe(9.5);
   });
 
   test('throws an error when the a passed value >= limit', () => {
-    const schema = NumberType.create().lessThan(10);
+    const schema = NumberSchema.create().lessThan(10);
     expect(() => schema.parse(10)).toThrow(ParseError);
     expect(() => schema.parse(11)).toThrow(ParseError);
   });
@@ -271,12 +271,12 @@ describe('lessThan()', () => {
   test('throws an error with custom error message', () => {
     const message = 'invalid value';
     expect(
-      () => NumberType.create()
+      () => NumberSchema.create()
         .lessThan(10, { message })
         .parse(15)
     ).toThrow(message);
     expect(
-      () => NumberType.create()
+      () => NumberSchema.create()
         .lessThan(10, { message: () => message })
         .parse(15)
     ).toThrow(message);
@@ -296,7 +296,7 @@ describe('custom()', () => {
   };
 
   test('returns a value from custom validator', () => {
-    const schema = NumberType.create().custom(inRange);
+    const schema = NumberSchema.create().custom(inRange);
     const value = 5;
     expect(schema.parse(value)).toBe(value);
   });
@@ -304,7 +304,7 @@ describe('custom()', () => {
   test(
     "throws an error when a passed value doesn't pass custom validator",
     () => {
-      const schema = NumberType.create().custom(inRange);
+      const schema = NumberSchema.create().custom(inRange);
       expect(() => schema.parse(12)).toThrow(rangeError);
     }
   );

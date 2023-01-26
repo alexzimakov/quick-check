@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'vitest';
-import { StringType } from '../type-aliases/string-type.js';
+import { StringSchema } from '../type-schemas/string-schema.js';
 import { ParseError } from '../parse-error.js';
 import { format } from '../util.js';
 
 describe('positive cases', () => {
   const valid = ['', '1', ' ', 'abc', 'multi\nline'];
-  const schema = StringType.create();
+  const schema = StringSchema.create();
   valid.forEach((value) => {
     test(
       `should return ${format(value)} when value is ${format(value)}`,
@@ -16,7 +16,7 @@ describe('positive cases', () => {
 
 describe('negative cases', () => {
   const invalid = [true, 1, 1n, Symbol('test'), [], {}];
-  const schema = StringType.create();
+  const schema = StringSchema.create();
   invalid.forEach((value) => {
     test(`should throw an error when value is ${format(value)}`, () => {
       expect(() => schema.parse(value)).toThrow(ParseError);
@@ -25,14 +25,14 @@ describe('negative cases', () => {
 });
 
 test('casts to string a passed value', () => {
-  const schema = StringType.create({ cast: true });
+  const schema = StringSchema.create({ cast: true });
   expect(schema.parse(null)).toBe('');
   expect(schema.parse(undefined)).toBe('');
   expect(schema.parse(0)).toBe('0');
 });
 
 test('trims a passed value', () => {
-  const schema = StringType.create({ trim: true });
+  const schema = StringSchema.create({ trim: true });
   expect(schema.parse('  ')).toBe('');
   expect(schema.parse('\n')).toBe('');
   expect(schema.parse('\t')).toBe('');
@@ -42,13 +42,13 @@ test('trims a passed value', () => {
 test('throws errors with custom messages', () => {
   const requiredError = 'is required';
   const typeError = 'must be string';
-  const schema = StringType.create({ requiredError, typeError });
+  const schema = StringSchema.create({ requiredError, typeError });
   expect(() => schema.parse(null)).toThrow(requiredError);
   expect(() => schema.parse(1)).toThrow(typeError);
 });
 
 describe('optional()', () => {
-  const schema = StringType.create().optional();
+  const schema = StringSchema.create().optional();
   test('returns undefined when a passed value is undefined', () => {
     expect(schema.parse(undefined)).toBe(undefined);
   });
@@ -59,7 +59,7 @@ describe('optional()', () => {
 });
 
 describe('nullable()', () => {
-  const schema = StringType.create().nullable();
+  const schema = StringSchema.create().nullable();
 
   test('returns null when a passed value is null', () => {
     expect(schema.parse(null)).toBe(null);
@@ -71,7 +71,7 @@ describe('nullable()', () => {
 });
 
 describe('nullish()', () => {
-  const schema = StringType.create().nullish();
+  const schema = StringSchema.create().nullish();
 
   test('returns null when a passed value is null', () => {
     expect(schema.parse(undefined)).toBe(undefined);
@@ -83,7 +83,7 @@ describe('nullish()', () => {
 });
 
 describe('required()', () => {
-  const optionalSchema = StringType.create().optional().nullable();
+  const optionalSchema = StringSchema.create().optional().nullable();
   const schema = optionalSchema.required();
 
   test('throws an error when a passed value is undefined', () => {
@@ -97,13 +97,13 @@ describe('required()', () => {
 
 describe('map()', () => {
   test('returns a value from the `mapper` function', () => {
-    const schema = StringType.create().map((value) => parseInt(value, 10));
+    const schema = StringSchema.create().map((value) => parseInt(value, 10));
     expect(schema.parse('105')).toBe(105);
   });
 
   test('rethrows any error from the `mapper` function', () => {
     const error = new ParseError('integer', 'Must be an integer.');
-    const schema = StringType.create().map((value) => {
+    const schema = StringSchema.create().map((value) => {
       const int = parseInt(value, 10);
       if (Number.isNaN(int)) {
         throw error;
@@ -116,19 +116,19 @@ describe('map()', () => {
 
 describe('notEmpty()', () => {
   test("returns a passed value when it isn't an empty string", () => {
-    const schema = StringType.create().notEmpty();
+    const schema = StringSchema.create().notEmpty();
     const value = 'lorem ipsum';
     expect(schema.parse(value)).toBe(value);
   });
 
   test('throws an error when a passed value is an empty string', () => {
-    const schema = StringType.create().notEmpty();
+    const schema = StringSchema.create().notEmpty();
     expect(() => schema.parse('')).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
     const message = 'is required';
-    const schema = StringType.create().notEmpty({ message });
+    const schema = StringSchema.create().notEmpty({ message });
     expect(() => schema.parse('')).toThrow(message);
   });
 });
@@ -137,7 +137,7 @@ describe('minLength()', () => {
   test(
     'returns a passed value when its length is greater than or equal to limit',
     () => {
-      const schema = StringType.create().minLength(3);
+      const schema = StringSchema.create().minLength(3);
       const values = [
         'abc',
         '1234',
@@ -151,7 +151,7 @@ describe('minLength()', () => {
   test(
     'throws an error when the length of a passed value is less than limit',
     () => {
-      const schema = StringType.create().minLength(3);
+      const schema = StringSchema.create().minLength(3);
       expect(() => schema.parse('12')).toThrow(ParseError);
     }
   );
@@ -159,12 +159,12 @@ describe('minLength()', () => {
   test('throws an error with custom error message', () => {
     const message = 'invalid length';
     expect(
-      () => StringType.create()
+      () => StringSchema.create()
         .minLength(4, { message })
         .parse('')
     ).toThrow(message);
     expect(
-      () => StringType.create()
+      () => StringSchema.create()
         .minLength(4, { message: () => message })
         .parse('')
     ).toThrow(message);
@@ -175,7 +175,7 @@ describe('maxLength()', () => {
   test(
     'returns a passed value when its length is less than or equal to limit',
     () => {
-      const schema = StringType.create().maxLength(2);
+      const schema = StringSchema.create().maxLength(2);
       const values = [
         '',
         'a',
@@ -190,7 +190,7 @@ describe('maxLength()', () => {
   test(
     'throws an error when the length of a passed value is greater than limit',
     () => {
-      const schema = StringType.create().maxLength(2);
+      const schema = StringSchema.create().maxLength(2);
       expect(() => schema.parse('123')).toThrow(ParseError);
     }
   );
@@ -198,12 +198,12 @@ describe('maxLength()', () => {
   test('throws an error with custom error message', () => {
     const message = 'invalid length';
     expect(
-      () => StringType.create()
+      () => StringSchema.create()
         .maxLength(2, { message })
         .parse('abc')
     ).toThrow(message);
     expect(
-      () => StringType.create()
+      () => StringSchema.create()
         .maxLength(2, { message: () => message })
         .parse('abc')
     ).toThrow(message);
@@ -212,25 +212,25 @@ describe('maxLength()', () => {
 
 describe('pattern()', () => {
   test('returns a passed value when it matches to pattern', () => {
-    const schema = StringType.create().pattern(/^test$/);
+    const schema = StringSchema.create().pattern(/^test$/);
     const value = 'test';
     expect(schema.parse(value)).toBe(value);
   });
 
   test("throws an error when a passed value doesn't matches to pattern", () => {
-    const schema = StringType.create().pattern(/^test$/);
+    const schema = StringSchema.create().pattern(/^test$/);
     expect(() => schema.parse('foo')).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
     const message = 'invalid value';
     expect(
-      () => StringType.create()
+      () => StringSchema.create()
         .pattern(/^test$/, { message })
         .parse('foo')
     ).toThrow(message);
     expect(
-      () => StringType.create()
+      () => StringSchema.create()
         .pattern(/^test$/, { message: () => message })
         .parse('foo')
     ).toThrow(message);
@@ -249,7 +249,7 @@ describe('custom()', () => {
     return value;
   };
   test('returns a value from custom validator', () => {
-    const schema = StringType.create().custom(validatePassword);
+    const schema = StringSchema.create().custom(validatePassword);
     const value = 'Qwerty12345';
     expect(schema.parse(value)).toBe(value);
   });
@@ -257,7 +257,7 @@ describe('custom()', () => {
   test(
     "throws an error when a passed value doesn't pass custom validator",
     () => {
-      const schema = StringType.create().custom(validatePassword);
+      const schema = StringSchema.create().custom(validatePassword);
       expect(() => schema.parse('Qwerty123')).toThrow(weakPasswordError);
     }
   );
@@ -265,8 +265,8 @@ describe('custom()', () => {
 
 describe('patterns', () => {
   describe('alphanumeric', () => {
-    const schema = StringType.create().pattern(
-      StringType.Patterns.alphanumeric
+    const schema = StringSchema.create().pattern(
+      StringSchema.Patterns.alphanumeric
     );
 
     describe('valid:', () => {
@@ -289,8 +289,8 @@ describe('patterns', () => {
   });
 
   describe('positiveInteger', () => {
-    const schema = StringType.create().pattern(
-      StringType.Patterns.positiveInteger
+    const schema = StringSchema.create().pattern(
+      StringSchema.Patterns.positiveInteger
     );
 
     describe('valid:', () => {
@@ -313,8 +313,8 @@ describe('patterns', () => {
   });
 
   describe('integer', () => {
-    const schema = StringType.create().pattern(
-      StringType.Patterns.integer
+    const schema = StringSchema.create().pattern(
+      StringSchema.Patterns.integer
     );
 
     describe('valid:', () => {
@@ -337,8 +337,8 @@ describe('patterns', () => {
   });
 
   describe('float', () => {
-    const schema = StringType.create().pattern(
-      StringType.Patterns.float
+    const schema = StringSchema.create().pattern(
+      StringSchema.Patterns.float
     );
 
     describe('valid:', () => {
@@ -361,8 +361,8 @@ describe('patterns', () => {
   });
 
   describe('email', () => {
-    const schema = StringType.create().pattern(
-      StringType.Patterns.email
+    const schema = StringSchema.create().pattern(
+      StringSchema.Patterns.email
     );
 
     describe('valid:', () => {
@@ -406,8 +406,8 @@ describe('patterns', () => {
   });
 
   describe('dateISO', () => {
-    const schema = StringType.create().pattern(
-      StringType.Patterns.dateISO
+    const schema = StringSchema.create().pattern(
+      StringSchema.Patterns.dateISO
     );
 
     describe('valid:', () => {
@@ -439,8 +439,8 @@ describe('patterns', () => {
   });
 
   describe('timeISO', () => {
-    const schema = StringType.create().pattern(
-      StringType.Patterns.timeISO
+    const schema = StringSchema.create().pattern(
+      StringSchema.Patterns.timeISO
     );
 
     describe('valid:', () => {
@@ -485,8 +485,8 @@ describe('patterns', () => {
   });
 
   describe('dateTimeISO', () => {
-    const schema = StringType.create().pattern(
-      StringType.Patterns.dateTimeISO
+    const schema = StringSchema.create().pattern(
+      StringSchema.Patterns.dateTimeISO
     );
 
     describe('valid:', () => {

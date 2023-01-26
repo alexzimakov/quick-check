@@ -1,30 +1,30 @@
 import { type ResultMapper } from '../types.js';
-import { TypeAlias } from './type-alias.js';
+import { AbstractSchema } from '../abstract-schema.js';
 import { ParseError } from '../parse-error.js';
 import { formatList } from '../util.js';
 
-type EnumTypeOptions = {
+type EnumSchemaOptions = {
   isOptional: boolean;
   isNullable: boolean;
   typeError?: string;
   requiredError?: string;
 };
 
-export type EnumParams = Pick<EnumTypeOptions,
+export type EnumParams = Pick<EnumSchemaOptions,
   | 'typeError'
   | 'requiredError'>;
 
-export class EnumType<
+export class EnumSchema<
   Value,
   Result,
-> extends TypeAlias<Value, Result> {
+> extends AbstractSchema<Value, Result> {
   readonly values: readonly Value[];
-  protected readonly options: EnumTypeOptions;
+  protected readonly options: EnumSchemaOptions;
   protected readonly mapper: ResultMapper | undefined;
 
   protected constructor(
     values: readonly Value[],
-    options: EnumTypeOptions,
+    options: EnumSchemaOptions,
     mapper: ResultMapper | undefined
   ) {
     super();
@@ -41,53 +41,53 @@ export class EnumType<
   static create<Value, Params extends EnumParams>(
     values: readonly Value[],
     params?: Params
-  ): EnumType<Value, Value> {
-    return new EnumType(values, {
+  ): EnumSchema<Value, Value> {
+    return new EnumSchema(values, {
       ...params,
       isOptional: false,
       isNullable: false,
     }, undefined);
   }
 
-  optional(): EnumType<Value, Result | undefined> {
-    return new EnumType(
+  optional(): EnumSchema<Value, Result | undefined> {
+    return new EnumSchema(
       this.values,
       { ...this.options, isOptional: true },
       this.mapper
     );
   }
 
-  nullable(): EnumType<Value, Result | null> {
-    return new EnumType(
+  nullable(): EnumSchema<Value, Result | null> {
+    return new EnumSchema(
       this.values,
       { ...this.options, isNullable: true },
       this.mapper
     );
   }
 
-  nullish(): EnumType<Value, Result | null | undefined> {
-    return new EnumType(
+  nullish(): EnumSchema<Value, Result | null | undefined> {
+    return new EnumSchema(
       this.values,
       { ...this.options, isOptional: true, isNullable: true },
       this.mapper
     );
   }
 
-  required(): EnumType<Value, Exclude<Result, null | undefined>> {
-    return new EnumType(
+  required(): EnumSchema<Value, Exclude<Result, null | undefined>> {
+    return new EnumSchema(
       this.values,
       { ...this.options, isOptional: false, isNullable: false },
       this.mapper
     );
   }
 
-  map<Mapped>(mapper: (value: Value) => Mapped): EnumType<Value, Mapped> {
-    return new EnumType(this.values, { ...this.options }, mapper);
+  map<Mapped>(mapper: (value: Value) => Mapped): EnumSchema<Value, Mapped> {
+    return new EnumSchema(this.values, { ...this.options }, mapper);
   }
 
   parse(value: unknown): Result;
   parse(value: unknown): unknown {
-    const ErrorCodes = EnumType.ErrorCodes;
+    const ErrorCodes = EnumSchema.ErrorCodes;
     const options = this.options;
     const mapper = this.mapper;
     const values = this.values;

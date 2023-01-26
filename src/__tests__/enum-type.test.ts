@@ -1,12 +1,12 @@
 import { describe, expect, test } from 'vitest';
-import { EnumType } from '../type-aliases/enum-type.js';
+import { EnumSchema } from '../type-schemas/enum-schema.js';
 import { ParseError } from '../parse-error.js';
 import { format } from '../util.js';
 
 describe('positive cases', () => {
   const values = ['north', 'south', 'east', 'west'] as const;
   const valid = values;
-  const schema = EnumType.create(values);
+  const schema = EnumSchema.create(values);
   valid.forEach((value) => {
     test(
       `should return ${format(value)} when value is ${format(value)}`,
@@ -18,7 +18,7 @@ describe('positive cases', () => {
 describe('negative cases', () => {
   const values = ['north', 'south', 'east', 'west'] as const;
   const invalid = ['North', '', 1, null, undefined];
-  const schema = EnumType.create(values);
+  const schema = EnumSchema.create(values);
   invalid.forEach((value) => {
     test(`should throw an error when value is ${format(value)}`, () => {
       expect(() => schema.parse(value)).toThrow(ParseError);
@@ -30,14 +30,14 @@ test('throws errors with custom messages', () => {
   const values = ['north', 'south', 'east', 'west'] as const;
   const requiredError = 'is required';
   const typeError = 'invalid value';
-  const schema = EnumType.create(values, { requiredError, typeError });
+  const schema = EnumSchema.create(values, { requiredError, typeError });
   expect(() => schema.parse(null)).toThrow(requiredError);
   expect(() => schema.parse('North')).toThrow(typeError);
 });
 
 describe('optional()', () => {
   const values = ['north', 'south', 'east', 'west'] as const;
-  const schema = EnumType.create(values).optional();
+  const schema = EnumSchema.create(values).optional();
   test('returns undefined when a passed value is undefined', () => {
     expect(schema.parse(undefined)).toBe(undefined);
   });
@@ -49,7 +49,7 @@ describe('optional()', () => {
 
 describe('nullable()', () => {
   const values = ['north', 'south', 'east', 'west'] as const;
-  const schema = EnumType.create(values).nullable();
+  const schema = EnumSchema.create(values).nullable();
 
   test('returns null when a passed value is null', () => {
     expect(schema.parse(null)).toBe(null);
@@ -62,7 +62,7 @@ describe('nullable()', () => {
 
 describe('nullish()', () => {
   const values = ['north', 'south', 'east', 'west'] as const;
-  const schema = EnumType.create(values).nullish();
+  const schema = EnumSchema.create(values).nullish();
 
   test('returns null when a passed value is null', () => {
     expect(schema.parse(undefined)).toBe(undefined);
@@ -75,7 +75,7 @@ describe('nullish()', () => {
 
 describe('required()', () => {
   const values = ['north', 'south', 'east', 'west'] as const;
-  const optionalSchema = EnumType.create(values).optional().nullable();
+  const optionalSchema = EnumSchema.create(values).optional().nullable();
   const schema = optionalSchema.required();
 
   test('throws an error when a passed value is undefined', () => {
@@ -90,7 +90,7 @@ describe('required()', () => {
 describe('map()', () => {
   test('returns a value from the `mapper` function', () => {
     const values = ['north', 'south', 'east', 'west'] as const;
-    const schema = EnumType.create(values).map(
+    const schema = EnumSchema.create(values).map(
       (value) => value.toUpperCase()
     );
     expect(schema.parse(values[1])).toBe(values[1].toUpperCase());
@@ -99,7 +99,7 @@ describe('map()', () => {
   test('rethrows any error from the `mapper` function', () => {
     const error = new ParseError('invalid_state', 'Invalid state.');
     const values = ['north', 'south', 'east', 'west'] as const;
-    const schema = EnumType.create(values).map((value) => {
+    const schema = EnumSchema.create(values).map((value) => {
       if (value !== 'north' && value !== 'south') {
         throw error;
       }

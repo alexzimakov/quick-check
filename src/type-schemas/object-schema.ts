@@ -1,14 +1,14 @@
 import { type OutputType, type ResultMapper } from '../types.js';
-import { EnumType } from './enum-type.js';
-import { TypeAlias } from './type-alias.js';
+import { AbstractSchema } from '../abstract-schema.js';
+import { EnumSchema } from './enum-schema.js';
 import { ParseError } from '../parse-error.js';
 import { hasMessage, isObject } from '../guards.js';
 
 type KeyErrorFormatter = (params: { key: string }) => string;
 type ValueErrorFormatter = (params: { key: string, value: unknown }) => string;
-type RecordTypeOptions = {
-  valueSchema: TypeAlias<unknown>;
-  keySchema?: TypeAlias<string>;
+type ObjectSchemaOptions = {
+  valueSchema: AbstractSchema<unknown>;
+  keySchema?: AbstractSchema<string>;
   isOptional: boolean;
   isNullable: boolean;
   typeError?: string;
@@ -18,19 +18,19 @@ type RecordTypeOptions = {
   valueError?: string | ValueErrorFormatter;
 };
 
-export type RecordParams = Pick<RecordTypeOptions,
+export type ObjectParams = Pick<ObjectSchemaOptions,
   | 'typeError'
   | 'requiredError'
   | 'missingKeyError'
   | 'keyError'
   | 'valueError'>;
 
-export class RecordType<Obj, Result> extends TypeAlias<Obj, Result> {
-  protected readonly options: RecordTypeOptions;
+export class ObjectSchema<Obj, Result> extends AbstractSchema<Obj, Result> {
+  protected readonly options: ObjectSchemaOptions;
   protected readonly mapper: ResultMapper | undefined;
 
   protected constructor(
-    options: RecordTypeOptions,
+    options: ObjectSchemaOptions,
     mapper: ResultMapper | undefined
   ) {
     super();
@@ -39,36 +39,36 @@ export class RecordType<Obj, Result> extends TypeAlias<Obj, Result> {
   }
 
   static ErrorCodes = {
-    type: 'RECORD_TYPE',
-    required: 'RECORD_REQUIRED',
-    invalidKey: 'RECORD_KEY_INVALID',
-    invalidValue: 'RECORD_VALUE_INVALID',
-    missingKey: 'RECORD_MISSING_KEY',
+    type: 'OBJECT_TYPE',
+    required: 'OBJECT_REQUIRED',
+    invalidKey: 'OBJECT_KEY_INVALID',
+    invalidValue: 'OBJECT_VALUE_INVALID',
+    missingKey: 'OBJECT_MISSING_KEY',
   };
 
   static create<
-    Value extends TypeAlias<unknown>
-  >(valueSchema: Value, params?: RecordParams): RecordType<
+    Value extends AbstractSchema<unknown>
+  >(valueSchema: Value, params?: ObjectParams): ObjectSchema<
     Record<string, OutputType<Value>>,
     Record<string, OutputType<Value>>
   >;
 
   static create<
-    Value extends TypeAlias<unknown>,
-    Key extends TypeAlias<string>,
-  >(valueSchema: Value, keySchema: Key, params?: RecordParams): RecordType<
+    Value extends AbstractSchema<unknown>,
+    Key extends AbstractSchema<string>,
+  >(valueSchema: Value, keySchema: Key, params?: ObjectParams): ObjectSchema<
     Record<OutputType<Key>, OutputType<Value>>,
     Record<OutputType<Key>, OutputType<Value>>
   >;
 
   static create(
-    valueSchema: TypeAlias<unknown>,
-    arg1: RecordParams | TypeAlias<string> | undefined,
-    arg2?: RecordParams | undefined
+    valueSchema: AbstractSchema<unknown>,
+    arg1: ObjectParams | AbstractSchema<string> | undefined,
+    arg2?: ObjectParams | undefined
   ): unknown {
-    let keySchema: TypeAlias<string> | undefined;
-    let params: RecordParams | undefined;
-    if (arg1 instanceof TypeAlias) {
+    let keySchema: AbstractSchema<string> | undefined;
+    let params: ObjectParams | undefined;
+    if (arg1 instanceof AbstractSchema) {
       keySchema = arg1;
       if (arg2) {
         params = arg2;
@@ -77,7 +77,7 @@ export class RecordType<Obj, Result> extends TypeAlias<Obj, Result> {
       params = arg1;
     }
 
-    return new RecordType({
+    return new ObjectSchema({
       ...params,
       keySchema,
       valueSchema,
@@ -86,32 +86,32 @@ export class RecordType<Obj, Result> extends TypeAlias<Obj, Result> {
     }, undefined);
   }
 
-  optional(): RecordType<Obj, Result | undefined> {
-    return new RecordType(
+  optional(): ObjectSchema<Obj, Result | undefined> {
+    return new ObjectSchema(
       { ...this.options, isOptional: true },
       this.mapper
     );
   }
 
-  nullable(): RecordType<Obj, Result | null> {
-    return new RecordType(
+  nullable(): ObjectSchema<Obj, Result | null> {
+    return new ObjectSchema(
       { ...this.options, isNullable: true },
       this.mapper
     );
   }
 
-  nullish(): RecordType<Obj, Result | null | undefined> {
-    return new RecordType(
+  nullish(): ObjectSchema<Obj, Result | null | undefined> {
+    return new ObjectSchema(
       { ...this.options, isOptional: true, isNullable: true },
       this.mapper
     );
   }
 
-  required(params?: { message: string }): RecordType<
+  required(params?: { message: string }): ObjectSchema<
     Obj,
     Exclude<Result, null | undefined>
   > {
-    return new RecordType({
+    return new ObjectSchema({
       ...this.options,
       isOptional: false,
       isNullable: false,
@@ -119,13 +119,13 @@ export class RecordType<Obj, Result> extends TypeAlias<Obj, Result> {
     }, this.mapper);
   }
 
-  map<Mapped>(mapper: (value: Obj) => Mapped): RecordType<Obj, Mapped> {
-    return new RecordType({ ...this.options }, mapper);
+  map<Mapped>(mapper: (value: Obj) => Mapped): ObjectSchema<Obj, Mapped> {
+    return new ObjectSchema({ ...this.options }, mapper);
   }
 
   parse(value: unknown): Result;
   parse(value: unknown): unknown {
-    const ErrorCodes = RecordType.ErrorCodes;
+    const ErrorCodes = ObjectSchema.ErrorCodes;
     const options = this.options;
     const mapper = this.mapper;
     const typeError = 'The value must be an object.';
@@ -155,7 +155,7 @@ export class RecordType<Obj, Result> extends TypeAlias<Obj, Result> {
     const valueSchema = options.valueSchema;
 
     // noinspection SuspiciousTypeOfGuard
-    if (keySchema && keySchema instanceof EnumType) {
+    if (keySchema && keySchema instanceof EnumSchema) {
       for (const value of keySchema.values) {
         if (!(value in res)) {
           const code = ErrorCodes.missingKey;

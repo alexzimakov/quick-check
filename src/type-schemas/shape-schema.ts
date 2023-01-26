@@ -1,10 +1,10 @@
 import { type InputType, type OutputType, type ResultMapper } from '../types.js';
-import { TypeAlias } from './type-alias.js';
+import { AbstractSchema } from '../abstract-schema.js';
 import { ParseError } from '../parse-error.js';
 import { isObject } from '../guards.js';
 import { formatList } from '../util.js';
 
-type ObjectTypeOptions = {
+type ShapeSchemaOptions = {
   isOptional: boolean;
   isNullable: boolean;
   cast?: boolean;
@@ -12,30 +12,30 @@ type ObjectTypeOptions = {
   typeError?: string;
   requiredError?: string;
 };
-type PropsSchema = { [property: string]: TypeAlias<unknown> };
+type PropsSchema = { [property: string]: AbstractSchema<unknown> };
 type ObjectValidator<T> = (props: T) => T;
 type ObjectValidators<T> = { [validator: string]: ObjectValidator<T> };
 
-export type ObjectParams = Pick<ObjectTypeOptions,
+export type ShapeParams = Pick<ShapeSchemaOptions,
   | 'cast'
   | 'omitUnknownProps'
   | 'typeError'
   | 'requiredError'>;
 
-export class ObjectType<
+export class ShapeSchema<
   Input extends { [key: string]: unknown },
   Props extends { [key: string]: unknown },
   Result,
   Cast extends boolean
-> extends TypeAlias<Input, Result> {
+> extends AbstractSchema<Input, Result> {
   readonly propsSchema: PropsSchema;
-  protected readonly options: ObjectTypeOptions;
+  protected readonly options: ShapeSchemaOptions;
   protected readonly validators: ObjectValidators<Props>;
   protected readonly mapper: ResultMapper | undefined;
 
   protected constructor(
     propsSchema: PropsSchema,
-    options: ObjectTypeOptions,
+    options: ShapeSchemaOptions,
     validators: ObjectValidators<Props>,
     mapper: ResultMapper | undefined
   ) {
@@ -47,22 +47,22 @@ export class ObjectType<
   }
 
   static ErrorCodes = {
-    required: 'OBJECT_REQUIRED',
-    type: 'OBJECT_TYPE',
-    invalidProps: 'OBJECT_INVALID_PROPS',
-    unknownProps: 'OBJECT_UNKNOWN_PROPS',
-    custom: 'ARRAY_CUSTOM',
+    required: 'SHAPE_REQUIRED',
+    type: 'SHAPE_TYPE',
+    invalidProps: 'SHAPE_INVALID_PROPS',
+    unknownProps: 'SHAPE_UNKNOWN_PROPS',
+    custom: 'SHAPE_CUSTOM',
   } as const;
 
   static create<
     Schema extends PropsSchema,
-    Params extends ObjectParams
-  >(propsSchema: Schema, params?: Params): ObjectType<
+    Params extends ShapeParams
+  >(propsSchema: Schema, params?: Params): ShapeSchema<
     { [P in keyof Schema]: InputType<Schema[P]> },
     { [P in keyof Schema]: OutputType<Schema[P]> },
     { [P in keyof Schema]: OutputType<Schema[P]> },
     Params extends { cast: true } ? true : false> {
-    return new ObjectType(
+    return new ShapeSchema(
       propsSchema,
       {
         ...params,
@@ -75,12 +75,12 @@ export class ObjectType<
     );
   }
 
-  optional(): ObjectType<
+  optional(): ShapeSchema<
     Input,
     Props,
     Cast extends true ? Result : Result | undefined,
     Cast> {
-    return new ObjectType(
+    return new ShapeSchema(
       this.propsSchema,
       { ...this.options, isOptional: true },
       { ...this.validators },
@@ -88,12 +88,12 @@ export class ObjectType<
     );
   }
 
-  nullable(): ObjectType<
+  nullable(): ShapeSchema<
     Input,
     Props,
     Cast extends true ? Result : Result | null,
     Cast> {
-    return new ObjectType(
+    return new ShapeSchema(
       this.propsSchema,
       { ...this.options, isNullable: true },
       { ...this.validators },
@@ -101,12 +101,12 @@ export class ObjectType<
     );
   }
 
-  nullish(): ObjectType<
+  nullish(): ShapeSchema<
     Input,
     Props,
     Cast extends true ? Result : Result | null | undefined,
     Cast> {
-    return new ObjectType(
+    return new ShapeSchema(
       this.propsSchema,
       { ...this.options, isOptional: true, isNullable: true },
       { ...this.validators },
@@ -114,12 +114,12 @@ export class ObjectType<
     );
   }
 
-  required(): ObjectType<
+  required(): ShapeSchema<
     Input,
     Props,
     Exclude<Result, null | undefined>,
     Cast> {
-    return new ObjectType(
+    return new ShapeSchema(
       this.propsSchema,
       { ...this.options, isOptional: false, isNullable: false },
       { ...this.validators },
@@ -127,12 +127,12 @@ export class ObjectType<
     );
   }
 
-  map<Mapped>(mapper: (value: Props) => Mapped): ObjectType<
+  map<Mapped>(mapper: (value: Props) => Mapped): ShapeSchema<
     Input,
     Props,
     Mapped,
     Cast> {
-    return new ObjectType(
+    return new ShapeSchema(
       this.propsSchema,
       { ...this.options },
       { ...this.validators },
@@ -142,8 +142,8 @@ export class ObjectType<
 
   onlyKnownProps(params?: {
     message?: string | ((params: { unknownProps: string[] }) => string)
-  }): ObjectType<Input, Props, Result, Cast> {
-    const code = ObjectType.ErrorCodes.unknownProps;
+  }): ShapeSchema<Input, Props, Result, Cast> {
+    const code = ShapeSchema.ErrorCodes.unknownProps;
     const validator: ObjectValidator<Props> = (props) => {
       const allowedProps: Record<string, true> = {};
       for (const key of Object.keys(this.propsSchema)) {
@@ -178,7 +178,7 @@ export class ObjectType<
       return props;
     };
 
-    return new ObjectType(
+    return new ShapeSchema(
       this.propsSchema,
       { ...this.options },
       { ...this.validators, [code]: validator },
@@ -186,13 +186,13 @@ export class ObjectType<
     );
   }
 
-  custom(validator: ObjectValidator<Props>): ObjectType<
+  custom(validator: ObjectValidator<Props>): ShapeSchema<
     Input,
     Props,
     Result,
     Cast> {
-    const code = ObjectType.ErrorCodes.custom;
-    return new ObjectType(
+    const code = ShapeSchema.ErrorCodes.custom;
+    return new ShapeSchema(
       this.propsSchema,
       { ...this.options },
       { ...this.validators, [code]: validator },
@@ -202,7 +202,7 @@ export class ObjectType<
 
   parse(value: unknown): Result;
   parse(value: unknown): unknown {
-    const ErrorCodes = ObjectType.ErrorCodes;
+    const ErrorCodes = ShapeSchema.ErrorCodes;
     const options = this.options;
     const validators = this.validators;
     const mapper = this.mapper;
@@ -237,7 +237,7 @@ export class ObjectType<
     const result = options.omitUnknownProps ? {} : { ...value };
     const propsSchema = this.propsSchema;
     const propsError = new ParseError(
-      ObjectType.ErrorCodes.invalidProps,
+      ShapeSchema.ErrorCodes.invalidProps,
       'The object has one or more invalid properties. ' +
       'See details for more info.'
     );

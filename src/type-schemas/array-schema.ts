@@ -1,9 +1,9 @@
 import { type ResultMapper } from '../types.js';
-import { TypeAlias } from './type-alias.js';
+import { AbstractSchema } from '../abstract-schema.js';
 import { ParseError } from '../parse-error.js';
 import { pluralize } from '../util.js';
 
-type ArrayTypeOptions = {
+type ArraySchemaOptions = {
   isOptional: boolean;
   isNullable: boolean;
   cast?: boolean;
@@ -13,24 +13,24 @@ type ArrayTypeOptions = {
 type ArrayValidator<T> = (array: T) => T;
 type ArrayValidators<T> = { [name: string]: ArrayValidator<T> };
 
-export type ArrayParams = Pick<ArrayTypeOptions,
+export type ArrayParams = Pick<ArraySchemaOptions,
   | 'cast'
   | 'typeError'
   | 'requiredError'>
 
-export class ArrayType<
+export class ArraySchema<
   Items extends unknown[],
   Result,
   Cast extends boolean
-> extends TypeAlias<Items, Result> {
-  protected readonly itemSchema: TypeAlias<unknown>;
-  protected readonly options: ArrayTypeOptions;
+> extends AbstractSchema<Items, Result> {
+  protected readonly itemSchema: AbstractSchema<unknown>;
+  protected readonly options: ArraySchemaOptions;
   protected readonly validators: ArrayValidators<Items>;
   protected readonly mapper: ResultMapper | undefined;
 
   protected constructor(
-    itemSchema: TypeAlias<unknown>,
-    options: ArrayTypeOptions,
+    itemSchema: AbstractSchema<unknown>,
+    options: ArraySchemaOptions,
     validators: ArrayValidators<Items>,
     mapper: ResultMapper | undefined
   ) {
@@ -53,13 +53,13 @@ export class ArrayType<
   } as const;
 
   static create<Item, Params extends ArrayParams>(
-    itemSchema: TypeAlias<Item>,
+    itemSchema: AbstractSchema<Item>,
     params?: Params
-  ): ArrayType<
+  ): ArraySchema<
     Item[],
     Item[],
     Params extends { cast: true } ? true : false> {
-    return new ArrayType(
+    return new ArraySchema(
       itemSchema,
       { ...params, isOptional: false, isNullable: false },
       {},
@@ -67,11 +67,11 @@ export class ArrayType<
     );
   }
 
-  optional(): ArrayType<
+  optional(): ArraySchema<
     Items,
     Cast extends true ? Result : Result | undefined,
     Cast> {
-    return new ArrayType(
+    return new ArraySchema(
       this.itemSchema,
       { ...this.options, isOptional: true },
       { ...this.validators },
@@ -79,11 +79,11 @@ export class ArrayType<
     );
   }
 
-  nullable(): ArrayType<
+  nullable(): ArraySchema<
     Items,
     Cast extends true ? Result : Result | null,
     Cast> {
-    return new ArrayType(
+    return new ArraySchema(
       this.itemSchema,
       { ...this.options, isNullable: true },
       { ...this.validators },
@@ -91,11 +91,11 @@ export class ArrayType<
     );
   }
 
-  nullish(): ArrayType<
+  nullish(): ArraySchema<
     Items,
     Cast extends true ? Result : Result | null | undefined,
     Cast> {
-    return new ArrayType(
+    return new ArraySchema(
       this.itemSchema,
       { ...this.options, isOptional: true, isNullable: true },
       { ...this.validators },
@@ -103,11 +103,11 @@ export class ArrayType<
     );
   }
 
-  required(): ArrayType<
+  required(): ArraySchema<
     Items,
     Exclude<Result, null | undefined>,
     Cast> {
-    return new ArrayType(
+    return new ArraySchema(
       this.itemSchema,
       { ...this.options, isOptional: false, isNullable: false },
       { ...this.validators },
@@ -115,11 +115,11 @@ export class ArrayType<
     );
   }
 
-  map<Mapped>(mapper: (value: Items) => Mapped): ArrayType<
+  map<Mapped>(mapper: (value: Items) => Mapped): ArraySchema<
     Items,
     Mapped,
     Cast> {
-    return new ArrayType(
+    return new ArraySchema(
       this.itemSchema,
       { ...this.options },
       { ...this.validators },
@@ -127,7 +127,7 @@ export class ArrayType<
     );
   }
 
-  unique(params?: { message?: string }): ArrayType<Items, Result, Cast> {
+  unique(params?: { message?: string }): ArraySchema<Items, Result, Cast> {
     let message: string;
     if (params?.message) {
       message = params.message;
@@ -135,7 +135,7 @@ export class ArrayType<
       message = 'Must contain unique items.';
     }
 
-    const code = ArrayType.ErrorCodes.unique;
+    const code = ArraySchema.ErrorCodes.unique;
     const validator: ArrayValidator<Items> = (items) => {
       const itemSet = new Set(items);
       if (items.length !== itemSet.size) {
@@ -144,7 +144,7 @@ export class ArrayType<
       return items;
     };
 
-    return new ArrayType(
+    return new ArraySchema(
       this.itemSchema,
       { ...this.options },
       { ...this.validators, [code]: validator },
@@ -154,7 +154,7 @@ export class ArrayType<
 
   length(limit: number, params?: {
     message?: string | ((params: { limit: number }) => string),
-  }): ArrayType<Items, Result, Cast> {
+  }): ArraySchema<Items, Result, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -166,7 +166,7 @@ export class ArrayType<
       message = `The array must contain ${pluralize(limit, 'item', 'items')}.`;
     }
 
-    const code = ArrayType.ErrorCodes.length;
+    const code = ArraySchema.ErrorCodes.length;
     const validator: ArrayValidator<Items> = (items) => {
       if (items.length !== limit) {
         throw new ParseError(code, message, {
@@ -176,7 +176,7 @@ export class ArrayType<
       return items;
     };
 
-    return new ArrayType(
+    return new ArraySchema(
       this.itemSchema,
       { ...this.options },
       { ...this.validators, [code]: validator },
@@ -186,7 +186,7 @@ export class ArrayType<
 
   minItems(limit: number, params?: {
     message?: string | ((params: { limit: number }) => string),
-  }): ArrayType<Items, Result, Cast> {
+  }): ArraySchema<Items, Result, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -200,7 +200,7 @@ export class ArrayType<
       }.`;
     }
 
-    const code = ArrayType.ErrorCodes.minItems;
+    const code = ArraySchema.ErrorCodes.minItems;
     const validator: ArrayValidator<Items> = (items) => {
       if (items.length < limit) {
         throw new ParseError(code, message, {
@@ -210,7 +210,7 @@ export class ArrayType<
       return items;
     };
 
-    return new ArrayType(
+    return new ArraySchema(
       this.itemSchema,
       { ...this.options },
       { ...this.validators, [code]: validator },
@@ -220,7 +220,7 @@ export class ArrayType<
 
   maxItems(limit: number, params?: {
     message?: string | ((params: { limit: number }) => string),
-  }): ArrayType<Items, Result, Cast> {
+  }): ArraySchema<Items, Result, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -234,7 +234,7 @@ export class ArrayType<
       }.`;
     }
 
-    const code = ArrayType.ErrorCodes.maxItems;
+    const code = ArraySchema.ErrorCodes.maxItems;
     const validator: ArrayValidator<Items> = (items) => {
       if (items.length > limit) {
         throw new ParseError(code, message, {
@@ -244,7 +244,7 @@ export class ArrayType<
       return items;
     };
 
-    return new ArrayType(
+    return new ArraySchema(
       this.itemSchema,
       { ...this.options },
       { ...this.validators, [code]: validator },
@@ -252,9 +252,9 @@ export class ArrayType<
     );
   }
 
-  custom(validator: ArrayValidator<Items>): ArrayType<Items, Result, Cast> {
-    const code = ArrayType.ErrorCodes.custom;
-    return new ArrayType(
+  custom(validator: ArrayValidator<Items>): ArraySchema<Items, Result, Cast> {
+    const code = ArraySchema.ErrorCodes.custom;
+    return new ArraySchema(
       this.itemSchema,
       { ...this.options },
       { ...this.validators, [code]: validator },
@@ -264,7 +264,7 @@ export class ArrayType<
 
   parse(value: unknown): Result;
   parse(value: unknown): unknown {
-    const ErrorCodes = ArrayType.ErrorCodes;
+    const ErrorCodes = ArraySchema.ErrorCodes;
     const options = this.options;
     const validators = this.validators;
     const mapper = this.mapper;
@@ -299,7 +299,7 @@ export class ArrayType<
     let items: unknown[] = [];
     const itemSchema = this.itemSchema;
     const itemsError = new ParseError(
-      ArrayType.ErrorCodes.invalidItems,
+      ArraySchema.ErrorCodes.invalidItems,
       'The array contains one or more invalid items. ' +
       'See details for more info.'
     );

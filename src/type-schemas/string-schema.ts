@@ -1,9 +1,9 @@
 import { type ResultMapper } from '../types.js';
-import { TypeAlias } from './type-alias.js';
+import { AbstractSchema } from '../abstract-schema.js';
 import { ParseError } from '../parse-error.js';
 import { pluralize } from '../util.js';
 
-type StringTypeOptions = {
+type StringSchemaOptions = {
   isOptional: boolean;
   isNullable: boolean;
   cast?: boolean;
@@ -15,22 +15,22 @@ type StringTypeOptions = {
 type StringValidator = (value: string) => string;
 type StringValidators = { [name: string]: StringValidator };
 
-export type StringParams = Pick<StringTypeOptions,
+export type StringParams = Pick<StringSchemaOptions,
   | 'cast'
   | 'trim'
   | 'typeError'
   | 'requiredError'>;
 
-export class StringType<
+export class StringSchema<
   Result,
   Cast extends boolean
-> extends TypeAlias<string, Result> {
-  protected readonly options: StringTypeOptions;
+> extends AbstractSchema<string, Result> {
+  protected readonly options: StringSchemaOptions;
   protected readonly validators: StringValidators;
   protected readonly mapper: ResultMapper | undefined;
 
   protected constructor(
-    options: StringTypeOptions,
+    options: StringSchemaOptions,
     validators: StringValidators,
     mapper: ResultMapper | undefined
   ) {
@@ -61,10 +61,10 @@ export class StringType<
     dateTimeISO: /^([0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])[T ]([01][0-9]|2[0-3]):([0-5][0-9])(:([0-5][0-9])(\.[0-9]{3})?)?(Z|[+-](?:2[0-3]|[01][0-9])(?::([0-5][0-9]))?)?$/,
   } as const;
 
-  static create<Params extends StringParams>(params?: Params): StringType<
+  static create<Params extends StringParams>(params?: Params): StringSchema<
     string,
     Params extends { cast: true } ? true : false> {
-    return new StringType({
+    return new StringSchema({
       isOptional: false,
       isNullable: false,
       cast: params?.cast ?? false,
@@ -74,55 +74,55 @@ export class StringType<
     }, {}, undefined);
   }
 
-  optional(): StringType<
+  optional(): StringSchema<
     Cast extends true ? Result : Result | undefined,
     Cast> {
-    return new StringType(
+    return new StringSchema(
       { ...this.options, isOptional: true },
       { ...this.validators },
       this.mapper
     );
   }
 
-  nullable(): StringType<
+  nullable(): StringSchema<
     Cast extends true ? Result : Result | null,
     Cast> {
-    return new StringType(
+    return new StringSchema(
       { ...this.options, isNullable: true },
       { ...this.validators },
       this.mapper
     );
   }
 
-  nullish(): StringType<
+  nullish(): StringSchema<
     Cast extends true ? Result : Result | null | undefined,
     Cast> {
-    return new StringType(
+    return new StringSchema(
       { ...this.options, isOptional: true, isNullable: true },
       { ...this.validators },
       this.mapper
     );
   }
 
-  required(): StringType<
+  required(): StringSchema<
     Exclude<Result, null | undefined>,
     Cast> {
-    return new StringType(
+    return new StringSchema(
       { ...this.options, isOptional: false, isNullable: false },
       { ...this.validators },
       this.mapper
     );
   }
 
-  map<Mapped>(mapper: (value: string) => Mapped): StringType<Mapped, Cast> {
-    return new StringType(
+  map<Mapped>(mapper: (value: string) => Mapped): StringSchema<Mapped, Cast> {
+    return new StringSchema(
       { ...this.options },
       { ...this.validators },
       mapper
     );
   }
 
-  notEmpty(params?: { message?: string }): StringType<Result, Cast> {
+  notEmpty(params?: { message?: string }): StringSchema<Result, Cast> {
     let message: string;
     if (params?.message) {
       message = params.message;
@@ -130,7 +130,7 @@ export class StringType<
       message = 'The value cannot be an empty string.';
     }
 
-    const code = StringType.ErrorCodes.notEmpty;
+    const code = StringSchema.ErrorCodes.notEmpty;
     const validator: StringValidator = (value) => {
       if (value === '') {
         throw new ParseError(code, message);
@@ -138,7 +138,7 @@ export class StringType<
       return value;
     };
 
-    return new StringType(
+    return new StringSchema(
       { ...this.options },
       { ...this.validators, [code]: validator },
       this.mapper
@@ -147,7 +147,7 @@ export class StringType<
 
   minLength(limit: number, params?: {
     message?: string | ((params: { limit: number }) => string);
-  }): StringType<Result, Cast> {
+  }): StringSchema<Result, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -161,7 +161,7 @@ export class StringType<
       } long.`;
     }
 
-    const code = StringType.ErrorCodes.minLength;
+    const code = StringSchema.ErrorCodes.minLength;
     const validator: StringValidator = (value) => {
       if (value.length < limit) {
         throw new ParseError(code, message, {
@@ -171,7 +171,7 @@ export class StringType<
       return value;
     };
 
-    return new StringType(
+    return new StringSchema(
       { ...this.options },
       { ...this.validators, [code]: validator },
       this.mapper
@@ -180,7 +180,7 @@ export class StringType<
 
   maxLength(limit: number, params?: {
     message?: string | ((params: { limit: number }) => string);
-  }): StringType<Result, Cast> {
+  }): StringSchema<Result, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -194,7 +194,7 @@ export class StringType<
       } long.`;
     }
 
-    const code = StringType.ErrorCodes.maxLength;
+    const code = StringSchema.ErrorCodes.maxLength;
     const validator: StringValidator = (value) => {
       if (value.length > limit) {
         throw new ParseError(code, message, {
@@ -204,7 +204,7 @@ export class StringType<
       return value;
     };
 
-    return new StringType(
+    return new StringSchema(
       { ...this.options },
       { ...this.validators, [code]: validator },
       this.mapper
@@ -213,7 +213,7 @@ export class StringType<
 
   pattern(regex: RegExp, params?: {
     message?: string | ((params: { regex: RegExp }) => string);
-  }): StringType<Result, Cast> {
+  }): StringSchema<Result, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -225,7 +225,7 @@ export class StringType<
       message = `The string does not match to \`${regex}\` pattern.`;
     }
 
-    const code = StringType.ErrorCodes.pattern;
+    const code = StringSchema.ErrorCodes.pattern;
     const validator: StringValidator = (value) => {
       if (!value.match(regex)) {
         throw new ParseError(code, message, {
@@ -235,16 +235,16 @@ export class StringType<
       return value;
     };
 
-    return new StringType(
+    return new StringSchema(
       { ...this.options },
       { ...this.validators, [code]: validator },
       this.mapper
     );
   }
 
-  custom(validator: StringValidator): StringType<Result, Cast> {
-    const code = StringType.ErrorCodes.custom;
-    return new StringType(
+  custom(validator: StringValidator): StringSchema<Result, Cast> {
+    const code = StringSchema.ErrorCodes.custom;
+    return new StringSchema(
       { ...this.options },
       { ...this.validators, [code]: validator },
       this.mapper
@@ -253,7 +253,7 @@ export class StringType<
 
   parse(value: unknown): Result;
   parse(value: unknown): unknown {
-    const ErrorCodes = StringType.ErrorCodes;
+    const ErrorCodes = StringSchema.ErrorCodes;
     const options = this.options;
     const validators = this.validators;
     const mapper = this.mapper;

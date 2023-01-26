@@ -1,28 +1,28 @@
 import { type InputType, type OutputType } from './types.js';
-import { StringType } from './type-aliases/string-type.js';
-import { NumberType } from './type-aliases/number-type.js';
-import { BooleanType } from './type-aliases/boolean-type.js';
-import { EnumType } from './type-aliases/enum-type.js';
-import { ArrayType } from './type-aliases/array-type.js';
-import { ObjectType } from './type-aliases/object-type.js';
-import { RecordType } from './type-aliases/record-type.js';
+import { StringSchema } from './type-schemas/string-schema.js';
+import { NumberSchema } from './type-schemas/number-schema.js';
+import { BooleanSchema } from './type-schemas/boolean-schema.js';
+import { EnumSchema } from './type-schemas/enum-schema.js';
+import { ArraySchema } from './type-schemas/array-schema.js';
+import { ShapeSchema } from './type-schemas/shape-schema.js';
+import { ObjectSchema } from './type-schemas/object-schema.js';
 
-const StringPatterns = StringType.Patterns;
-const StringErrorCodes = StringType.ErrorCodes;
-const NumberErrorCodes = NumberType.ErrorCodes;
-const BooleanErrorCodes = BooleanType.ErrorCodes;
-const EnumErrorCodes = EnumType.ErrorCodes;
-const ArrayErrorCodes = ArrayType.ErrorCodes;
-const ObjectErrorCodes = ObjectType.ErrorCodes;
-const RecordErrorCodes = RecordType.ErrorCodes;
+const StringPatterns = StringSchema.Patterns;
+const StringErrorCodes = StringSchema.ErrorCodes;
+const NumberErrorCodes = NumberSchema.ErrorCodes;
+const BooleanErrorCodes = BooleanSchema.ErrorCodes;
+const ArrayErrorCodes = ArraySchema.ErrorCodes;
+const ObjectErrorCodes = ObjectSchema.ErrorCodes;
+const EnumErrorCodes = EnumSchema.ErrorCodes;
+const ShapeErrorCodes = ShapeSchema.ErrorCodes;
 
-const stringFactory = StringType.create;
-const numberFactory = NumberType.create;
-const booleanFactory = BooleanType.create;
-const enumFactory = EnumType.create;
-const arrayFactory = ArrayType.create;
-const objectFactory = ObjectType.create;
-const recordFactory = RecordType.create;
+const stringFactory = StringSchema.create;
+const numberFactory = NumberSchema.create;
+const booleanFactory = BooleanSchema.create;
+const arrayFactory = ArraySchema.create;
+const objectFactory = ObjectSchema.create;
+const enumFactory = EnumSchema.create;
+const shapeFactory = ShapeSchema.create;
 
 // noinspection ReservedWordAsName
 export {
@@ -44,17 +44,17 @@ export {
   EnumErrorCodes as ENUM_ERROR_CODES,
   ArrayErrorCodes,
   ArrayErrorCodes as ARRAY_ERROR_CODES,
+  ShapeErrorCodes,
+  ShapeErrorCodes as SHAPE_ERROR_CODES,
   ObjectErrorCodes,
   ObjectErrorCodes as OBJECT_ERROR_CODES,
-  RecordErrorCodes,
-  RecordErrorCodes as RECORD_ERROR_CODES,
 
   // Public methods
   stringFactory as string,
   numberFactory as number,
   booleanFactory as boolean,
-  enumFactory as enum,
   arrayFactory as array,
   objectFactory as object,
-  recordFactory as record,
+  enumFactory as enum,
+  shapeFactory as shape,
 };

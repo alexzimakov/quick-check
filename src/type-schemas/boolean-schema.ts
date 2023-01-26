@@ -1,8 +1,8 @@
 import { type ResultMapper } from '../types.js';
-import { TypeAlias } from './type-alias.js';
+import { AbstractSchema } from '../abstract-schema.js';
 import { ParseError } from '../parse-error.js';
 
-type BooleanTypeOptions = {
+type BooleanSchemaOptions = {
   isOptional: boolean;
   isNullable: boolean;
   cast?: boolean;
@@ -13,21 +13,21 @@ type BooleanTypeOptions = {
 type BooleanValidator = (value: boolean) => boolean;
 type BooleanValidators = { [name: string]: BooleanValidator };
 
-export type BooleanParams = Pick<BooleanTypeOptions,
+export type BooleanParams = Pick<BooleanSchemaOptions,
   | 'cast'
   | 'typeError'
   | 'requiredError'>;
 
-export class BooleanType<
+export class BooleanSchema<
   Result,
   Cast extends boolean
-> extends TypeAlias<boolean, Result> {
-  protected readonly options: BooleanTypeOptions;
+> extends AbstractSchema<boolean, Result> {
+  protected readonly options: BooleanSchemaOptions;
   protected readonly validators: BooleanValidators;
   protected readonly mapper: ResultMapper | undefined;
 
   protected constructor(
-    options: BooleanTypeOptions,
+    options: BooleanSchemaOptions,
     validators: BooleanValidators,
     mapper: ResultMapper | undefined
   ) {
@@ -45,65 +45,65 @@ export class BooleanType<
     custom: 'BOOLEAN_CUSTOM',
   } as const;
 
-  static create<Params extends BooleanParams>(params?: Params): BooleanType<
+  static create<Params extends BooleanParams>(params?: Params): BooleanSchema<
     boolean,
     Params extends { cast: true } ? true : false> {
-    return new BooleanType({
+    return new BooleanSchema({
       ...params,
       isOptional: false,
       isNullable: false,
     }, {}, undefined);
   }
 
-  optional(): BooleanType<
+  optional(): BooleanSchema<
     Cast extends true ? Result : Result | undefined,
     Cast> {
-    return new BooleanType(
+    return new BooleanSchema(
       { ...this.options, isOptional: true },
       { ...this.validators },
       this.mapper
     );
   }
 
-  nullable(): BooleanType<
+  nullable(): BooleanSchema<
     Cast extends true ? Result : Result | null,
     Cast> {
-    return new BooleanType(
+    return new BooleanSchema(
       { ...this.options, isNullable: true },
       { ...this.validators },
       this.mapper
     );
   }
 
-  nullish(): BooleanType<
+  nullish(): BooleanSchema<
     Cast extends true ? Result : Result | null | undefined,
     Cast> {
-    return new BooleanType(
+    return new BooleanSchema(
       { ...this.options, isOptional: true, isNullable: true },
       { ...this.validators },
       this.mapper
     );
   }
 
-  required(): BooleanType<
+  required(): BooleanSchema<
     Exclude<Result, null | undefined>,
     Cast> {
-    return new BooleanType(
+    return new BooleanSchema(
       { ...this.options, isOptional: false, isNullable: false },
       { ...this.validators },
       this.mapper
     );
   }
 
-  map<Mapped>(mapper: (value: boolean) => Mapped): BooleanType<Mapped, Cast> {
-    return new BooleanType(
+  map<Mapped>(mapper: (value: boolean) => Mapped): BooleanSchema<Mapped, Cast> {
+    return new BooleanSchema(
       { ...this.options },
       { ...this.validators },
       mapper
     );
   }
 
-  truthy(params?: { message?: string }): BooleanType<Result, Cast> {
+  truthy(params?: { message?: string }): BooleanSchema<Result, Cast> {
     let message: string;
     if (params?.message) {
       message = params.message;
@@ -111,7 +111,7 @@ export class BooleanType<
       message = 'Must be truthy value.';
     }
 
-    const code = BooleanType.ErrorCodes.truthy;
+    const code = BooleanSchema.ErrorCodes.truthy;
     const validator: BooleanValidator = (value) => {
       if (!value) {
         throw new ParseError(code, message);
@@ -119,14 +119,14 @@ export class BooleanType<
       return value;
     };
 
-    return new BooleanType(
+    return new BooleanSchema(
       { ...this.options },
       { ...this.validators, [code]: validator },
       this.mapper
     );
   }
 
-  falsy(params?: { message?: string }): BooleanType<Result, Cast> {
+  falsy(params?: { message?: string }): BooleanSchema<Result, Cast> {
     let message: string;
     if (params?.message) {
       message = params.message;
@@ -134,7 +134,7 @@ export class BooleanType<
       message = 'Must be falsy value.';
     }
 
-    const code = BooleanType.ErrorCodes.falsy;
+    const code = BooleanSchema.ErrorCodes.falsy;
     const validator: BooleanValidator = (value) => {
       if (value) {
         throw new ParseError(code, message);
@@ -142,16 +142,16 @@ export class BooleanType<
       return value;
     };
 
-    return new BooleanType(
+    return new BooleanSchema(
       { ...this.options },
       { ...this.validators, [code]: validator },
       this.mapper
     );
   }
 
-  custom(validator: BooleanValidator): BooleanType<Result, Cast> {
-    const code = BooleanType.ErrorCodes.custom;
-    return new BooleanType(
+  custom(validator: BooleanValidator): BooleanSchema<Result, Cast> {
+    const code = BooleanSchema.ErrorCodes.custom;
+    return new BooleanSchema(
       { ...this.options },
       { ...this.validators, [code]: validator },
       this.mapper
@@ -160,7 +160,7 @@ export class BooleanType<
 
   parse(value: unknown): Result;
   parse(value: unknown): unknown {
-    const ErrorCodes = BooleanType.ErrorCodes;
+    const ErrorCodes = BooleanSchema.ErrorCodes;
     const options = this.options;
     const validators = this.validators;
     const mapper = this.mapper;

@@ -1,8 +1,8 @@
 import { type ResultMapper } from '../types.js';
-import { TypeAlias } from './type-alias.js';
+import { AbstractSchema } from '../abstract-schema.js';
 import { ParseError } from '../parse-error.js';
 
-type NumberTypeOptions = {
+type NumberSchemaOptions = {
   isOptional: boolean;
   isNullable: boolean;
   cast?: boolean;
@@ -13,21 +13,21 @@ type NumberTypeOptions = {
 type NumberValidator = (value: number) => number;
 type NumberValidators = { [name: string]: NumberValidator };
 
-export type NumberParams = Pick<NumberTypeOptions,
+export type NumberParams = Pick<NumberSchemaOptions,
   | 'cast'
   | 'typeError'
   | 'requiredError'>;
 
-export class NumberType<
+export class NumberSchema<
   Result,
   Cast extends boolean
-> extends TypeAlias<number, Result> {
-  protected readonly options: NumberTypeOptions;
+> extends AbstractSchema<number, Result> {
+  protected readonly options: NumberSchemaOptions;
   protected readonly validators: NumberValidators;
   protected readonly mapper: ResultMapper | undefined;
 
   protected constructor(
-    options: NumberTypeOptions,
+    options: NumberSchemaOptions,
     validators: NumberValidators,
     mapper: ResultMapper | undefined
   ) {
@@ -49,65 +49,65 @@ export class NumberType<
     custom: 'NUMBER_CUSTOM',
   } as const;
 
-  static create<Params extends NumberParams>(params?: Params): NumberType<
+  static create<Params extends NumberParams>(params?: Params): NumberSchema<
     number,
     Params extends { cast: true } ? true : false> {
-    return new NumberType({
+    return new NumberSchema({
       ...params,
       isOptional: false,
       isNullable: false,
     }, {}, undefined);
   }
 
-  optional(): NumberType<
+  optional(): NumberSchema<
     Cast extends true ? Result : Result | undefined,
     Cast> {
-    return new NumberType(
+    return new NumberSchema(
       { ...this.options, isOptional: true },
       { ...this.validators },
       this.mapper
     );
   }
 
-  nullable(): NumberType<
+  nullable(): NumberSchema<
     Cast extends true ? Result : Result | null,
     Cast> {
-    return new NumberType(
+    return new NumberSchema(
       { ...this.options, isNullable: true },
       { ...this.validators },
       this.mapper
     );
   }
 
-  nullish(): NumberType<
+  nullish(): NumberSchema<
     Cast extends true ? Result : Result | null | undefined,
     Cast> {
-    return new NumberType(
+    return new NumberSchema(
       { ...this.options, isOptional: true, isNullable: true },
       { ...this.validators },
       this.mapper
     );
   }
 
-  required(): NumberType<
+  required(): NumberSchema<
     Exclude<Result, null | undefined>,
     Cast> {
-    return new NumberType(
+    return new NumberSchema(
       { ...this.options, isOptional: false, isNullable: false },
       { ...this.validators },
       this.mapper
     );
   }
 
-  map<Mapped>(mapper: (value: number) => Mapped): NumberType<Mapped, Cast> {
-    return new NumberType(
+  map<Mapped>(mapper: (value: number) => Mapped): NumberSchema<Mapped, Cast> {
+    return new NumberSchema(
       { ...this.options },
       { ...this.validators },
       mapper
     );
   }
 
-  int(params?: { message?: string }): NumberType<Result, Cast> {
+  int(params?: { message?: string }): NumberSchema<Result, Cast> {
     let message: string;
     if (params?.message) {
       message = params.message;
@@ -115,7 +115,7 @@ export class NumberType<
       message = 'Must be an integer.';
     }
 
-    const code = NumberType.ErrorCodes.int;
+    const code = NumberSchema.ErrorCodes.int;
     const validator: NumberValidator = (value) => {
       if (!Number.isInteger(value)) {
         throw new ParseError(code, message);
@@ -123,14 +123,14 @@ export class NumberType<
       return value;
     };
 
-    return new NumberType(
+    return new NumberSchema(
       { ...this.options },
       { ...this.validators, [code]: validator },
       this.mapper
     );
   }
 
-  positive(params?: { message?: string }): NumberType<Result, Cast> {
+  positive(params?: { message?: string }): NumberSchema<Result, Cast> {
     let message: string;
     if (params?.message) {
       message = params.message;
@@ -138,7 +138,7 @@ export class NumberType<
       message = 'Must be a positive number.';
     }
 
-    const code = NumberType.ErrorCodes.positive;
+    const code = NumberSchema.ErrorCodes.positive;
     const validator: NumberValidator = (value) => {
       if (value < 0) {
         throw new ParseError(code, message);
@@ -146,7 +146,7 @@ export class NumberType<
       return value;
     };
 
-    return new NumberType(
+    return new NumberSchema(
       { ...this.options },
       { ...this.validators, [code]: validator },
       this.mapper
@@ -155,7 +155,7 @@ export class NumberType<
 
   min(min: number, params?: {
     message?: string | ((params: { min: number }) => string);
-  }): NumberType<Result, Cast> {
+  }): NumberSchema<Result, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -167,7 +167,7 @@ export class NumberType<
       message = `The number must be greater than or equal to ${min}.`;
     }
 
-    const code = NumberType.ErrorCodes.min;
+    const code = NumberSchema.ErrorCodes.min;
     const validator: NumberValidator = (value) => {
       if (value < min) {
         throw new ParseError(code, message, {
@@ -177,7 +177,7 @@ export class NumberType<
       return value;
     };
 
-    return new NumberType(
+    return new NumberSchema(
       { ...this.options },
       { ...this.validators, [code]: validator },
       this.mapper
@@ -186,7 +186,7 @@ export class NumberType<
 
   max(max: number, params?: {
     message?: string | ((params: { max: number }) => string);
-  }): NumberType<Result, Cast> {
+  }): NumberSchema<Result, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -198,7 +198,7 @@ export class NumberType<
       message = `The number must be less than or equal to ${max}.`;
     }
 
-    const code = NumberType.ErrorCodes.max;
+    const code = NumberSchema.ErrorCodes.max;
     const validator: NumberValidator = (value) => {
       if (value > max) {
         throw new ParseError(code, message, {
@@ -208,7 +208,7 @@ export class NumberType<
       return value;
     };
 
-    return new NumberType(
+    return new NumberSchema(
       { ...this.options },
       { ...this.validators, [code]: validator },
       this.mapper
@@ -217,7 +217,7 @@ export class NumberType<
 
   greaterThan(min: number, params?: {
     message?: string | ((params: { min: number }) => string);
-  }): NumberType<Result, Cast> {
+  }): NumberSchema<Result, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -229,7 +229,7 @@ export class NumberType<
       message = `The value must be greater than ${min}.`;
     }
 
-    const code = NumberType.ErrorCodes.lessThan;
+    const code = NumberSchema.ErrorCodes.lessThan;
     const validator: NumberValidator = (value) => {
       if (value <= min) {
         throw new ParseError(code, message, {
@@ -239,7 +239,7 @@ export class NumberType<
       return value;
     };
 
-    return new NumberType(
+    return new NumberSchema(
       { ...this.options },
       { ...this.validators, [code]: validator },
       this.mapper
@@ -248,7 +248,7 @@ export class NumberType<
 
   lessThan(max: number, params?: {
     message?: string | ((params: { max: number }) => string);
-  }): NumberType<Result, Cast> {
+  }): NumberSchema<Result, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -260,7 +260,7 @@ export class NumberType<
       message = `The value must be less than ${max}.`;
     }
 
-    const code = NumberType.ErrorCodes.lessThan;
+    const code = NumberSchema.ErrorCodes.lessThan;
     const validator: NumberValidator = (value) => {
       if (value >= max) {
         throw new ParseError(code, message, {
@@ -270,16 +270,16 @@ export class NumberType<
       return value;
     };
 
-    return new NumberType(
+    return new NumberSchema(
       { ...this.options },
       { ...this.validators, [code]: validator },
       this.mapper
     );
   }
 
-  custom(validator: NumberValidator): NumberType<Result, Cast> {
-    const code = NumberType.ErrorCodes.custom;
-    return new NumberType(
+  custom(validator: NumberValidator): NumberSchema<Result, Cast> {
+    const code = NumberSchema.ErrorCodes.custom;
+    return new NumberSchema(
       { ...this.options },
       { ...this.validators, [code]: validator },
       this.mapper
@@ -288,7 +288,7 @@ export class NumberType<
 
   parse(value: unknown): Result;
   parse(value: unknown): unknown {
-    const ErrorCodes = NumberType.ErrorCodes;
+    const ErrorCodes = NumberSchema.ErrorCodes;
     const options = this.options;
     const validators = this.validators;
     const mapper = this.mapper;

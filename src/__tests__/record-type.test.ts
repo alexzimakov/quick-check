@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
-import { RecordType } from '../type-aliases/record-type.js';
-import { NumberType } from '../type-aliases/number-type.js';
-import { StringType } from '../type-aliases/string-type.js';
-import { EnumType } from '../type-aliases/enum-type.js';
+import { ObjectSchema } from '../type-schemas/object-schema.js';
+import { NumberSchema } from '../type-schemas/number-schema.js';
+import { StringSchema } from '../type-schemas/string-schema.js';
+import { EnumSchema } from '../type-schemas/enum-schema.js';
 import { ParseError } from '../parse-error.js';
 import { format } from '../util.js';
 
@@ -11,7 +11,7 @@ describe('positive cases', () => {
     { one: 1, two: 2, three: 3 },
     {},
   ];
-  const schema = RecordType.create(NumberType.create().int());
+  const schema = ObjectSchema.create(NumberSchema.create().int());
   valid.forEach((value) => {
     test(
       `should return ${format(value)} when value is ${format(value)}`,
@@ -31,7 +31,7 @@ describe('negative cases', () => {
     [],
     { one: 1, two: 2, three: '3' },
   ];
-  const schema = RecordType.create(NumberType.create().int());
+  const schema = ObjectSchema.create(NumberSchema.create().int());
   invalid.forEach((value) => {
     test(`should throw an error when value is ${format(value)}`, () => {
       expect(() => schema.parse(value)).toThrow(ParseError);
@@ -40,9 +40,9 @@ describe('negative cases', () => {
 });
 
 test('should validate keys', () => {
-  const schema = RecordType.create(
-    NumberType.create().int(),
-    StringType.create().minLength(2)
+  const schema = ObjectSchema.create(
+    NumberSchema.create().int(),
+    StringSchema.create().minLength(2)
   );
 
   expect(schema.parse({
@@ -60,9 +60,9 @@ test('should validate keys', () => {
 });
 
 test('should validate enum keys', () => {
-  const schema = RecordType.create(
-    NumberType.create().int(),
-    EnumType.create(['north', 'south', 'east', 'west'] as const)
+  const schema = ObjectSchema.create(
+    NumberSchema.create().int(),
+    EnumSchema.create(['north', 'south', 'east', 'west'] as const)
   );
 
   expect(schema.parse({
@@ -86,9 +86,9 @@ test('should validate enum keys', () => {
 
 test('checks that an object contains all keys from `EnumType`', () => {
   const keys = ['north', 'south', 'east', 'west'] as const;
-  const schema = RecordType.create(
-    NumberType.create().int(),
-    EnumType.create(keys)
+  const schema = ObjectSchema.create(
+    NumberSchema.create().int(),
+    EnumSchema.create(keys)
   );
   expect(() => schema.parse({
     north: 1,
@@ -98,15 +98,15 @@ test('checks that an object contains all keys from `EnumType`', () => {
 });
 
 test('throws errors with custom messages', () => {
-  let schema: RecordType<
+  let schema: ObjectSchema<
     Record<string, number>,
     Record<string, number>
   >;
 
   const typeError = 'must be a record';
   const requiredError = 'is required';
-  schema = RecordType.create(
-    NumberType.create(),
+  schema = ObjectSchema.create(
+    NumberSchema.create(),
     { requiredError, typeError }
   );
   expect(() => schema.parse(null)).toThrow(requiredError);
@@ -114,17 +114,17 @@ test('throws errors with custom messages', () => {
 
   const keyError = 'invalid key';
   const valueError = 'invalid value';
-  schema = RecordType.create(
-    NumberType.create(),
-    StringType.create().minLength(3),
+  schema = ObjectSchema.create(
+    NumberSchema.create(),
+    StringSchema.create().minLength(3),
     { keyError, valueError }
   );
   expect(() => schema.parse({ z: 0 })).toThrow(keyError);
   expect(() => schema.parse({ zero: '0' })).toThrow(valueError);
 
-  schema = RecordType.create(
-    NumberType.create(),
-    StringType.create().minLength(3),
+  schema = ObjectSchema.create(
+    NumberSchema.create(),
+    StringSchema.create().minLength(3),
     {
       keyError: () => keyError,
       valueError: () => valueError,
@@ -134,16 +134,16 @@ test('throws errors with custom messages', () => {
   expect(() => schema.parse({ zero: '0' })).toThrow(valueError);
 
   const missingKeyError = 'must contain all keys';
-  schema = RecordType.create(
-    NumberType.create(),
-    EnumType.create(['north', 'south', 'east', 'west'] as const),
+  schema = ObjectSchema.create(
+    NumberSchema.create(),
+    EnumSchema.create(['north', 'south', 'east', 'west'] as const),
     { missingKeyError }
   );
   expect(() => schema.parse({})).toThrow(missingKeyError);
 
-  schema = RecordType.create(
-    NumberType.create(),
-    EnumType.create(['north', 'south', 'east', 'west'] as const),
+  schema = ObjectSchema.create(
+    NumberSchema.create(),
+    EnumSchema.create(['north', 'south', 'east', 'west'] as const),
     { missingKeyError: () => missingKeyError }
   );
   expect(() => schema.parse({
@@ -154,8 +154,8 @@ test('throws errors with custom messages', () => {
 });
 
 describe('optional()', () => {
-  const schema = RecordType.create(
-    NumberType.create().int()
+  const schema = ObjectSchema.create(
+    NumberSchema.create().int()
   ).optional();
 
   test('returns undefined when a passed value is undefined', () => {
@@ -168,8 +168,8 @@ describe('optional()', () => {
 });
 
 describe('nullable()', () => {
-  const schema = RecordType.create(
-    NumberType.create().int()
+  const schema = ObjectSchema.create(
+    NumberSchema.create().int()
   ).nullable();
 
   test('returns null when a passed value is null', () => {
@@ -182,8 +182,8 @@ describe('nullable()', () => {
 });
 
 describe('nullish()', () => {
-  const schema = RecordType.create(
-    NumberType.create().int()
+  const schema = ObjectSchema.create(
+    NumberSchema.create().int()
   ).nullish();
 
   test('returns null when a passed value is null', () => {
@@ -196,7 +196,7 @@ describe('nullish()', () => {
 });
 
 describe('required()', () => {
-  const schema = RecordType.create(NumberType.create().int()).optional();
+  const schema = ObjectSchema.create(NumberSchema.create().int()).optional();
 
   test('throws an error when a passed value is undefined', () => {
     expect(() => schema
@@ -220,7 +220,7 @@ describe('required()', () => {
 
 describe('map()', () => {
   test('returns a value from the `mapper` function', () => {
-    const schema = RecordType.create(NumberType.create().int()).map(
+    const schema = ObjectSchema.create(NumberSchema.create().int()).map(
       (obj) => JSON.stringify(obj)
     );
     expect(schema.parse({ one: 1 })).toBe('{"one":1}');
@@ -228,7 +228,7 @@ describe('map()', () => {
 
   test('rethrows any error from the `mapper` function', () => {
     const error = new ParseError('invalid_state', 'Invalid state.');
-    const schema = RecordType.create(NumberType.create().int()).map(
+    const schema = ObjectSchema.create(NumberSchema.create().int()).map(
       () => {
         throw error;
       }

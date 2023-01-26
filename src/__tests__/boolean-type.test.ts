@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'vitest';
-import { BooleanType } from '../type-aliases/boolean-type.js';
+import { BooleanSchema } from '../type-schemas/boolean-schema.js';
 import { ParseError } from '../parse-error.js';
 import { format } from '../util.js';
 
 describe('positive cases', () => {
   const valid = [true];
-  const schema = BooleanType.create();
+  const schema = BooleanSchema.create();
   valid.forEach((value) => {
     test(
       `should return ${format(value)} when value is ${format(value)}`,
@@ -16,7 +16,7 @@ describe('positive cases', () => {
 
 describe('negative cases', () => {
   const invalid = [null, undefined, 'foo', 1, Symbol('test'), [], {}, NaN];
-  const schema = BooleanType.create();
+  const schema = BooleanSchema.create();
   invalid.forEach((value) => {
     test(`should throw an error when value is ${format(value)}`, () => {
       expect(() => schema.parse(value)).toThrow(ParseError);
@@ -25,7 +25,7 @@ describe('negative cases', () => {
 });
 
 test('casts to boolean a passed value', () => {
-  const schema = BooleanType.create({ cast: true });
+  const schema = BooleanSchema.create({ cast: true });
 
   expect(schema.parse('true')).toBe(true);
   expect(schema.parse('yes')).toBe(true);
@@ -45,13 +45,13 @@ test('casts to boolean a passed value', () => {
 test('throws errors with custom messages', () => {
   const requiredError = 'is required';
   const typeError = 'must be string';
-  const schema = BooleanType.create({ requiredError, typeError });
+  const schema = BooleanSchema.create({ requiredError, typeError });
   expect(() => schema.parse(null)).toThrow(requiredError);
   expect(() => schema.parse(1)).toThrow(typeError);
 });
 
 describe('optional()', () => {
-  const schema = BooleanType.create().optional();
+  const schema = BooleanSchema.create().optional();
   test('returns undefined when a passed value is undefined', () => {
     expect(schema.parse(undefined)).toBe(undefined);
   });
@@ -62,7 +62,7 @@ describe('optional()', () => {
 });
 
 describe('nullable()', () => {
-  const schema = BooleanType.create().nullable();
+  const schema = BooleanSchema.create().nullable();
 
   test('returns null when a passed value is null', () => {
     expect(schema.parse(null)).toBe(null);
@@ -74,7 +74,7 @@ describe('nullable()', () => {
 });
 
 describe('nullish()', () => {
-  const schema = BooleanType.create().nullish();
+  const schema = BooleanSchema.create().nullish();
 
   test('returns null when a passed value is null', () => {
     expect(schema.parse(undefined)).toBe(undefined);
@@ -86,7 +86,7 @@ describe('nullish()', () => {
 });
 
 describe('required()', () => {
-  const optionalSchema = BooleanType.create().optional().nullable();
+  const optionalSchema = BooleanSchema.create().optional().nullable();
   const schema = optionalSchema.required();
 
   test('throws an error when a passed value is undefined', () => {
@@ -102,7 +102,7 @@ describe('map()', () => {
   test('returns a value from the `mapper` function', () => {
     const ENABLED = 'ENABLED';
     const DISABLED = 'DISABLED';
-    const schema = BooleanType.create().map(
+    const schema = BooleanSchema.create().map(
       (value) => (value ? ENABLED : DISABLED)
     );
     expect(schema.parse(true)).toBe(ENABLED);
@@ -111,7 +111,7 @@ describe('map()', () => {
 
   test('rethrows any error from the `mapper` function', () => {
     const error = new ParseError('invalid_state', 'Invalid state.');
-    const schema = BooleanType.create().map((value) => {
+    const schema = BooleanSchema.create().map((value) => {
       if (!value) {
         throw error;
       }
@@ -123,20 +123,20 @@ describe('map()', () => {
 
 describe('truthy()', () => {
   test('returns a passed value when it is `true`', () => {
-    const schema = BooleanType.create().truthy();
+    const schema = BooleanSchema.create().truthy();
     const value = true;
     expect(schema.parse(value)).toBe(value);
   });
 
   test('throws an error when a passed value is `false`', () => {
-    const schema = BooleanType.create().truthy();
+    const schema = BooleanSchema.create().truthy();
     expect(() => schema.parse(false)).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
     const message = 'invalid value';
     expect(
-      () => BooleanType.create()
+      () => BooleanSchema.create()
         .truthy({ message })
         .parse(false)
     ).toThrow(message);
@@ -145,20 +145,20 @@ describe('truthy()', () => {
 
 describe('falsy()', () => {
   test('returns a passed value when it is `false`', () => {
-    const schema = BooleanType.create().falsy();
+    const schema = BooleanSchema.create().falsy();
     const value = false;
     expect(schema.parse(value)).toBe(value);
   });
 
   test('throws an error when a passed value is `true`', () => {
-    const schema = BooleanType.create().falsy();
+    const schema = BooleanSchema.create().falsy();
     expect(() => schema.parse(true)).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
     const message = 'invalid value';
     expect(
-      () => BooleanType.create()
+      () => BooleanSchema.create()
         .falsy({ message })
         .parse(true)
     ).toThrow(message);
@@ -177,7 +177,7 @@ describe('custom()', () => {
     return value;
   };
   test('returns a value from custom validator', () => {
-    const schema = BooleanType.create().custom(validate);
+    const schema = BooleanSchema.create().custom(validate);
     const value = true;
     expect(schema.parse(value)).toBe(value);
   });
@@ -185,7 +185,7 @@ describe('custom()', () => {
   test(
     "throws an error when a passed value doesn't pass custom validator",
     () => {
-      const schema = BooleanType.create().custom(validate);
+      const schema = BooleanSchema.create().custom(validate);
       expect(() => schema.parse(false)).toThrow(invalidStateError);
     }
   );

@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import { ObjectType } from '../type-aliases/object-type.js';
-import { StringType } from '../type-aliases/string-type.js';
-import { NumberType } from '../type-aliases/number-type.js';
-import { BooleanType } from '../type-aliases/boolean-type.js';
-import { EnumType } from '../type-aliases/enum-type.js';
-import { ArrayType } from '../type-aliases/array-type.js';
+import { ShapeSchema } from '../type-schemas/shape-schema.js';
+import { StringSchema } from '../type-schemas/string-schema.js';
+import { NumberSchema } from '../type-schemas/number-schema.js';
+import { BooleanSchema } from '../type-schemas/boolean-schema.js';
+import { EnumSchema } from '../type-schemas/enum-schema.js';
+import { ArraySchema } from '../type-schemas/array-schema.js';
 import { ParseError } from '../parse-error.js';
 import { format } from '../util.js';
 
@@ -33,9 +33,9 @@ describe('positive cases', () => {
       output: { str: 'test', num: 10 },
     },
   ];
-  const schema = ObjectType.create({
-    str: StringType.create(),
-    num: NumberType.create().optional(),
+  const schema = ShapeSchema.create({
+    str: StringSchema.create(),
+    num: NumberSchema.create().optional(),
   });
   testCases.forEach(({ input, output }) => {
     test(
@@ -55,7 +55,7 @@ describe('negative cases', () => {
     [],
     Symbol('Object'),
   ];
-  const schema = ObjectType.create({});
+  const schema = ShapeSchema.create({});
   invalid.forEach((value) => {
     test(`should throw an error when value is ${format(value)}`, () => {
       expect(() => schema.parse(value)).toThrow(ParseError);
@@ -64,9 +64,9 @@ describe('negative cases', () => {
 });
 
 test('should allow unknown properties', () => {
-  const schema = ObjectType.create({
-    str: StringType.create(),
-    num: NumberType.create(),
+  const schema = ShapeSchema.create({
+    str: StringSchema.create(),
+    num: NumberSchema.create(),
   }, { omitUnknownProps: false });
   const value = {
     str: 'lorem ipsum',
@@ -80,14 +80,14 @@ test('should allow unknown properties', () => {
 test(
   "throws an error when one or more props don't conform to the schema",
   () => {
-    const schema = ObjectType.create({
-      str: StringType.create(),
-      num: NumberType.create(),
-      bool: BooleanType.create(),
-      enum: EnumType.create([1, 2, 3] as const),
-      arr: ArrayType.create(StringType.create()),
-      nested: ObjectType.create({
-        foo: StringType.create(),
+    const schema = ShapeSchema.create({
+      str: StringSchema.create(),
+      num: NumberSchema.create(),
+      bool: BooleanSchema.create(),
+      enum: EnumSchema.create([1, 2, 3] as const),
+      arr: ArraySchema.create(StringSchema.create()),
+      nested: ShapeSchema.create({
+        foo: StringSchema.create(),
       }),
     });
     const value = {
@@ -125,7 +125,7 @@ test(
 );
 
 test('casts to the object a passed value', () => {
-  const schema = ObjectType.create({}, { cast: true });
+  const schema = ShapeSchema.create({}, { cast: true });
   expect(schema.parse(null)).toEqual({});
   expect(schema.parse(undefined)).toEqual({});
 });
@@ -133,7 +133,7 @@ test('casts to the object a passed value', () => {
 test('throws errors with custom messages', () => {
   const requiredError = 'is required';
   const typeError = 'must be string';
-  const schema = ObjectType.create({}, {
+  const schema = ShapeSchema.create({}, {
     requiredError,
     typeError,
   });
@@ -142,7 +142,7 @@ test('throws errors with custom messages', () => {
 });
 
 describe('optional()', () => {
-  const schema = ObjectType.create({}).optional();
+  const schema = ShapeSchema.create({}).optional();
   test('returns undefined when a passed value is undefined', () => {
     expect(schema.parse(undefined)).toBe(undefined);
   });
@@ -153,7 +153,7 @@ describe('optional()', () => {
 });
 
 describe('nullable()', () => {
-  const schema = ObjectType.create({}).nullable();
+  const schema = ShapeSchema.create({}).nullable();
 
   test('returns null when a passed value is null', () => {
     expect(schema.parse(null)).toBe(null);
@@ -165,7 +165,7 @@ describe('nullable()', () => {
 });
 
 describe('nullish()', () => {
-  const schema = ObjectType.create({}).nullish();
+  const schema = ShapeSchema.create({}).nullish();
 
   test('returns null when a passed value is null', () => {
     expect(schema.parse(undefined)).toBe(undefined);
@@ -177,7 +177,7 @@ describe('nullish()', () => {
 });
 
 describe('required()', () => {
-  const optionalSchema = ObjectType.create({})
+  const optionalSchema = ShapeSchema.create({})
     .optional()
     .nullable();
   const schema = optionalSchema.required();
@@ -193,8 +193,8 @@ describe('required()', () => {
 
 describe('map()', () => {
   test('returns a value from the `mapper` function', () => {
-    const schema = ObjectType.create({
-      foo: StringType.create(),
+    const schema = ShapeSchema.create({
+      foo: StringSchema.create(),
     }).map((obj) => JSON.stringify(obj));
     const value = { foo: 'bar' };
     expect(schema.parse(value)).toBe(JSON.stringify(value));
@@ -202,7 +202,7 @@ describe('map()', () => {
 
   test('rethrows any error from the `mapper` function', () => {
     const error = new ParseError('invalid_state', 'Invalid state.');
-    const schema = ObjectType.create({}).map(() => {
+    const schema = ShapeSchema.create({}).map(() => {
       throw error;
     });
     expect(() => schema.parse({})).toThrow(error);
@@ -212,9 +212,9 @@ describe('map()', () => {
 
 describe('onlyKnownProps()', () => {
   test("returns a passed object when it doesn't have unknown props", () => {
-    const schema = ObjectType.create({
-      a: NumberType.create().optional(),
-      b: NumberType.create().optional(),
+    const schema = ShapeSchema.create({
+      a: NumberSchema.create().optional(),
+      b: NumberSchema.create().optional(),
     }).onlyKnownProps();
     expect(schema.parse({})).toEqual({});
     expect(schema.parse({ a: 1 })).toEqual({ a: 1 });
@@ -222,9 +222,9 @@ describe('onlyKnownProps()', () => {
   });
 
   test('throws an error when the object has unknown properties', () => {
-    const schema = ObjectType.create({
-      a: NumberType.create().optional(),
-      b: NumberType.create().optional(),
+    const schema = ShapeSchema.create({
+      a: NumberSchema.create().optional(),
+      b: NumberSchema.create().optional(),
     }, { omitUnknownProps: false }).onlyKnownProps();
     expect(() => schema.parse({
       a: 1,
@@ -237,16 +237,16 @@ describe('onlyKnownProps()', () => {
     const message = 'must have only known props';
     const obj = { a: 'foo', b: 2 };
     expect(
-      () => ObjectType.create(
-        { a: StringType.create() },
+      () => ShapeSchema.create(
+        { a: StringSchema.create() },
         { omitUnknownProps: false }
       )
         .onlyKnownProps({ message })
         .parse(obj)
     ).toThrow(message);
     expect(
-      () => ObjectType.create(
-        { a: StringType.create() },
+      () => ShapeSchema.create(
+        { a: StringSchema.create() },
         { omitUnknownProps: false }
       )
         .onlyKnownProps({ message: () => message })
@@ -257,8 +257,8 @@ describe('onlyKnownProps()', () => {
 
 describe('custom()', () => {
   const propsSchema = {
-    a: NumberType.create(),
-    b: NumberType.create(),
+    a: NumberSchema.create(),
+    b: NumberSchema.create(),
   };
   const sumError = new ParseError('invalid_sum', 'Invalid sum');
   const validateSum = (value: { a: number, b: number }) => {
@@ -269,7 +269,7 @@ describe('custom()', () => {
   };
 
   test('returns a value from custom validator', () => {
-    const schema = ObjectType
+    const schema = ShapeSchema
       .create(propsSchema)
       .custom(validateSum);
     const obj = { a: 5, b: 5 };
@@ -279,7 +279,7 @@ describe('custom()', () => {
   test(
     "throws an error when a passed value doesn't pass custom validator",
     () => {
-      const schema = ObjectType
+      const schema = ShapeSchema
         .create(propsSchema)
         .custom(validateSum);
       expect(() => schema.parse({ a: 5, b: 3 })).toThrow(sumError);

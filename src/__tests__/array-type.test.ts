@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { ArrayType } from '../type-aliases/array-type.js';
-import { StringType } from '../type-aliases/string-type.js';
+import { ArraySchema } from '../type-schemas/array-schema.js';
+import { StringSchema } from '../type-schemas/string-schema.js';
 import { ParseError } from '../parse-error.js';
 import { format } from '../util.js';
 
@@ -10,7 +10,7 @@ describe('positive cases', () => {
     ['a'],
     ['a', 'b', 'c'],
   ];
-  const schema = ArrayType.create(StringType.create());
+  const schema = ArraySchema.create(StringSchema.create());
   valid.forEach((value) => {
     test(
       `should return ${format(value)} when value is ${format(value)}`,
@@ -29,7 +29,7 @@ describe('negative cases', () => {
     {},
     Symbol('Array'),
   ];
-  const schema = ArrayType.create(StringType.create());
+  const schema = ArraySchema.create(StringSchema.create());
   invalid.forEach((value) => {
     test(`should throw an error when value is ${format(value)}`, () => {
       expect(() => schema.parse(value)).toThrow(ParseError);
@@ -42,7 +42,7 @@ test(
   () => {
     const values = [[], 'a', 2, 'b', null, undefined];
     const invalidItemsCount = 4;
-    const schema = ArrayType.create(StringType.create());
+    const schema = ArraySchema.create(StringSchema.create());
 
     try {
       schema.parse(values);
@@ -61,7 +61,7 @@ test('validate and parses nested arrays', () => {
     ['a', 'b'],
     ['a', 2, 'c'],
   ];
-  const schema = ArrayType.create(ArrayType.create(StringType.create()));
+  const schema = ArraySchema.create(ArraySchema.create(StringSchema.create()));
 
   try {
     schema.parse(items);
@@ -79,7 +79,7 @@ test('validate and parses nested arrays', () => {
 });
 
 test('casts to array a passed value', () => {
-  const schema = ArrayType.create(StringType.create(), { cast: true });
+  const schema = ArraySchema.create(StringSchema.create(), { cast: true });
   expect(schema.parse(null)).toEqual([]);
   expect(schema.parse(undefined)).toEqual([]);
 });
@@ -87,7 +87,7 @@ test('casts to array a passed value', () => {
 test('throws errors with custom messages', () => {
   const requiredError = 'is required';
   const typeError = 'must be string';
-  const schema = ArrayType.create(StringType.create(), {
+  const schema = ArraySchema.create(StringSchema.create(), {
     requiredError,
     typeError,
   });
@@ -96,7 +96,7 @@ test('throws errors with custom messages', () => {
 });
 
 describe('optional()', () => {
-  const schema = ArrayType.create(StringType.create()).optional();
+  const schema = ArraySchema.create(StringSchema.create()).optional();
   test('returns undefined when a passed value is undefined', () => {
     expect(schema.parse(undefined)).toBe(undefined);
   });
@@ -107,7 +107,7 @@ describe('optional()', () => {
 });
 
 describe('nullable()', () => {
-  const schema = ArrayType.create(StringType.create()).nullable();
+  const schema = ArraySchema.create(StringSchema.create()).nullable();
 
   test('returns null when a passed value is null', () => {
     expect(schema.parse(null)).toBe(null);
@@ -119,7 +119,7 @@ describe('nullable()', () => {
 });
 
 describe('nullish()', () => {
-  const schema = ArrayType.create(StringType.create()).nullish();
+  const schema = ArraySchema.create(StringSchema.create()).nullish();
 
   test('returns null when a passed value is null', () => {
     expect(schema.parse(undefined)).toBe(undefined);
@@ -131,7 +131,7 @@ describe('nullish()', () => {
 });
 
 describe('required()', () => {
-  const optionalSchema = ArrayType.create(StringType.create())
+  const optionalSchema = ArraySchema.create(StringSchema.create())
     .optional()
     .nullable();
   const schema = optionalSchema.required();
@@ -148,7 +148,7 @@ describe('required()', () => {
 describe('map()', () => {
   test('returns a value from the `mapper` function', () => {
     const items = ['a', 'b', 'c'];
-    const schema = ArrayType.create(StringType.create()).map(
+    const schema = ArraySchema.create(StringSchema.create()).map(
       (items) => items.join()
     );
     expect(schema.parse(items)).toBe(items.join());
@@ -156,7 +156,7 @@ describe('map()', () => {
 
   test('rethrows any error from the `mapper` function', () => {
     const error = new ParseError('invalid_state', 'Invalid state.');
-    const schema = ArrayType.create(StringType.create()).map(() => {
+    const schema = ArraySchema.create(StringSchema.create()).map(() => {
       throw error;
     });
     expect(() => schema.parse([])).toThrow(error);
@@ -165,20 +165,22 @@ describe('map()', () => {
 
 describe('unique()', () => {
   test('returns a passed items when they are unique', () => {
-    const schema = ArrayType.create(StringType.create()).unique();
+    const schema = ArraySchema.create(StringSchema.create()).unique();
     const items = ['a', 'b', 'c'];
     expect(schema.parse(items)).toEqual(items);
   });
 
   test("throws an error when a passed items aren't unique", () => {
-    const schema = ArrayType.create(StringType.create()).unique();
+    const schema = ArraySchema.create(StringSchema.create()).unique();
     const items = ['a', 'b', 'a'];
     expect(() => schema.parse(items)).toThrow(ParseError);
   });
 
   test('throws an error with custom error message', () => {
     const message = 'not unique';
-    const schema = ArrayType.create(StringType.create()).unique({ message });
+    const schema = ArraySchema.create(
+      StringSchema.create()
+    ).unique({ message });
     const items = ['a', 'b', 'a'];
     expect(() => schema.parse(items)).toThrow(message);
   });
@@ -186,7 +188,7 @@ describe('unique()', () => {
 
 describe('length()', () => {
   test('returns a passed array when it has required length', () => {
-    const schema = ArrayType.create(StringType.create()).length(3);
+    const schema = ArraySchema.create(StringSchema.create()).length(3);
     const items = ['a', 'b', 'c'];
     expect(schema.parse(items)).toEqual(items);
   });
@@ -194,7 +196,7 @@ describe('length()', () => {
   test(
     "throws an error when a passed array doesn't have required length",
     () => {
-      const schema = ArrayType.create(StringType.create()).length(2);
+      const schema = ArraySchema.create(StringSchema.create()).length(2);
       const items = ['a', 'b', 'a'];
       expect(() => schema.parse(items)).toThrow(ParseError);
     }
@@ -204,12 +206,12 @@ describe('length()', () => {
     const message = 'must have length: 2';
     const items = ['a', 'b', 'a'];
     expect(
-      () => ArrayType.create(StringType.create())
+      () => ArraySchema.create(StringSchema.create())
         .length(2, { message })
         .parse(items)
     ).toThrow(message);
     expect(
-      () => ArrayType.create(StringType.create())
+      () => ArraySchema.create(StringSchema.create())
         .length(2, { message: () => message })
         .parse(items)
     ).toThrow(message);
@@ -218,13 +220,13 @@ describe('length()', () => {
 
 describe('maxItems()', () => {
   test('returns a passed array when it has length <= limit', () => {
-    const schema = ArrayType.create(StringType.create()).maxItems(3);
+    const schema = ArraySchema.create(StringSchema.create()).maxItems(3);
     expect(schema.parse(['a', 'b', 'c'])).toEqual(['a', 'b', 'c']);
     expect(schema.parse(['a', 'b'])).toEqual(['a', 'b']);
   });
 
   test('throws an error when a passed array length > limit', () => {
-    const schema = ArrayType.create(StringType.create()).maxItems(3);
+    const schema = ArraySchema.create(StringSchema.create()).maxItems(3);
     const items = ['a', 'b', 'c', 'd'];
     expect(() => schema.parse(items)).toThrow(ParseError);
   });
@@ -233,12 +235,12 @@ describe('maxItems()', () => {
     const message = 'must have at most 3 items';
     const items = ['a', 'b', 'c', 'd'];
     expect(
-      () => ArrayType.create(StringType.create())
+      () => ArraySchema.create(StringSchema.create())
         .maxItems(3, { message })
         .parse(items)
     ).toThrow(message);
     expect(
-      () => ArrayType.create(StringType.create())
+      () => ArraySchema.create(StringSchema.create())
         .maxItems(3, { message: () => message })
         .parse(items)
     ).toThrow(message);
@@ -247,13 +249,13 @@ describe('maxItems()', () => {
 
 describe('minItems()', () => {
   test('returns a passed array when it has length >= limit', () => {
-    const schema = ArrayType.create(StringType.create()).minItems(3);
+    const schema = ArraySchema.create(StringSchema.create()).minItems(3);
     expect(schema.parse(['a', 'b', 'c'])).toEqual(['a', 'b', 'c']);
     expect(schema.parse(['a', 'b', 'c', 'd'])).toEqual(['a', 'b', 'c', 'd']);
   });
 
   test('throws an error when a passed array length < limit', () => {
-    const schema = ArrayType.create(StringType.create()).minItems(3);
+    const schema = ArraySchema.create(StringSchema.create()).minItems(3);
     const items = ['a', 'b'];
     expect(() => schema.parse(items)).toThrow(ParseError);
   });
@@ -262,12 +264,12 @@ describe('minItems()', () => {
     const message = 'must have at least 3 items';
     const items = ['a', 'b'];
     expect(
-      () => ArrayType.create(StringType.create())
+      () => ArraySchema.create(StringSchema.create())
         .minItems(3, { message })
         .parse(items)
     ).toThrow(message);
     expect(
-      () => ArrayType.create(StringType.create())
+      () => ArraySchema.create(StringSchema.create())
         .minItems(3, { message: () => message })
         .parse(items)
     ).toThrow(message);
@@ -287,8 +289,8 @@ describe('custom()', () => {
   };
 
   test('returns a value from custom validator', () => {
-    const schema = ArrayType
-      .create(StringType.create())
+    const schema = ArraySchema
+      .create(StringSchema.create())
       .custom(validateArrayLength);
     const items = ['a', 'b', 'c'];
     expect(schema.parse(items)).toEqual(items);
@@ -297,8 +299,8 @@ describe('custom()', () => {
   test(
     "throws an error when a passed value doesn't pass custom validator",
     () => {
-      const schema = ArrayType
-        .create(StringType.create())
+      const schema = ArraySchema
+        .create(StringSchema.create())
         .custom(validateArrayLength);
       expect(() => schema.parse(['a', 'b'])).toThrow(lengthError);
     }
