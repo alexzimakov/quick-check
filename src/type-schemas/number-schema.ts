@@ -19,9 +19,10 @@ export type NumberParams = Pick<NumberSchemaOptions,
   | 'requiredError'>;
 
 export class NumberSchema<
-  Result,
+  Input,
+  Output,
   Cast extends boolean
-> extends AbstractSchema<number, Result> {
+> extends AbstractSchema<Input, Output> {
   protected readonly options: NumberSchemaOptions;
   protected readonly validators: NumberValidators;
   protected readonly mapper: ResultMapper | undefined;
@@ -51,6 +52,7 @@ export class NumberSchema<
 
   static create<Params extends NumberParams>(params?: Params): NumberSchema<
     number,
+    number,
     Params extends { cast: true } ? true : false> {
     return new NumberSchema({
       ...params,
@@ -60,7 +62,8 @@ export class NumberSchema<
   }
 
   optional(): NumberSchema<
-    Cast extends true ? Result : Result | undefined,
+    Input | undefined,
+    Cast extends true ? Output : Output | undefined,
     Cast> {
     return new NumberSchema(
       { ...this.options, isOptional: true },
@@ -70,7 +73,8 @@ export class NumberSchema<
   }
 
   nullable(): NumberSchema<
-    Cast extends true ? Result : Result | null,
+    Input | null,
+    Cast extends true ? Output : Output | null,
     Cast> {
     return new NumberSchema(
       { ...this.options, isNullable: true },
@@ -80,7 +84,8 @@ export class NumberSchema<
   }
 
   nullish(): NumberSchema<
-    Cast extends true ? Result : Result | null | undefined,
+    Input | null | undefined,
+    Cast extends true ? Output : Output | null | undefined,
     Cast> {
     return new NumberSchema(
       { ...this.options, isOptional: true, isNullable: true },
@@ -90,7 +95,8 @@ export class NumberSchema<
   }
 
   required(): NumberSchema<
-    Exclude<Result, null | undefined>,
+    Exclude<Input, null | undefined>,
+    Exclude<Output, null | undefined>,
     Cast> {
     return new NumberSchema(
       { ...this.options, isOptional: false, isNullable: false },
@@ -99,7 +105,10 @@ export class NumberSchema<
     );
   }
 
-  map<Mapped>(mapper: (value: number) => Mapped): NumberSchema<Mapped, Cast> {
+  map<Mapped>(mapper: (value: number) => Mapped): NumberSchema<
+    Input,
+    Mapped,
+    Cast> {
     return new NumberSchema(
       { ...this.options },
       { ...this.validators },
@@ -107,7 +116,10 @@ export class NumberSchema<
     );
   }
 
-  int(params?: { message?: string }): NumberSchema<Result, Cast> {
+  int(params?: { message?: string }): NumberSchema<
+    Input,
+    Output,
+    Cast> {
     let message: string;
     if (params?.message) {
       message = params.message;
@@ -130,7 +142,10 @@ export class NumberSchema<
     );
   }
 
-  positive(params?: { message?: string }): NumberSchema<Result, Cast> {
+  positive(params?: { message?: string }): NumberSchema<
+    Input,
+    Output,
+    Cast> {
     let message: string;
     if (params?.message) {
       message = params.message;
@@ -155,7 +170,10 @@ export class NumberSchema<
 
   min(min: number, params?: {
     message?: string | ((params: { min: number }) => string);
-  }): NumberSchema<Result, Cast> {
+  }): NumberSchema<
+    Input,
+    Output,
+    Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -186,7 +204,10 @@ export class NumberSchema<
 
   max(max: number, params?: {
     message?: string | ((params: { max: number }) => string);
-  }): NumberSchema<Result, Cast> {
+  }): NumberSchema<
+    Input,
+    Output,
+    Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -217,7 +238,10 @@ export class NumberSchema<
 
   greaterThan(min: number, params?: {
     message?: string | ((params: { min: number }) => string);
-  }): NumberSchema<Result, Cast> {
+  }): NumberSchema<
+    Input,
+    Output,
+    Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -248,7 +272,10 @@ export class NumberSchema<
 
   lessThan(max: number, params?: {
     message?: string | ((params: { max: number }) => string);
-  }): NumberSchema<Result, Cast> {
+  }): NumberSchema<
+    Input,
+    Output,
+    Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -277,7 +304,10 @@ export class NumberSchema<
     );
   }
 
-  custom(validator: NumberValidator): NumberSchema<Result, Cast> {
+  custom(validator: NumberValidator): NumberSchema<
+    Input,
+    Output,
+    Cast> {
     const code = NumberSchema.ErrorCodes.custom;
     return new NumberSchema(
       { ...this.options },
@@ -286,7 +316,7 @@ export class NumberSchema<
     );
   }
 
-  parse(value: unknown): Result;
+  parse(value: unknown): Output;
   parse(value: unknown): unknown {
     const ErrorCodes = NumberSchema.ErrorCodes;
     const options = this.options;

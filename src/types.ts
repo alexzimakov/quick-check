@@ -7,6 +7,6 @@ export type ObjectWithParams = { params: Record<string, unknown> };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ResultMapper = (value: any) => any;
 
-export type InputType<T extends AbstractSchema<unknown>> = T['__result'];
+export type InputType<T extends AbstractSchema<unknown>> = T['__input'];
 
-export type OutputType<T extends AbstractSchema<unknown>> = T['__mapped'];
+export type OutputType<T extends AbstractSchema<unknown>> = T['__output'];

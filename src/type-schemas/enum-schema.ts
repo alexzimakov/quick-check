@@ -16,8 +16,9 @@ export type EnumParams = Pick<EnumSchemaOptions,
 
 export class EnumSchema<
   Value,
-  Result,
-> extends AbstractSchema<Value, Result> {
+  Input,
+  Output,
+> extends AbstractSchema<Input, Output> {
   readonly values: readonly Value[];
   protected readonly options: EnumSchemaOptions;
   protected readonly mapper: ResultMapper | undefined;
@@ -41,7 +42,7 @@ export class EnumSchema<
   static create<Value, Params extends EnumParams>(
     values: readonly Value[],
     params?: Params
-  ): EnumSchema<Value, Value> {
+  ): EnumSchema<Value, Value, Value> {
     return new EnumSchema(values, {
       ...params,
       isOptional: false,
@@ -49,7 +50,10 @@ export class EnumSchema<
     }, undefined);
   }
 
-  optional(): EnumSchema<Value, Result | undefined> {
+  optional(): EnumSchema<
+    Value,
+    Input | undefined,
+    Output | undefined> {
     return new EnumSchema(
       this.values,
       { ...this.options, isOptional: true },
@@ -57,7 +61,10 @@ export class EnumSchema<
     );
   }
 
-  nullable(): EnumSchema<Value, Result | null> {
+  nullable(): EnumSchema<
+    Value,
+    Input | null,
+    Output | null> {
     return new EnumSchema(
       this.values,
       { ...this.options, isNullable: true },
@@ -65,7 +72,10 @@ export class EnumSchema<
     );
   }
 
-  nullish(): EnumSchema<Value, Result | null | undefined> {
+  nullish(): EnumSchema<
+    Value,
+    Input | null | undefined,
+    Output | null | undefined> {
     return new EnumSchema(
       this.values,
       { ...this.options, isOptional: true, isNullable: true },
@@ -73,7 +83,10 @@ export class EnumSchema<
     );
   }
 
-  required(): EnumSchema<Value, Exclude<Result, null | undefined>> {
+  required(): EnumSchema<
+    Value,
+    Exclude<Input, null | undefined>,
+    Exclude<Output, null | undefined>> {
     return new EnumSchema(
       this.values,
       { ...this.options, isOptional: false, isNullable: false },
@@ -81,11 +94,14 @@ export class EnumSchema<
     );
   }
 
-  map<Mapped>(mapper: (value: Value) => Mapped): EnumSchema<Value, Mapped> {
+  map<Mapped>(mapper: (value: Value) => Mapped): EnumSchema<
+    Value,
+    Input,
+    Mapped> {
     return new EnumSchema(this.values, { ...this.options }, mapper);
   }
 
-  parse(value: unknown): Result;
+  parse(value: unknown): Output;
   parse(value: unknown): unknown {
     const ErrorCodes = EnumSchema.ErrorCodes;
     const options = this.options;

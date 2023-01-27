@@ -20,9 +20,10 @@ export type ArrayParams = Pick<ArraySchemaOptions,
 
 export class ArraySchema<
   Items extends unknown[],
-  Result,
+  Input,
+  Output,
   Cast extends boolean
-> extends AbstractSchema<Items, Result> {
+> extends AbstractSchema<Input, Output> {
   protected readonly itemSchema: AbstractSchema<unknown>;
   protected readonly options: ArraySchemaOptions;
   protected readonly validators: ArrayValidators<Items>;
@@ -58,6 +59,7 @@ export class ArraySchema<
   ): ArraySchema<
     Item[],
     Item[],
+    Item[],
     Params extends { cast: true } ? true : false> {
     return new ArraySchema(
       itemSchema,
@@ -69,7 +71,8 @@ export class ArraySchema<
 
   optional(): ArraySchema<
     Items,
-    Cast extends true ? Result : Result | undefined,
+    Input | undefined,
+    Cast extends true ? Output : Output | undefined,
     Cast> {
     return new ArraySchema(
       this.itemSchema,
@@ -81,7 +84,8 @@ export class ArraySchema<
 
   nullable(): ArraySchema<
     Items,
-    Cast extends true ? Result : Result | null,
+    Input | null,
+    Cast extends true ? Output : Output | null,
     Cast> {
     return new ArraySchema(
       this.itemSchema,
@@ -93,7 +97,8 @@ export class ArraySchema<
 
   nullish(): ArraySchema<
     Items,
-    Cast extends true ? Result : Result | null | undefined,
+    Input | null | undefined,
+    Cast extends true ? Output : Output | null | undefined,
     Cast> {
     return new ArraySchema(
       this.itemSchema,
@@ -105,7 +110,8 @@ export class ArraySchema<
 
   required(): ArraySchema<
     Items,
-    Exclude<Result, null | undefined>,
+    Exclude<Input, null | undefined>,
+    Exclude<Output, null | undefined>,
     Cast> {
     return new ArraySchema(
       this.itemSchema,
@@ -117,6 +123,7 @@ export class ArraySchema<
 
   map<Mapped>(mapper: (value: Items) => Mapped): ArraySchema<
     Items,
+    Input,
     Mapped,
     Cast> {
     return new ArraySchema(
@@ -127,7 +134,11 @@ export class ArraySchema<
     );
   }
 
-  unique(params?: { message?: string }): ArraySchema<Items, Result, Cast> {
+  unique(params?: { message?: string }): ArraySchema<
+    Items,
+    Input,
+    Output,
+    Cast> {
     let message: string;
     if (params?.message) {
       message = params.message;
@@ -154,7 +165,7 @@ export class ArraySchema<
 
   length(limit: number, params?: {
     message?: string | ((params: { limit: number }) => string),
-  }): ArraySchema<Items, Result, Cast> {
+  }): ArraySchema<Items, Input, Output, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -186,7 +197,7 @@ export class ArraySchema<
 
   minItems(limit: number, params?: {
     message?: string | ((params: { limit: number }) => string),
-  }): ArraySchema<Items, Result, Cast> {
+  }): ArraySchema<Items, Input, Output, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -220,7 +231,7 @@ export class ArraySchema<
 
   maxItems(limit: number, params?: {
     message?: string | ((params: { limit: number }) => string),
-  }): ArraySchema<Items, Result, Cast> {
+  }): ArraySchema<Items, Input, Output, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -252,7 +263,11 @@ export class ArraySchema<
     );
   }
 
-  custom(validator: ArrayValidator<Items>): ArraySchema<Items, Result, Cast> {
+  custom(validator: ArrayValidator<Items>): ArraySchema<
+    Items,
+    Input,
+    Output,
+    Cast> {
     const code = ArraySchema.ErrorCodes.custom;
     return new ArraySchema(
       this.itemSchema,
@@ -262,7 +277,7 @@ export class ArraySchema<
     );
   }
 
-  parse(value: unknown): Result;
+  parse(value: unknown): Output;
   parse(value: unknown): unknown {
     const ErrorCodes = ArraySchema.ErrorCodes;
     const options = this.options;

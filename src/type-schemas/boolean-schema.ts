@@ -19,9 +19,10 @@ export type BooleanParams = Pick<BooleanSchemaOptions,
   | 'requiredError'>;
 
 export class BooleanSchema<
-  Result,
+  Input,
+  Output,
   Cast extends boolean
-> extends AbstractSchema<boolean, Result> {
+> extends AbstractSchema<Input, Output> {
   protected readonly options: BooleanSchemaOptions;
   protected readonly validators: BooleanValidators;
   protected readonly mapper: ResultMapper | undefined;
@@ -47,6 +48,7 @@ export class BooleanSchema<
 
   static create<Params extends BooleanParams>(params?: Params): BooleanSchema<
     boolean,
+    boolean,
     Params extends { cast: true } ? true : false> {
     return new BooleanSchema({
       ...params,
@@ -56,7 +58,8 @@ export class BooleanSchema<
   }
 
   optional(): BooleanSchema<
-    Cast extends true ? Result : Result | undefined,
+    Input | undefined,
+    Cast extends true ? Output : Output | undefined,
     Cast> {
     return new BooleanSchema(
       { ...this.options, isOptional: true },
@@ -66,7 +69,8 @@ export class BooleanSchema<
   }
 
   nullable(): BooleanSchema<
-    Cast extends true ? Result : Result | null,
+    Input | null,
+    Cast extends true ? Output : Output | null,
     Cast> {
     return new BooleanSchema(
       { ...this.options, isNullable: true },
@@ -76,7 +80,8 @@ export class BooleanSchema<
   }
 
   nullish(): BooleanSchema<
-    Cast extends true ? Result : Result | null | undefined,
+    Input | null | undefined,
+    Cast extends true ? Output : Output | null | undefined,
     Cast> {
     return new BooleanSchema(
       { ...this.options, isOptional: true, isNullable: true },
@@ -86,7 +91,8 @@ export class BooleanSchema<
   }
 
   required(): BooleanSchema<
-    Exclude<Result, null | undefined>,
+    Exclude<Input, null | undefined>,
+    Exclude<Output, null | undefined>,
     Cast> {
     return new BooleanSchema(
       { ...this.options, isOptional: false, isNullable: false },
@@ -95,7 +101,10 @@ export class BooleanSchema<
     );
   }
 
-  map<Mapped>(mapper: (value: boolean) => Mapped): BooleanSchema<Mapped, Cast> {
+  map<Mapped>(mapper: (value: boolean) => Mapped): BooleanSchema<
+    Input,
+    Mapped,
+    Cast> {
     return new BooleanSchema(
       { ...this.options },
       { ...this.validators },
@@ -103,7 +112,10 @@ export class BooleanSchema<
     );
   }
 
-  truthy(params?: { message?: string }): BooleanSchema<Result, Cast> {
+  truthy(params?: { message?: string }): BooleanSchema<
+    Input,
+    Output,
+    Cast> {
     let message: string;
     if (params?.message) {
       message = params.message;
@@ -126,7 +138,7 @@ export class BooleanSchema<
     );
   }
 
-  falsy(params?: { message?: string }): BooleanSchema<Result, Cast> {
+  falsy(params?: { message?: string }): BooleanSchema<Input, Output, Cast> {
     let message: string;
     if (params?.message) {
       message = params.message;
@@ -149,7 +161,7 @@ export class BooleanSchema<
     );
   }
 
-  custom(validator: BooleanValidator): BooleanSchema<Result, Cast> {
+  custom(validator: BooleanValidator): BooleanSchema<Input, Output, Cast> {
     const code = BooleanSchema.ErrorCodes.custom;
     return new BooleanSchema(
       { ...this.options },
@@ -158,7 +170,7 @@ export class BooleanSchema<
     );
   }
 
-  parse(value: unknown): Result;
+  parse(value: unknown): Output;
   parse(value: unknown): unknown {
     const ErrorCodes = BooleanSchema.ErrorCodes;
     const options = this.options;

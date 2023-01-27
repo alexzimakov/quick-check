@@ -22,9 +22,10 @@ export type StringParams = Pick<StringSchemaOptions,
   | 'requiredError'>;
 
 export class StringSchema<
-  Result,
+  Input,
+  Output,
   Cast extends boolean
-> extends AbstractSchema<string, Result> {
+> extends AbstractSchema<Input, Output> {
   protected readonly options: StringSchemaOptions;
   protected readonly validators: StringValidators;
   protected readonly mapper: ResultMapper | undefined;
@@ -52,6 +53,7 @@ export class StringSchema<
 
   static create<Params extends StringParams>(params?: Params): StringSchema<
     string,
+    string,
     Params extends { cast: true } ? true : false> {
     return new StringSchema({
       isOptional: false,
@@ -64,7 +66,8 @@ export class StringSchema<
   }
 
   optional(): StringSchema<
-    Cast extends true ? Result : Result | undefined,
+    Input | undefined,
+    Cast extends true ? Output : Output | undefined,
     Cast> {
     return new StringSchema(
       { ...this.options, isOptional: true },
@@ -74,7 +77,8 @@ export class StringSchema<
   }
 
   nullable(): StringSchema<
-    Cast extends true ? Result : Result | null,
+    Input | null,
+    Cast extends true ? Output : Output | null,
     Cast> {
     return new StringSchema(
       { ...this.options, isNullable: true },
@@ -84,7 +88,8 @@ export class StringSchema<
   }
 
   nullish(): StringSchema<
-    Cast extends true ? Result : Result | null | undefined,
+    Input | null | undefined,
+    Cast extends true ? Output : Output | null | undefined,
     Cast> {
     return new StringSchema(
       { ...this.options, isOptional: true, isNullable: true },
@@ -94,7 +99,8 @@ export class StringSchema<
   }
 
   required(): StringSchema<
-    Exclude<Result, null | undefined>,
+    Exclude<Input, null | undefined>,
+    Exclude<Output, null | undefined>,
     Cast> {
     return new StringSchema(
       { ...this.options, isOptional: false, isNullable: false },
@@ -103,7 +109,10 @@ export class StringSchema<
     );
   }
 
-  map<Mapped>(mapper: (value: string) => Mapped): StringSchema<Mapped, Cast> {
+  map<Mapped>(mapper: (value: string) => Mapped): StringSchema<
+    Input,
+    Mapped,
+    Cast> {
     return new StringSchema(
       { ...this.options },
       { ...this.validators },
@@ -111,7 +120,10 @@ export class StringSchema<
     );
   }
 
-  notEmpty(params?: { message?: string }): StringSchema<Result, Cast> {
+  notEmpty(params?: { message?: string }): StringSchema<
+    Input,
+    Output,
+    Cast> {
     let message: string;
     if (params?.message) {
       message = params.message;
@@ -136,7 +148,7 @@ export class StringSchema<
 
   minLength(limit: number, params?: {
     message?: string | ((params: { limit: number }) => string);
-  }): StringSchema<Result, Cast> {
+  }): StringSchema<Input, Output, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -169,7 +181,7 @@ export class StringSchema<
 
   maxLength(limit: number, params?: {
     message?: string | ((params: { limit: number }) => string);
-  }): StringSchema<Result, Cast> {
+  }): StringSchema<Input, Output, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -202,7 +214,7 @@ export class StringSchema<
 
   pattern(regex: RegExp, params?: {
     message?: string | ((params: { regex: RegExp }) => string);
-  }): StringSchema<Result, Cast> {
+  }): StringSchema<Input, Output, Cast> {
     let message: string;
     if (params?.message) {
       if (typeof params.message === 'function') {
@@ -231,7 +243,7 @@ export class StringSchema<
     );
   }
 
-  custom(validator: StringValidator): StringSchema<Result, Cast> {
+  custom(validator: StringValidator): StringSchema<Input, Output, Cast> {
     const code = StringSchema.ErrorCodes.custom;
     return new StringSchema(
       { ...this.options },
@@ -240,7 +252,7 @@ export class StringSchema<
     );
   }
 
-  parse(value: unknown): Result;
+  parse(value: unknown): Output;
   parse(value: unknown): unknown {
     const ErrorCodes = StringSchema.ErrorCodes;
     const options = this.options;

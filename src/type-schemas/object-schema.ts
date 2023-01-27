@@ -25,7 +25,11 @@ export type ObjectParams = Pick<ObjectSchemaOptions,
   | 'keyError'
   | 'valueError'>;
 
-export class ObjectSchema<Obj, Result> extends AbstractSchema<Obj, Result> {
+export class ObjectSchema<
+  Obj,
+  Input,
+  Output
+> extends AbstractSchema<Input, Output> {
   protected readonly options: ObjectSchemaOptions;
   protected readonly mapper: ResultMapper | undefined;
 
@@ -50,6 +54,7 @@ export class ObjectSchema<Obj, Result> extends AbstractSchema<Obj, Result> {
     Value extends AbstractSchema<unknown>
   >(valueSchema: Value, params?: ObjectParams): ObjectSchema<
     Record<string, OutputType<Value>>,
+    Record<string, OutputType<Value>>,
     Record<string, OutputType<Value>>
   >;
 
@@ -57,6 +62,7 @@ export class ObjectSchema<Obj, Result> extends AbstractSchema<Obj, Result> {
     Value extends AbstractSchema<unknown>,
     Key extends AbstractSchema<string>,
   >(valueSchema: Value, keySchema: Key, params?: ObjectParams): ObjectSchema<
+    Record<OutputType<Key>, OutputType<Value>>,
     Record<OutputType<Key>, OutputType<Value>>,
     Record<OutputType<Key>, OutputType<Value>>
   >;
@@ -86,21 +92,30 @@ export class ObjectSchema<Obj, Result> extends AbstractSchema<Obj, Result> {
     }, undefined);
   }
 
-  optional(): ObjectSchema<Obj, Result | undefined> {
+  optional(): ObjectSchema<
+    Obj,
+    Input | undefined,
+    Output | undefined> {
     return new ObjectSchema(
       { ...this.options, isOptional: true },
       this.mapper
     );
   }
 
-  nullable(): ObjectSchema<Obj, Result | null> {
+  nullable(): ObjectSchema<
+    Obj,
+    Input | null,
+    Output | null> {
     return new ObjectSchema(
       { ...this.options, isNullable: true },
       this.mapper
     );
   }
 
-  nullish(): ObjectSchema<Obj, Result | null | undefined> {
+  nullish(): ObjectSchema<
+    Obj,
+    Input | null | undefined,
+    Output | null | undefined> {
     return new ObjectSchema(
       { ...this.options, isOptional: true, isNullable: true },
       this.mapper
@@ -109,8 +124,8 @@ export class ObjectSchema<Obj, Result> extends AbstractSchema<Obj, Result> {
 
   required(params?: { message: string }): ObjectSchema<
     Obj,
-    Exclude<Result, null | undefined>
-  > {
+    Exclude<Input, null | undefined>,
+    Exclude<Output, null | undefined>> {
     return new ObjectSchema({
       ...this.options,
       isOptional: false,
@@ -119,11 +134,14 @@ export class ObjectSchema<Obj, Result> extends AbstractSchema<Obj, Result> {
     }, this.mapper);
   }
 
-  map<Mapped>(mapper: (value: Obj) => Mapped): ObjectSchema<Obj, Mapped> {
+  map<Mapped>(mapper: (value: Obj) => Mapped): ObjectSchema<
+    Obj,
+    Input,
+    Mapped> {
     return new ObjectSchema({ ...this.options }, mapper);
   }
 
-  parse(value: unknown): Result;
+  parse(value: unknown): Output;
   parse(value: unknown): unknown {
     const ErrorCodes = ObjectSchema.ErrorCodes;
     const options = this.options;

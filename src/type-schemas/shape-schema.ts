@@ -23,8 +23,8 @@ export type ShapeParams = Pick<ShapeSchemaOptions,
   | 'requiredError'>;
 
 export class ShapeSchema<
-  Input extends { [key: string]: unknown },
   Props extends { [key: string]: unknown },
+  Input,
   Result,
   Cast extends boolean
 > extends AbstractSchema<Input, Result> {
@@ -58,8 +58,8 @@ export class ShapeSchema<
     Schema extends PropsSchema,
     Params extends ShapeParams
   >(propsSchema: Schema, params?: Params): ShapeSchema<
-    { [P in keyof Schema]: InputType<Schema[P]> },
     { [P in keyof Schema]: OutputType<Schema[P]> },
+    { [P in keyof Schema]: InputType<Schema[P]> },
     { [P in keyof Schema]: OutputType<Schema[P]> },
     Params extends { cast: true } ? true : false> {
     return new ShapeSchema(
@@ -76,8 +76,8 @@ export class ShapeSchema<
   }
 
   optional(): ShapeSchema<
-    Input,
     Props,
+    Input | undefined,
     Cast extends true ? Result : Result | undefined,
     Cast> {
     return new ShapeSchema(
@@ -89,8 +89,8 @@ export class ShapeSchema<
   }
 
   nullable(): ShapeSchema<
-    Input,
     Props,
+    Input | null,
     Cast extends true ? Result : Result | null,
     Cast> {
     return new ShapeSchema(
@@ -102,8 +102,8 @@ export class ShapeSchema<
   }
 
   nullish(): ShapeSchema<
-    Input,
     Props,
+    Input | null | undefined,
     Cast extends true ? Result : Result | null | undefined,
     Cast> {
     return new ShapeSchema(
@@ -115,8 +115,8 @@ export class ShapeSchema<
   }
 
   required(): ShapeSchema<
-    Input,
     Props,
+    Exclude<Input, null | undefined>,
     Exclude<Result, null | undefined>,
     Cast> {
     return new ShapeSchema(
@@ -128,8 +128,8 @@ export class ShapeSchema<
   }
 
   map<Mapped>(mapper: (value: Props) => Mapped): ShapeSchema<
-    Input,
     Props,
+    Input,
     Mapped,
     Cast> {
     return new ShapeSchema(
@@ -142,7 +142,11 @@ export class ShapeSchema<
 
   onlyKnownProps(params?: {
     message?: string | ((params: { unknownProps: string[] }) => string)
-  }): ShapeSchema<Input, Props, Result, Cast> {
+  }): ShapeSchema<
+    Props,
+    Input,
+    Result,
+    Cast> {
     const code = ShapeSchema.ErrorCodes.unknownProps;
     const validator: ObjectValidator<Props> = (props) => {
       const allowedProps: Record<string, true> = {};
@@ -187,8 +191,8 @@ export class ShapeSchema<
   }
 
   custom(validator: ObjectValidator<Props>): ShapeSchema<
-    Input,
     Props,
+    Input,
     Result,
     Cast> {
     const code = ShapeSchema.ErrorCodes.custom;

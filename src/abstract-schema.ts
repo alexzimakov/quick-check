@@ -1,17 +1,26 @@
-export abstract class AbstractSchema<Result, Mapped = Result> {
-  readonly __result!: Result;
-  readonly __mapped!: Mapped;
+export abstract class AbstractSchema<Input, Output = Input> {
+  readonly __input!: Input;
+  readonly __output!: Output;
 
-  abstract parse(value: unknown): Mapped;
+  abstract parse(value: unknown): Output;
 
-  abstract optional(): AbstractSchema<Result, Mapped | undefined>;
+  abstract optional(): AbstractSchema<
+    Input | undefined,
+    Output | undefined
+  >;
 
-  abstract nullable(): AbstractSchema<Result, Mapped | null>;
+  abstract nullable(): AbstractSchema<
+    Input | null,
+    Output | null
+  >;
 
-  abstract nullish(): AbstractSchema<Result, Mapped | null | undefined>;
+  abstract nullish(): AbstractSchema<
+    Input | null | undefined,
+    Output | null | undefined
+  >;
 
   abstract required(params?: { message: string }): AbstractSchema<
-    Result,
-    Exclude<Mapped, null | undefined>
+    Exclude<Input, null | undefined>,
+    Exclude<Output, null | undefined>
   >;
 }
