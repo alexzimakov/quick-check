@@ -13,7 +13,6 @@ type ObjectSchemaOptions = {
   isNullable: boolean;
   typeError?: string;
   requiredError?: string;
-  missingKeyError?: string | KeyErrorFormatter;
   keyError?: string | KeyErrorFormatter;
   valueError?: string | ValueErrorFormatter;
 };
@@ -21,7 +20,6 @@ type ObjectSchemaOptions = {
 export type ObjectParams = Pick<ObjectSchemaOptions,
   | 'typeError'
   | 'requiredError'
-  | 'missingKeyError'
   | 'keyError'
   | 'valueError'>;
 
@@ -47,24 +45,32 @@ export class ObjectSchema<
     required: 'OBJECT_REQUIRED',
     invalidKey: 'OBJECT_KEY_INVALID',
     invalidValue: 'OBJECT_VALUE_INVALID',
-    missingKey: 'OBJECT_MISSING_KEY',
   };
 
   static create<
     Value extends AbstractSchema<unknown>
   >(valueSchema: Value, params?: ObjectParams): ObjectSchema<
-    Record<string, OutputType<Value>>,
-    Record<string, OutputType<Value>>,
-    Record<string, OutputType<Value>>
+    { [key: string]: OutputType<Value> },
+    { [key: string]: OutputType<Value> },
+    { [key: string]: OutputType<Value> }
+  >;
+
+  static create<
+    Value extends AbstractSchema<unknown>,
+    Key extends EnumSchema<unknown, unknown, string | number | symbol>,
+  >(valueSchema: Value, keySchema: Key, params?: ObjectParams): ObjectSchema<
+    { [key in OutputType<Key>]?: OutputType<Value> },
+    { [key in OutputType<Key>]?: OutputType<Value> },
+    { [key in OutputType<Key>]?: OutputType<Value> }
   >;
 
   static create<
     Value extends AbstractSchema<unknown>,
     Key extends AbstractSchema<string>,
   >(valueSchema: Value, keySchema: Key, params?: ObjectParams): ObjectSchema<
-    Record<OutputType<Key>, OutputType<Value>>,
-    Record<OutputType<Key>, OutputType<Value>>,
-    Record<OutputType<Key>, OutputType<Value>>
+    { [key in OutputType<Key>]: OutputType<Value> },
+    { [key in OutputType<Key>]: OutputType<Value> },
+    { [key in OutputType<Key>]: OutputType<Value> }
   >;
 
   static create(
@@ -171,29 +177,6 @@ export class ObjectSchema<
     const res = { ...value };
     const keySchema = options.keySchema;
     const valueSchema = options.valueSchema;
-
-    // noinspection SuspiciousTypeOfGuard
-    if (keySchema && keySchema instanceof EnumSchema) {
-      for (const value of keySchema.values) {
-        if (!(value in res)) {
-          const code = ErrorCodes.missingKey;
-          const params = { key: value };
-
-          let message: string;
-          if (options.missingKeyError) {
-            if (typeof options.missingKeyError === 'function') {
-              message = options.missingKeyError(params);
-            } else {
-              message = options.missingKeyError;
-            }
-          } else {
-            message = `The object must contain the key '${value}'`;
-          }
-
-          throw new ParseError(code, message, { params });
-        }
-      }
-    }
 
     for (const key of Object.keys(res)) {
       const value = res[key];

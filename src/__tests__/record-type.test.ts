@@ -80,25 +80,13 @@ test('should validate enum keys', () => {
   expect(() => schema.parse({
     north: 1,
     south: 2,
-    east: 3,
-  })).toThrow(ParseError);
-});
-
-test('checks that an object contains all keys from `EnumType`', () => {
-  const keys = ['north', 'south', 'east', 'west'] as const;
-  const schema = ObjectSchema.create(
-    NumberSchema.create().int(),
-    EnumSchema.create(keys)
-  );
-  expect(() => schema.parse({
-    north: 1,
-    south: 2,
-    west: 4,
+    _east: 3,
   })).toThrow(ParseError);
 });
 
 test('throws errors with custom messages', () => {
   let schema: ObjectSchema<
+    unknown,
     Record<string, number>,
     Record<string, number>
   >;
@@ -132,25 +120,6 @@ test('throws errors with custom messages', () => {
   );
   expect(() => schema.parse({ z: 0 })).toThrow(keyError);
   expect(() => schema.parse({ zero: '0' })).toThrow(valueError);
-
-  const missingKeyError = 'must contain all keys';
-  schema = ObjectSchema.create(
-    NumberSchema.create(),
-    EnumSchema.create(['north', 'south', 'east', 'west'] as const),
-    { missingKeyError }
-  );
-  expect(() => schema.parse({})).toThrow(missingKeyError);
-
-  schema = ObjectSchema.create(
-    NumberSchema.create(),
-    EnumSchema.create(['north', 'south', 'east', 'west'] as const),
-    { missingKeyError: () => missingKeyError }
-  );
-  expect(() => schema.parse({
-    north: 1,
-    south: 2,
-    east: 3,
-  })).toThrow(missingKeyError);
 });
 
 describe('optional()', () => {
