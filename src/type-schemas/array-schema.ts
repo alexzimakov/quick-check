@@ -1,4 +1,4 @@
-import { type ResultMapper } from '../types.js';
+import { type InputType, type OutputType, type ResultMapper } from '../types.js';
 import { AbstractSchema } from '../abstract-schema.js';
 import { ParseError } from '../parse-error.js';
 import { pluralize } from '../util.js';
@@ -53,13 +53,16 @@ export class ArraySchema<
     custom: 'ARRAY_CUSTOM',
   } as const;
 
-  static create<Item, Params extends ArrayParams>(
-    itemSchema: AbstractSchema<Item>,
+  static create<
+    Item extends AbstractSchema<unknown>,
+    Params extends ArrayParams
+  >(
+    itemSchema: Item,
     params?: Params
   ): ArraySchema<
-    Item[],
-    Item[],
-    Item[],
+    InputType<Item>[],
+    InputType<Item>[],
+    OutputType<Item>[],
     Params extends { cast: true } ? true : false> {
     return new ArraySchema(
       itemSchema,
