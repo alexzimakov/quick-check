@@ -6,6 +6,7 @@ import { EnumSchema } from './type-schemas/enum-schema.js';
 import { ArraySchema } from './type-schemas/array-schema.js';
 import { ShapeSchema } from './type-schemas/shape-schema.js';
 import { ObjectSchema } from './type-schemas/object-schema.js';
+import { UnknownTypeSchema } from './type-schemas/unknown-type-schema.js';
 
 const StringErrorCodes = StringSchema.ErrorCodes;
 const NumberErrorCodes = NumberSchema.ErrorCodes;
@@ -14,6 +15,7 @@ const ArrayErrorCodes = ArraySchema.ErrorCodes;
 const ObjectErrorCodes = ObjectSchema.ErrorCodes;
 const EnumErrorCodes = EnumSchema.ErrorCodes;
 const ShapeErrorCodes = ShapeSchema.ErrorCodes;
+const UnknownTypeErrorCodes = UnknownTypeSchema.ErrorCodes;
 
 const stringFactory = StringSchema.create;
 const numberFactory = NumberSchema.create;
@@ -22,6 +24,7 @@ const arrayFactory = ArraySchema.create;
 const objectFactory = ObjectSchema.create;
 const enumFactory = EnumSchema.create;
 const shapeFactory = ShapeSchema.create;
+const unknownFactory = UnknownTypeSchema.create;
 
 // noinspection ReservedWordAsName
 export {
@@ -38,6 +41,7 @@ export {
   ArrayErrorCodes,
   ShapeErrorCodes,
   ObjectErrorCodes,
+  UnknownTypeErrorCodes,
 
   // Public methods
   stringFactory as string,
@@ -47,4 +51,5 @@ export {
   objectFactory as object,
   enumFactory as enum,
   shapeFactory as shape,
+  unknownFactory as unknown,
 };
