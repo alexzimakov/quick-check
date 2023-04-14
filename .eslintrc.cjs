@@ -15,6 +15,10 @@ module.exports = {
       parser: '@typescript-eslint/parser',
       plugins: ['@typescript-eslint'],
       extends: ['plugin:@typescript-eslint/recommended'],
-    }
-  ]
+      rules: {
+        'no-use-before-define': 'off',
+        'no-useless-constructor': 'off',
+      },
+    },
+  ],
 };

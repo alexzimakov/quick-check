@@ -7,9 +7,9 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./types/index.d.ts",
-      "import": "./esm/index.js",
-      "require": "./cjs/index.cjs"
+      "types": "./types/safe-data.d.ts",
+      "import": "./esm/safe-data.js",
+      "require": "./cjs/safe-data.cjs"
     }
   },
   "files": [
@@ -17,9 +17,9 @@
     "./esm",
     "./cjs"
   ],
-  "types": "./types/index.d.ts",
-  "module": "./esm/index.js",
-  "main": "./cjs/index.cjs",
+  "types": "./types/safe-data.d.ts",
+  "module": "./esm/safe-data.js",
+  "main": "./cjs/safe-data.cjs",
   "scripts": {
     "prepare": "husky install",
     "preversion": "npm run build",
@@ -57,17 +57,17 @@
     "*.ts": "eslint --fix"
   },
   "devDependencies": {
-    "@alexzimakov/eslint-config": "1.0.0",
-    "@rollup/plugin-typescript": "11.0.0",
-    "@typescript-eslint/eslint-plugin": "5.48.1",
-    "@typescript-eslint/parser": "5.48.1",
-    "@vitest/coverage-c8": "0.27.1",
-    "eslint": "8.31.0",
+    "@alexzimakov/eslint-config": "1.5.0",
+    "@rollup/plugin-typescript": "11.1.0",
+    "@typescript-eslint/eslint-plugin": "5.58.0",
+    "@typescript-eslint/parser": "5.58.0",
+    "@vitest/coverage-istanbul": "0.30.1",
+    "eslint": "8.38.0",
     "husky": "8.0.3",
-    "lint-staged": "13.1.0",
-    "rollup": "3.10.0",
+    "lint-staged": "13.2.1",
+    "rollup": "3.20.2",
     "rollup-plugin-delete": "2.0.0",
-    "typescript": "4.9.4",
-    "vitest": "0.27.1"
+    "typescript": "4.9.5",
+    "vitest": "0.30.1"
   }
 }

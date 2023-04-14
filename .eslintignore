@@ -2,3 +2,4 @@
 /esm
 /cjs
 /coverage
+!.eslintrc.cjs

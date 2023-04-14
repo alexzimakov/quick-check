@@ -5,7 +5,7 @@ export default defineConfig({
     include: ['src/**/*.test.ts'],
     environment: 'node',
     coverage: {
-      provider: 'c8',
+      provider: 'istanbul',
     },
   },
 });
