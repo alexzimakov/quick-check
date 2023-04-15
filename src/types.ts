@@ -1,3 +1,6 @@
+import { ResultTransformer } from './result-transformer.js';
+import { NullishModifier, OptionalModifier } from './result-modifier.js';
+
 export interface TypeSchema<Type> {
   validate(value: unknown): Type;
 }
@@ -28,3 +31,15 @@ export type WithOptionalAttrs<T extends object> = PrettyType<{
 export type InferOutput<T> = T extends TypeSchema<infer R>
   ? R
   : never;
+
+export type InferInput<T> = T extends NullishModifier<infer R>
+  ? InferInput<R> | null | undefined
+  : T extends NullishModifier<infer R>
+    ? InferInput<R> | null
+    : T extends OptionalModifier<infer R>
+      ? InferInput<R> | undefined
+      : T extends ResultTransformer<infer R, unknown>
+        ? InferInput<R>
+        : T extends TypeSchema<infer R>
+          ? R
+          : never;
