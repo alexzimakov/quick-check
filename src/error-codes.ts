@@ -14,4 +14,5 @@ export const errorCodes = {
   stringTooShort: 'string_too_short',
   stringPattern: 'string_pattern',
   numberTooSmall: 'number_too_small',
+  numberTooLarge: 'number_too_large',
 };
