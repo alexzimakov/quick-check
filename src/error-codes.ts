@@ -4,4 +4,5 @@ export const errorCodes = {
   invalidEnum: 'invalid_enum',
   invalidArrayItems: 'invalid_array_items',
   invalidObject: 'invalid_object',
+  invalidObjectShape: 'invalid_object_shape',
 };
