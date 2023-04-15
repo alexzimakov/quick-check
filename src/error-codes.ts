@@ -17,4 +17,5 @@ export const errorCodes = {
   numberTooSmall: 'number_too_small',
   numberTooLarge: 'number_too_large',
   numberOutOfRange: 'number_out_of_range',
+  arrayTooShort: 'array_too_short',
 };
