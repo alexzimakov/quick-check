@@ -1,12 +1,10 @@
-import { AbstractSchema } from './abstract-schema.js';
-
-export type ObjectWithMessage = { message: string };
-export type ObjectWithCode = { code: string };
-export type ObjectWithParams = { params: Record<string, unknown> };
+export interface TypeSchema<Type> {
+  validate(value: unknown): Type;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ResultMapper = (value: any) => any;
+export type AnySchema = TypeSchema<any>;
 
-export type InputType<T extends AbstractSchema<unknown>> = T['__input'];
-
-export type OutputType<T extends AbstractSchema<unknown>> = T['__output'];
+export type InferOutput<T> = T extends TypeSchema<infer R>
+  ? R
+  : never;
