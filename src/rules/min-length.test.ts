@@ -1,5 +1,5 @@
-import { minLength } from './min-length.js';
 import { describe, expect, test, vi } from 'vitest';
+import { minLength } from './min-length.js';
 
 describe('positive cases', () => {
   const checkMinLength = minLength(2);

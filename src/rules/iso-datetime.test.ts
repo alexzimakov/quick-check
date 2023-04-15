@@ -1,5 +1,5 @@
-import { isoDatetime } from './iso-datetime.js';
 import { describe, expect, test, vi } from 'vitest';
+import { isoDatetime } from './iso-datetime.js';
 
 const validDates = [
   '2010',

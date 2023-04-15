@@ -1,5 +1,5 @@
-import { pattern } from './pattern.js';
 import { describe, expect, test, vi } from 'vitest';
+import { pattern } from './pattern.js';
 
 describe('positive cases', () => {
   const checkPattern = pattern(/^\d+$/);

@@ -1,5 +1,5 @@
-import { isoTime } from './iso-time.js';
 import { describe, expect, test, vi } from 'vitest';
+import { isoTime } from './iso-time.js';
 
 describe('positive cases', () => {
   const checkISOTime = isoTime();

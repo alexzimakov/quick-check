@@ -1,5 +1,5 @@
-import { maxLength } from './max-length.js';
 import { describe, expect, test, vi } from 'vitest';
+import { maxLength } from './max-length.js';
 
 describe('positive cases', () => {
   const checkMaxLength = maxLength(2);

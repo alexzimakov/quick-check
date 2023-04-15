@@ -1,5 +1,5 @@
-import { isoDate } from './iso-date.js';
 import { describe, expect, test, vi } from 'vitest';
+import { isoDate } from './iso-date.js';
 
 describe('positive cases', () => {
   const checkISODate = isoDate();

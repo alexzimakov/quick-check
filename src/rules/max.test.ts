@@ -1,5 +1,5 @@
-import { max } from './max.js';
 import { describe, expect, test, vi } from 'vitest';
+import { max } from './max.js';
 
 describe('positive cases', () => {
   const checkMax = max(5);

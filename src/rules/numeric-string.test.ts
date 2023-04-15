@@ -1,5 +1,5 @@
-import { numericString } from './numeric-string.js';
 import { describe, expect, test, vi } from 'vitest';
+import { numericString } from './numeric-string.js';
 
 describe('positive cases', () => {
   const checkNumericString = numericString();

@@ -1,5 +1,5 @@
-import { maxItems } from './max-items.js';
 import { describe, expect, test, vi } from 'vitest';
+import { maxItems } from './max-items.js';
 
 describe('positive cases', () => {
   const checkMaxItems = maxItems(2);

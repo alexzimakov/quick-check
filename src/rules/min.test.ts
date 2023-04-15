@@ -1,5 +1,5 @@
-import { min } from './min.js';
 import { describe, expect, test, vi } from 'vitest';
+import { min } from './min.js';
 
 describe('positive cases', () => {
   const checkMin = min(2);
