@@ -6,4 +6,5 @@ export const errorCodes = {
   invalidObject: 'invalid_object',
   invalidObjectShape: 'invalid_object_shape',
   invalidUnion: 'invalid_union',
+  stringPattern: 'string_pattern',
 };
