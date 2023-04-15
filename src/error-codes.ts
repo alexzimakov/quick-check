@@ -11,11 +11,12 @@ export const errorCodes = {
   invalidISOTime: 'invalid_iso_time',
   invalidISODatetime: 'invalid_iso_datetime',
   invalidNumericString: 'invalid_numeric_string',
-  stringTooLong: 'string_too_long',
   stringTooShort: 'string_too_short',
+  stringTooLong: 'string_too_long',
   stringPattern: 'string_pattern',
   numberTooSmall: 'number_too_small',
   numberTooLarge: 'number_too_large',
   numberOutOfRange: 'number_out_of_range',
   arrayTooShort: 'array_too_short',
+  arrayTooLong: 'array_too_long',
 };
