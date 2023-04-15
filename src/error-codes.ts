@@ -7,6 +7,7 @@ export const errorCodes = {
   invalidObjectShape: 'invalid_object_shape',
   invalidUnion: 'invalid_union',
   invalidISODate: 'invalid_iso_date',
+  invalidISOTime: 'invalid_iso_time',
   invalidNumericString: 'invalid_numeric_string',
   stringTooLong: 'string_too_long',
   stringTooShort: 'string_too_short',
