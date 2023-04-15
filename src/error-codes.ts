@@ -15,4 +15,5 @@ export const errorCodes = {
   stringPattern: 'string_pattern',
   numberTooSmall: 'number_too_small',
   numberTooLarge: 'number_too_large',
+  numberOutOfRange: 'number_out_of_range',
 };
