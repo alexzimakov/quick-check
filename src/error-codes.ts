@@ -8,6 +8,7 @@ export const errorCodes = {
   invalidUnion: 'invalid_union',
   invalidISODate: 'invalid_iso_date',
   invalidISOTime: 'invalid_iso_time',
+  invalidISODatetime: 'invalid_iso_datetime',
   invalidNumericString: 'invalid_numeric_string',
   stringTooLong: 'string_too_long',
   stringTooShort: 'string_too_short',
