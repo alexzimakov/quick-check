@@ -5,6 +5,9 @@
   "homepage": "https://github.com/alexzimakov/safe-data#readme",
   "license": "MIT",
   "type": "module",
+  "main": "./cjs/safe-data.cjs",
+  "module": "./esm/safe-data.js",
+  "types": "./types/safe-data.d.ts",
   "exports": {
     ".": {
       "types": "./types/safe-data.d.ts",
@@ -17,9 +20,6 @@
     "./esm",
     "./cjs"
   ],
-  "types": "./types/safe-data.d.ts",
-  "module": "./esm/safe-data.js",
-  "main": "./cjs/safe-data.cjs",
   "scripts": {
     "prepare": "husky install",
     "preversion": "npm run build",
