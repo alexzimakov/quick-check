@@ -17,7 +17,7 @@ export class ResultTransformer<
     this._transform = transformer;
   }
 
-  get initialType(): T {
+  get sourceSchema(): T {
     return this._schema;
   }
 

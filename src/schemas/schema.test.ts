@@ -152,7 +152,7 @@ testCases.forEach(([schema, value]) => {
       const transformedSchema = schema.transform(transform);
 
       test('returns wrapped schema', () => {
-        expect(transformedSchema.initialType).toBe(schema);
+        expect(transformedSchema.sourceSchema).toBe(schema);
       });
 
       test('should transform value after success validation', () => {
@@ -180,7 +180,7 @@ testCases.forEach(([schema, value]) => {
       test('should create new transformed schema', () => {
         const newTransformedSchema = transformedSchema.transform(transform);
         expect(newTransformedSchema).toBeInstanceOf(ResultTransformer);
-        expect(newTransformedSchema.initialType).toBe(transformedSchema);
+        expect(newTransformedSchema.sourceSchema).toBe(transformedSchema);
       });
     });
 
