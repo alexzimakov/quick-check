@@ -3,6 +3,7 @@ import { ValidationError, ValidationErrorOptions } from './validation-error.js';
 import { errorCodes } from './error-codes.js';
 import {
   ArraySchemaOptions,
+  BigIntSchemaOptions,
   BooleanSchemaOptions,
   EnumSchemaOptions,
   InstanceSchemaOptions,
@@ -12,6 +13,7 @@ import {
   StringSchemaOptions,
   UnionSchemaOptions,
   createArraySchema,
+  createBigIntSchema,
   createBooleanSchema,
   createEnumSchema,
   createInstanceSchema,
@@ -40,6 +42,7 @@ import {
 const schema = {
   boolean: createBooleanSchema,
   number: createNumberSchema,
+  bigint: createBigIntSchema,
   string: createStringSchema,
   enum: createEnumSchema,
   array: createArraySchema,
@@ -76,6 +79,7 @@ export {
   type ValidationErrorOptions,
   type BooleanSchemaOptions,
   type NumberSchemaOptions,
+  type BigIntSchemaOptions,
   type StringSchemaOptions,
   type EnumSchemaOptions,
   type ArraySchemaOptions,

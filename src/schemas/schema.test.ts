@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { createStringSchema } from './string-schema.js';
 import { createNumberSchema } from './number-schema.js';
+import { createBigIntSchema } from './bigint-schema.js';
 import { createBooleanSchema } from './boolean-schema.js';
 import { createEnumSchema } from './enum-schema.js';
 import { createArraySchema } from './array-schema.js';
@@ -18,6 +19,7 @@ const rules = [ruleA, ruleB];
 const testCases = [
   [createStringSchema({ rules }), 'lorem ipsum'],
   [createNumberSchema({ rules }), 10],
+  [createBigIntSchema({ rules }), 10n],
   [createBooleanSchema({ rules }), true],
   [createEnumSchema(['a', 'b', 'c'], { rules }), 'a'],
   [createArraySchema({ rules }), [1, 2, 3]],

@@ -8,6 +8,10 @@ export {
   type NumberSchemaOptions,
 } from './number-schema.js';
 export {
+  createBigIntSchema,
+  type BigIntSchemaOptions,
+} from './bigint-schema.js';
+export {
   createStringSchema,
   type StringSchemaOptions,
 } from './string-schema.js';
