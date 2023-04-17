@@ -2,31 +2,39 @@ import { describe, expect, test, vi } from 'vitest';
 import { max } from './max.js';
 
 describe('positive cases', () => {
-  const checkMax = max(5);
-  const positiveCases = [
-    0,
-    2.5,
-    5,
-    -5,
-    -Infinity,
+  const positiveCases = [3n, 0, 2.5, 5, 5n, -5, -Infinity];
+  const limits: [string, number | bigint][] = [
+    ['number', 5],
+    ['bigint', 5n],
   ];
-  positiveCases.forEach((input) => {
-    test(`max(${input}) does not throw an error`, () => {
-      expect(() => checkMax(input)).not.toThrow();
+  limits.forEach(([type, limit]) => {
+    describe(type, () => {
+      const checkMax = max(limit);
+      positiveCases.forEach((value) => {
+        const arg = typeof value === 'bigint' ? `${value}n` : value;
+        test(`max(${arg}) does not throw an error`, () => {
+          expect(() => checkMax(value)).not.toThrow();
+        });
+      });
     });
   });
 });
 
 describe('negative cases', () => {
-  const checkMax = max(5);
-  const negativeCases = [
-    NaN,
-    Infinity,
-    6,
+  const negativeCases = [NaN, Infinity, 6, 6.5, 6n];
+  const limits: [string, number | bigint][] = [
+    ['number', 5],
+    ['bigint', 5n],
   ];
-  negativeCases.forEach((input) => {
-    test(`max(${input}) throws an error`, () => {
-      expect(() => checkMax(input)).toThrow();
+  limits.forEach(([type, limit]) => {
+    describe(type, () => {
+      const checkMax = max(limit);
+      negativeCases.forEach((value) => {
+        const arg = typeof value === 'bigint' ? `${value}n` : value;
+        test(`max(${arg}) throws an error`, () => {
+          expect(() => checkMax(value)).toThrow();
+        });
+      });
     });
   });
 });

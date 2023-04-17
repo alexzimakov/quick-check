@@ -3,15 +3,15 @@ import { ValidationError } from '../validation-error.js';
 import { Message, formatMessage } from '../utils/format-message.js';
 
 export type MaxErrorDetails = {
-  value: number;
-  limit: number;
+  value: number | bigint;
+  limit: number | bigint;
 };
 
 export function max(
-  limit: number,
+  limit: number | bigint,
   message: Message<MaxErrorDetails> = formatMaxError,
 ) {
-  return (value: number) => {
+  return (value: number | bigint) => {
     const isValid = value <= limit;
     if (!isValid) {
       const details: MaxErrorDetails = { value, limit };
