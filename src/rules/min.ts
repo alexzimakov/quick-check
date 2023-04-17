@@ -3,15 +3,15 @@ import { ValidationError } from '../validation-error.js';
 import { Message, formatMessage } from '../utils/format-message.js';
 
 export type MinErrorDetails = {
-  value: number;
-  limit: number;
+  value: number | bigint;
+  limit: number | bigint;
 };
 
 export function min(
-  limit: number,
+  limit: number | bigint,
   message: Message<MinErrorDetails> = formatMinError,
 ) {
-  return (value: number) => {
+  return (value: number | bigint) => {
     const isValid = value >= limit;
     if (!isValid) {
       const details: MinErrorDetails = { value, limit };

@@ -2,31 +2,39 @@ import { describe, expect, test, vi } from 'vitest';
 import { min } from './min.js';
 
 describe('positive cases', () => {
-  const checkMin = min(2);
-  const positiveCases = [
-    4,
-    2.5,
-    Infinity,
+  const positiveCases = [4n, 4, 2.5, 2, 2n, Infinity];
+  const limits: [string, number | bigint][] = [
+    ['number', 2],
+    ['bigint', 2n],
   ];
-  positiveCases.forEach((input) => {
-    test(`min(${input}) does not throw an error`, () => {
-      expect(() => checkMin(input)).not.toThrow();
+  limits.forEach(([type, limit]) => {
+    describe(type, () => {
+      const checkMin = min(limit);
+      positiveCases.forEach((value) => {
+        const arg = typeof value === 'bigint' ? `${value}n` : value;
+        test(`max(${arg}) does not throw an error`, () => {
+          expect(() => checkMin(value)).not.toThrow();
+        });
+      });
     });
   });
 });
 
 describe('negative cases', () => {
-  const checkMin = min(2);
-  const negativeCases = [
-    0,
-    1,
-    -1,
-    NaN,
-    -Infinity,
+  const negativeCases = [0, 1n, 1, -1, NaN, -Infinity];
+  const limits: [string, number | bigint][] = [
+    ['number', 2],
+    ['bigint', 2n],
   ];
-  negativeCases.forEach((input) => {
-    test(`min(${input}) throws an error`, () => {
-      expect(() => checkMin(input)).toThrow();
+  limits.forEach(([type, limit]) => {
+    describe(type, () => {
+      const checkMin = min(limit);
+      negativeCases.forEach((value) => {
+        const arg = typeof value === 'bigint' ? `${value}n` : value;
+        test(`max(${arg}) throws an error`, () => {
+          expect(() => checkMin(value)).toThrow();
+        });
+      });
     });
   });
 });
