@@ -14,6 +14,7 @@ export const errorCodes = {
   stringTooShort: 'string_too_short',
   stringTooLong: 'string_too_long',
   stringPattern: 'string_pattern',
+  emptyString: 'empty_string',
   numberTooSmall: 'number_too_small',
   numberTooLarge: 'number_too_large',
   numberOutOfRange: 'number_out_of_range',
