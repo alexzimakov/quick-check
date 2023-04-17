@@ -114,3 +114,25 @@ assertType<InferInput<typeof typeB>>('');
 assertType<InferOutput<typeof typeB>>(new Date());
 assertType<InferInput<typeof typeC>>('');
 assertType<InferOutput<typeof typeC>>(customType);
+
+const nullableCustomType = schema.string()
+  .transform(CustomType.create)
+  .nullable();
+assertType<InferInput<typeof nullableCustomType>>('');
+assertType<InferInput<typeof nullableCustomType>>(null);
+assertType<InferOutput<typeof nullableCustomType>>(customType);
+
+const optionalCustomType = schema.string()
+  .transform(CustomType.create)
+  .optional();
+assertType<InferInput<typeof optionalCustomType>>('');
+assertType<InferInput<typeof optionalCustomType>>(undefined);
+assertType<InferOutput<typeof optionalCustomType>>(customType);
+
+const nullishCustomType = schema.string()
+  .transform(CustomType.create)
+  .nullish();
+assertType<InferInput<typeof nullishCustomType>>('');
+assertType<InferInput<typeof nullishCustomType>>(null);
+assertType<InferInput<typeof nullishCustomType>>(undefined);
+assertType<InferOutput<typeof nullishCustomType>>(customType);

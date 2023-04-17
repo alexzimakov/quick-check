@@ -1,24 +1,28 @@
-import { AbstractSchema, AnySchema, InferOutput } from './abstract-schema.js';
+import { AbstractSchema, AnySchema, InferInput, InferOutput } from './abstract-schema.js';
 import { ResultTransformer, TransformFunction } from './result-transformer.js';
 
-class Modifier<T extends AnySchema, R> extends AbstractSchema<R> {
-  protected readonly _schema: T;
+class Modifier<
+  Schema extends AnySchema,
+  Input,
+  Output,
+> extends AbstractSchema<Output, Input> {
+  protected readonly _schema: Schema;
 
-  constructor(schema: T) {
+  constructor(schema: Schema) {
     super();
     this._schema = schema;
   }
 
-  unwrap(): T {
+  unwrap(): Schema {
     return this._schema;
   }
 
-  validate(value: unknown): R {
+  validate(value: unknown): InferOutput<Schema> {
     return this._schema.validate(value);
   }
 
   nullable() {
-    return new NullableModifier(this._schema);
+    return new NullableModifier<Schema>(this._schema);
   }
 
   optional() {
@@ -34,11 +38,12 @@ class Modifier<T extends AnySchema, R> extends AbstractSchema<R> {
   }
 }
 
-export class NullableModifier<
-  T extends AnySchema,
-  R = InferOutput<T>,
-> extends Modifier<T, R | null> {
-  validate(value: unknown): R | null {
+export class NullableModifier<Schema extends AnySchema> extends Modifier<
+  Schema,
+  InferInput<Schema> | null,
+  InferOutput<Schema> | null
+> {
+  validate(value: unknown): InferOutput<Schema> | null {
     if (value === null) {
       return value;
     }
@@ -46,11 +51,12 @@ export class NullableModifier<
   }
 }
 
-export class OptionalModifier<
-  T extends AnySchema,
-  R = InferOutput<T>
-> extends Modifier<T, R | undefined> {
-  validate(value: unknown): R | undefined {
+export class OptionalModifier<Schema extends AnySchema> extends Modifier<
+  Schema,
+  InferInput<Schema> | undefined,
+  InferOutput<Schema> | undefined
+> {
+  validate(value: unknown): InferOutput<Schema> | undefined {
     if (value === undefined) {
       return value;
     }
@@ -58,11 +64,12 @@ export class OptionalModifier<
   }
 }
 
-export class NullishModifier<
-  T extends AnySchema,
-  R = InferOutput<T>
-> extends Modifier<T, R | null | undefined> {
-  validate(value: unknown): R | null | undefined {
+export class NullishModifier<Schema extends AnySchema> extends Modifier<
+  Schema,
+  InferInput<Schema> | null | undefined,
+  InferOutput<Schema> | null | undefined
+> {
+  validate(value: unknown): InferOutput<Schema> | null | undefined {
     if (value === null || value === undefined) {
       return value;
     }
