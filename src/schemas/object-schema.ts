@@ -1,38 +1,52 @@
-import { AnySchema, InferOutput, TypeSchema } from '../types.js';
-import { RequiredErrorMessage, Rule, Schema, TypeErrorMessage } from './schema.js';
-import { EnumSchema } from './enum-schema.js';
+import { AbstractSchema, AnySchema, InferInput, InferOutput } from '../abstract-schema.js';
+import { AbstractTypeSchema, RequiredErrorMessage, Rule, TypeErrorMessage } from '../abstract-type-schema.js';
 import { ValidationError } from '../validation-error.js';
 import { isPlainObject } from '../utils/is-plain-object.js';
 import { formatList } from '../utils/format-list.js';
 import { errorCodes } from '../error-codes.js';
 
-type KeySchema = TypeSchema<symbol | string | number> | undefined;
-type InferKeyType<T extends KeySchema> = T extends undefined
-  ? string
-  : InferOutput<T>;
+type OptionalEnumKeys<T extends object> = [keyof T] extends [string]
+  ? { [K in keyof T]?: T[K] }
+  : { [K in keyof T]: T[K] };
 
+type KeySchema = AbstractSchema<symbol | string | number> | undefined;
 type ValueSchema = AnySchema | undefined;
-type InferValueType<T extends ValueSchema> = T extends undefined
-  ? unknown
-  : InferOutput<T>
 
-type ObjectOf<
+type KeyInput<T extends KeySchema> = T extends AnySchema
+  ? InferInput<T>
+  : string;
+type ValueInput<T extends ValueSchema> = T extends AnySchema
+  ? InferInput<T>
+  : unknown;
+type ObjectInput<
+  K extends KeySchema,
+  V extends ValueSchema,
+> = OptionalEnumKeys<{ [P in KeyInput<K>]: ValueInput<V> }>;
+
+type KeyOutput<T extends KeySchema> = T extends AnySchema
+  ? InferOutput<T>
+  : string;
+type ValueOutput<T extends ValueSchema> = T extends AnySchema
+  ? InferOutput<T>
+  : unknown;
+type ObjectOutput<
   K extends KeySchema,
   V extends ValueSchema
-> = K extends EnumSchema<any> // eslint-disable-line @typescript-eslint/no-explicit-any
-  ? { [P in InferKeyType<K>]?: InferValueType<V> }
-  : { [P in InferKeyType<K>]: InferValueType<V> };
+> = OptionalEnumKeys<{ [P in KeyOutput<K>]: ValueOutput<V> }>
 
 type ObjectRule<T extends object> = Rule<T>;
 type ObjectRules<
   K extends KeySchema,
   V extends ValueSchema
-> = ObjectRule<ObjectOf<K, V>>[];
+> = ObjectRule<ObjectOutput<K, V>>[];
 
 export class ObjectSchema<
   K extends KeySchema,
   V extends ValueSchema
-> extends Schema<ObjectOf<K, V>> {
+> extends AbstractTypeSchema<
+  ObjectOutput<K, V>,
+  ObjectInput<K, V>
+> {
   protected readonly _keySchema?: K;
   protected readonly _valueSchema?: V;
 
@@ -48,7 +62,7 @@ export class ObjectSchema<
     this._valueSchema = valueSchema;
   }
 
-  protected _validate(maybeObject: unknown): ObjectOf<K, V> {
+  protected _validate(maybeObject: unknown): ObjectOutput<K, V> {
     if (!isPlainObject(maybeObject)) {
       this._throwTypeError(maybeObject, 'object');
     }
@@ -103,7 +117,7 @@ export class ObjectSchema<
       });
     }
 
-    return object as ObjectOf<K, V>;
+    return object as ObjectOutput<K, V>;
   }
 }
 

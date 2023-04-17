@@ -1,4 +1,4 @@
-export { Schema } from './schema.js';
+export { AbstractTypeSchema } from '../abstract-type-schema.js';
 export {
   createBooleanSchema,
   type BooleanSchemaOptions,

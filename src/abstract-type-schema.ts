@@ -1,10 +1,10 @@
-import { TypeSchema } from '../types.js';
-import { ResultTransformer, TransformFunction } from '../result-transformer.js';
-import { NullableModifier, NullishModifier, OptionalModifier } from '../result-modifier.js';
-import { ValidationError } from '../validation-error.js';
-import { Message, formatMessage } from '../utils/format-message.js';
-import { determineType } from '../utils/determine-type.js';
-import { errorCodes } from '../error-codes.js';
+import { AbstractSchema } from './abstract-schema.js';
+import { ResultTransformer, TransformFunction } from './result-transformer.js';
+import { NullableModifier, NullishModifier, OptionalModifier } from './result-modifier.js';
+import { ValidationError } from './validation-error.js';
+import { Message, formatMessage } from './utils/format-message.js';
+import { determineType } from './utils/determine-type.js';
+import { errorCodes } from './error-codes.js';
 
 export type Rule<T> = (value: T) => void;
 
@@ -27,16 +27,20 @@ const defaultRequiredErrorMessage: RequiredErrorMessage = ({
   value,
 }) => `The value cannot be ${value}.`;
 
-export abstract class Schema<T> implements TypeSchema<T> {
-  protected readonly _rules: Rule<T>[];
+export abstract class AbstractTypeSchema<
+  Output,
+  Input = Output,
+> extends AbstractSchema<Output, Input> {
+  protected readonly _rules: Rule<Output>[];
   protected readonly _typeError: TypeErrorMessage;
   protected readonly _requiredError: RequiredErrorMessage;
 
   protected constructor(
-    rules?: Rule<T>[],
+    rules?: Rule<Output>[],
     typeError?: TypeErrorMessage,
     requiredError?: RequiredErrorMessage,
   ) {
+    super();
     this._rules = rules || [];
     this._typeError = typeError || defaultTypeErrorMessage;
     this._requiredError = requiredError || defaultRequiredErrorMessage;
@@ -68,9 +72,9 @@ export abstract class Schema<T> implements TypeSchema<T> {
     return value;
   }
 
-  protected abstract _validate(value: unknown): T;
+  protected abstract _validate(value: unknown): Output;
 
-  validate(value: unknown): T {
+  validate(value: unknown): Output {
     value = this._prepareValue(value);
 
     if (value === null || value === undefined) {

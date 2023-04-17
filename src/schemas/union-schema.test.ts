@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { Schema } from './schema.js';
+import { AnySchema } from '../abstract-schema.js';
+import { AbstractTypeSchema } from '../abstract-type-schema.js';
 import { createUnionSchema, mapSchemaToType } from './union-schema.js';
 import { createStringSchema } from './string-schema.js';
 import { createNumberSchema } from './number-schema.js';
@@ -33,7 +34,7 @@ test('fails validation when a value conforms to no one schema', () => {
 });
 
 describe('`mapSchemaToType` maps schema instance to a type:', () => {
-  class UnknownSchema extends Schema<unknown> {
+  class UnknownSchema extends AbstractTypeSchema<unknown> {
     constructor() {
       super();
     }
@@ -44,7 +45,7 @@ describe('`mapSchemaToType` maps schema instance to a type:', () => {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const testCases: [string, string, () => Schema<any>][] = [
+  const testCases: [string, string, () => AnySchema][] = [
     ['StringSchema', 'string', () => createStringSchema()],
     ['NumberSchema', 'number', () => createNumberSchema()],
     ['BooleanSchema', 'boolean', () => createBooleanSchema()],

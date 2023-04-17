@@ -1,4 +1,4 @@
-import { InferInput, InferOutput } from './types.js';
+import { InferInput, InferOutput } from './abstract-schema.js';
 import { ValidationError, ValidationErrorOptions } from './validation-error.js';
 import { errorCodes } from './error-codes.js';
 import {

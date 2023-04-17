@@ -1,9 +1,9 @@
-import { RequiredErrorMessage, Rule, Schema, TypeErrorMessage } from './schema.js';
+import { AbstractTypeSchema, RequiredErrorMessage, Rule, TypeErrorMessage } from '../abstract-type-schema.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Constructor<T> = new(...args: any[]) => T;
 
-export class InstanceSchema<T> extends Schema<T> {
+export class InstanceSchema<T> extends AbstractTypeSchema<T> {
   protected readonly _constructor: Constructor<T>;
 
   constructor(

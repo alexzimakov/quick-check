@@ -1,8 +1,8 @@
-import { RequiredErrorMessage, Rule, Schema, TypeErrorMessage } from './schema.js';
+import { AbstractTypeSchema, RequiredErrorMessage, Rule, TypeErrorMessage } from '../abstract-type-schema.js';
 
 type NumberRule = Rule<number>;
 
-export class NumberSchema extends Schema<number> {
+export class NumberSchema extends AbstractTypeSchema<number> {
   readonly shouldCoerceType: boolean;
 
   constructor(

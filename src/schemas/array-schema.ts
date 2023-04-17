@@ -1,16 +1,24 @@
-import { AnySchema, InferOutput } from '../types.js';
-import { RequiredErrorMessage, Rule, Schema, TypeErrorMessage } from './schema.js';
+import { AnySchema, InferInput, InferOutput } from '../abstract-schema.js';
+import { AbstractTypeSchema, RequiredErrorMessage, Rule, TypeErrorMessage } from '../abstract-type-schema.js';
 import { ValidationError } from '../validation-error.js';
 import { errorCodes } from '../error-codes.js';
 
 type Item = AnySchema | undefined;
-type ArrayOf<T extends Item> = T extends AnySchema
+
+type ArrayInput<T extends Item> = T extends AnySchema
+  ? InferInput<T>[]
+  : unknown[];
+type ArrayOutput<T extends Item> = T extends AnySchema
   ? InferOutput<T>[]
   : unknown[];
-type ArrayRule<T extends unknown[]> = Rule<T>;
-type ArrayRules<T extends Item> = ArrayRule<ArrayOf<T>>[];
 
-export class ArraySchema<T extends Item> extends Schema<ArrayOf<T>> {
+type ArrayRule<T extends unknown[]> = Rule<T>;
+type ArrayRules<T extends Item> = ArrayRule<ArrayOutput<T>>[];
+
+export class ArraySchema<T extends Item> extends AbstractTypeSchema<
+  ArrayOutput<T>,
+  ArrayInput<T>
+> {
   protected readonly _item: Item;
 
   constructor(
@@ -23,7 +31,7 @@ export class ArraySchema<T extends Item> extends Schema<ArrayOf<T>> {
     this._item = item;
   }
 
-  protected _validate(value: unknown): ArrayOf<T> {
+  protected _validate(value: unknown): ArrayOutput<T> {
     if (!Array.isArray(value)) {
       this._throwTypeError(value, 'array');
     }
@@ -56,7 +64,7 @@ export class ArraySchema<T extends Item> extends Schema<ArrayOf<T>> {
       });
     }
 
-    return items as ArrayOf<T>;
+    return items as ArrayOutput<T>;
   }
 }
 

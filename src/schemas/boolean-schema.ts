@@ -1,8 +1,8 @@
-import { RequiredErrorMessage, Rule, Schema, TypeErrorMessage } from './schema.js';
+import { AbstractTypeSchema, RequiredErrorMessage, Rule, TypeErrorMessage } from '../abstract-type-schema.js';
 
 type BooleanRule = Rule<boolean>;
 
-export class BooleanSchema extends Schema<boolean> {
+export class BooleanSchema extends AbstractTypeSchema<boolean> {
   readonly shouldCoerceType: boolean;
 
   constructor(

@@ -1,8 +1,8 @@
-import { RequiredErrorMessage, Rule, Schema, TypeErrorMessage } from './schema.js';
+import { AbstractTypeSchema, RequiredErrorMessage, Rule, TypeErrorMessage } from '../abstract-type-schema.js';
 
 type BigIntRule = Rule<bigint>;
 
-export class BigIntSchema extends Schema<bigint> {
+export class BigIntSchema extends AbstractTypeSchema<bigint> {
   readonly shouldCoerceType: boolean;
 
   constructor(

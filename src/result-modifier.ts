@@ -1,10 +1,11 @@
-import { AnySchema, InferOutput, TypeSchema } from './types.js';
+import { AbstractSchema, AnySchema, InferOutput } from './abstract-schema.js';
 import { ResultTransformer, TransformFunction } from './result-transformer.js';
 
-class Modifier<T extends AnySchema, R> implements TypeSchema<R> {
+class Modifier<T extends AnySchema, R> extends AbstractSchema<R> {
   protected readonly _schema: T;
 
   constructor(schema: T) {
+    super();
     this._schema = schema;
   }
 

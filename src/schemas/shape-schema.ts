@@ -1,5 +1,6 @@
-import { AnySchema, InferOutput, WithOptionalAttrs } from '../types.js';
-import { RequiredErrorMessage, Rule, Schema, TypeErrorMessage } from './schema.js';
+import { AnySchema, InferInput, InferOutput } from '../abstract-schema.js';
+import { WithOptionalAttrs } from '../types.js';
+import { AbstractTypeSchema, RequiredErrorMessage, Rule, TypeErrorMessage } from '../abstract-type-schema.js';
 import { ValidationError } from '../validation-error.js';
 import { formatList } from '../utils/format-list.js';
 import { errorCodes } from '../error-codes.js';
@@ -7,17 +8,25 @@ import { errorCodes } from '../error-codes.js';
 type Props = {
   [key: string]: AnySchema;
 };
-type Shape<T extends Props> = WithOptionalAttrs<{
+
+type ShapeInput<T extends Props> = WithOptionalAttrs<{
+  [K in keyof T]: InferInput<T[K]>;
+}>;
+type ShapeOutput<T extends Props> = WithOptionalAttrs<{
   [K in keyof T]: InferOutput<T[K]>;
 }>;
-type ShapeRule<T extends Props> = Rule<Shape<T>>;
+
+type ShapeRule<T extends Props> = Rule<ShapeOutput<T>>;
 type ShapeRules<T extends Props> = ShapeRule<T>[];
 
 const isObject = (value: unknown): value is Record<string, unknown> => (
   value != null && typeof value === 'object'
 );
 
-export class ShapeSchema<T extends Props> extends Schema<Shape<T>> {
+export class ShapeSchema<T extends Props> extends AbstractTypeSchema<
+  ShapeOutput<T>,
+  ShapeInput<T>
+> {
   protected readonly _props: T;
 
   constructor(
@@ -30,7 +39,7 @@ export class ShapeSchema<T extends Props> extends Schema<Shape<T>> {
     this._props = props;
   }
 
-  protected _validate(maybeObject: unknown): Shape<T> {
+  protected _validate(maybeObject: unknown): ShapeOutput<T> {
     if (!isObject(maybeObject)) {
       this._throwTypeError(maybeObject, 'object');
     }
@@ -67,7 +76,7 @@ export class ShapeSchema<T extends Props> extends Schema<Shape<T>> {
       });
     }
 
-    return object as Shape<T>;
+    return object as ShapeOutput<T>;
   }
 
   get<P extends keyof T>(name: P) {

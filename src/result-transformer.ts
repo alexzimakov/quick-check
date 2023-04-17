@@ -1,5 +1,5 @@
-import { AnySchema, InferOutput, TypeSchema } from './types.js';
 import { NullableModifier, NullishModifier, OptionalModifier } from './result-modifier.js';
+import { AbstractSchema, AnySchema, InferOutput } from './abstract-schema.js';
 
 export type TransformFunction<T extends AnySchema, R> = (
   value: InferOutput<T>,
@@ -8,11 +8,12 @@ export type TransformFunction<T extends AnySchema, R> = (
 export class ResultTransformer<
   T extends AnySchema,
   R
-> implements TypeSchema<R> {
+> extends AbstractSchema<R, T['input']> {
   protected readonly _schema: T;
   protected readonly _transform: TransformFunction<T, R>;
 
   constructor(schema: T, transformer: TransformFunction<T, R>) {
+    super();
     this._schema = schema;
     this._transform = transformer;
   }

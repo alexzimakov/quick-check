@@ -1,5 +1,5 @@
-import { AnySchema, InferOutput } from '../types.js';
-import { RequiredErrorMessage, Rule, Schema } from './schema.js';
+import { AnySchema, InferInput, InferOutput } from '../abstract-schema.js';
+import { AbstractTypeSchema, RequiredErrorMessage, Rule } from '../abstract-type-schema.js';
 import { ValidationError } from '../validation-error.js';
 import { Message, formatMessage } from '../utils/format-message.js';
 import { formatList } from '../utils/format-list.js';
@@ -14,8 +14,11 @@ import { StringSchema } from './string-schema.js';
 import { InstanceSchema } from './instance-schema.js';
 
 type Schemas = AnySchema[];
-type Union<T extends Schemas> = InferOutput<T[number]>;
-type UnionRule<T extends Schemas> = Rule<Union<T>>;
+
+type UnionInput<T extends Schemas> = InferInput<T[number]>;
+type UnionOutput<T extends Schemas> = InferOutput<T[number]>;
+
+type UnionRule<T extends Schemas> = Rule<UnionOutput<T>>;
 type UnionRules<T extends Schemas> = UnionRule<T>[];
 
 type UnionErrorMessage = Message<UnionErrorDetails>;
@@ -61,7 +64,10 @@ export const mapSchemaToType = (schema: AnySchema) => {
   return 'unknown';
 };
 
-export class UnionSchema<T extends Schemas> extends Schema<Union<T>> {
+export class UnionSchema<T extends Schemas> extends AbstractTypeSchema<
+  UnionOutput<T>,
+  UnionInput<T>
+> {
   protected readonly _schemas: T;
   protected readonly _unionError: UnionErrorMessage;
 
@@ -80,7 +86,7 @@ export class UnionSchema<T extends Schemas> extends Schema<Union<T>> {
     return this._schemas.map(mapSchemaToType).join(' | ');
   }
 
-  protected _validate(value: unknown): Union<T> {
+  protected _validate(value: unknown): UnionOutput<T> {
     let result: unknown;
     let subErrors: ValidationError[] = [];
     for (const schema of this._schemas) {
@@ -103,7 +109,7 @@ export class UnionSchema<T extends Schemas> extends Schema<Union<T>> {
       });
     }
 
-    return result as Union<T>;
+    return result as UnionOutput<T>;
   }
 }
 

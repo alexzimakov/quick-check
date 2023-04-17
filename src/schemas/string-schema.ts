@@ -1,8 +1,8 @@
-import { RequiredErrorMessage, Rule, Schema, TypeErrorMessage } from './schema.js';
+import { AbstractTypeSchema, RequiredErrorMessage, Rule, TypeErrorMessage } from '../abstract-type-schema.js';
 
 type StringRule = Rule<string>;
 
-export class StringSchema extends Schema<string> {
+export class StringSchema extends AbstractTypeSchema<string> {
   readonly shouldCoerceType: boolean;
   readonly shouldTrimValue: boolean;
 

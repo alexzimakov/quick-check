@@ -1,16 +1,18 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { createStringSchema } from './string-schema.js';
-import { createNumberSchema } from './number-schema.js';
-import { createBigIntSchema } from './bigint-schema.js';
-import { createBooleanSchema } from './boolean-schema.js';
-import { createEnumSchema } from './enum-schema.js';
-import { createArraySchema } from './array-schema.js';
-import { createObjectSchema } from './object-schema.js';
-import { createShapeSchema } from './shape-schema.js';
-import { createInstanceSchema } from './instance-schema.js';
-import { createUnionSchema } from './union-schema.js';
-import { ResultTransformer } from '../result-transformer.js';
-import { NullableModifier, NullishModifier, OptionalModifier } from '../result-modifier.js';
+import {
+  createArraySchema,
+  createBigIntSchema,
+  createBooleanSchema,
+  createEnumSchema,
+  createInstanceSchema,
+  createNumberSchema,
+  createObjectSchema,
+  createShapeSchema,
+  createStringSchema,
+  createUnionSchema,
+} from './schemas/index.js';
+import { ResultTransformer } from './result-transformer.js';
+import { NullableModifier, NullishModifier, OptionalModifier } from './result-modifier.js';
 
 const transformedValue = Symbol('transformed');
 const ruleA = vi.fn();

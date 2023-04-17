@@ -1,4 +1,4 @@
-import { RequiredErrorMessage, Rule, Schema } from './schema.js';
+import { AbstractTypeSchema, RequiredErrorMessage, Rule } from '../abstract-type-schema.js';
 import { ValidationError } from '../validation-error.js';
 import { Message, formatMessage } from '../utils/format-message.js';
 import { formatList } from '../utils/format-list.js';
@@ -25,7 +25,7 @@ const defaultEnumErrorMessage: EnumErrorMessage = ({
   return `The value must be one of ${values}, but received '${value}'.`;
 };
 
-export class EnumSchema<T extends Values> extends Schema<Enum<T>> {
+export class EnumSchema<T extends Values> extends AbstractTypeSchema<Enum<T>> {
   protected readonly _values: T;
   protected readonly _enumError: EnumErrorMessage;
 
