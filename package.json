@@ -5,6 +5,7 @@
   "homepage": "https://github.com/alexzimakov/safe-data#readme",
   "license": "MIT",
   "type": "module",
+  "sideEffects": false,
   "main": "./cjs/safe-data.cjs",
   "module": "./esm/safe-data.js",
   "types": "./types/safe-data.d.ts",
