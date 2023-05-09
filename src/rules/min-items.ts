@@ -9,10 +9,12 @@ export type MinItemsErrorDetails = {
   itemCount: number;
 };
 
-export function minItems(
-  limit: number,
-  message: Message<MinItemsErrorDetails> = formatMinItemsError,
-) {
+export function minItems(options: {
+  limit: number;
+  message?: Message<MinItemsErrorDetails>;
+}) {
+  const limit = options.limit;
+  const message = options.message || formatMinItemsError;
   return (value: unknown[]) => {
     const itemCount = value.length;
     if (itemCount < limit) {
