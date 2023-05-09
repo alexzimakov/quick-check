@@ -22,7 +22,7 @@ describe('positive cases', () => {
       ['with whitespace characters', ' \tabc\n'],
       ['plaintext', 'abc'],
     ];
-    const checkNonEmpty = nonEmpty(true);
+    const checkNonEmpty = nonEmpty({ ignoreWhitespace: true });
     values.forEach(([name, value]) => {
       test(name, () => {
         expect(() => checkNonEmpty(value)).not.toThrow();
@@ -49,7 +49,7 @@ describe('negative cases', () => {
       ['only whitespace characters', ' \t\n'],
       ['empty string', ''],
     ];
-    const checkNonEmpty = nonEmpty(true);
+    const checkNonEmpty = nonEmpty({ ignoreWhitespace: true });
     values.forEach(([name, value]) => {
       test(name, () => {
         expect(() => checkNonEmpty(value)).toThrow(ValidationError);
@@ -60,7 +60,7 @@ describe('negative cases', () => {
 
 test('should throw an error with custom message', () => {
   const message = 'invalid value';
-  const checkNonEmpty = nonEmpty(false, message);
+  const checkNonEmpty = nonEmpty({ message, ignoreWhitespace: false });
   expect(() => checkNonEmpty('')).toThrow(message);
 });
 
@@ -68,8 +68,11 @@ test('should throw an error with formatted message', () => {
   const value = '\t\n';
   const ignoreWhitespace = true;
   const message = 'invalid value';
-  const messageFormat = vi.fn(() => message);
-  const checkNonEmpty = nonEmpty(ignoreWhitespace, messageFormat);
+  const messageFormatter = vi.fn(() => message);
+  const checkNonEmpty = nonEmpty({
+    ignoreWhitespace,
+    message: messageFormatter,
+  });
   expect(() => checkNonEmpty(value)).toThrow(message);
-  expect(messageFormat).toHaveBeenCalledWith({ value, ignoreWhitespace });
+  expect(messageFormatter).toHaveBeenCalledWith({ value, ignoreWhitespace });
 });

@@ -7,11 +7,13 @@ export type NonEmptyErrorDetails = {
   ignoreWhitespace: boolean;
 };
 
-export function nonEmpty(
-  ignoreWhitespace = false,
-  message: Message<NonEmptyErrorDetails> = formatNonEmptyError,
-) {
+export function nonEmpty(options: {
+  ignoreWhitespace?: boolean;
+  message?: Message<NonEmptyErrorDetails>;
+} = {}) {
   return (value: string) => {
+    const ignoreWhitespace = options.ignoreWhitespace || false;
+    const message = options.message || formatNonEmptyError;
     const valueToCheck = ignoreWhitespace ? value.trim() : value;
     if (!valueToCheck) {
       const details: NonEmptyErrorDetails = { value, ignoreWhitespace };
