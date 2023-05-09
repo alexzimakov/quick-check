@@ -31,8 +31,8 @@ const reminderSchema = schema.shape({
   isCompleted: schema.boolean(),
   title: schema.string({
     rules: [
-      rules.minLength(5),
-      rules.maxLength(64)
+      rules.minLength({ limit: 5 }),
+      rules.maxLength({ limit: 64 }),
     ],
   }),
   notes: schema.string().nullish(),
