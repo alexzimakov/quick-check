@@ -9,10 +9,12 @@ export type MaxLengthErrorDetails = {
   characterCount: number;
 };
 
-export function maxLength(
-  limit: number,
-  message: Message<MaxLengthErrorDetails> = formatMaxLengthError,
-) {
+export function maxLength(options: {
+  limit: number;
+  message?: Message<MaxLengthErrorDetails>;
+}) {
+  const limit = options.limit;
+  const message = options.message || formatMaxLengthError;
   return (value: string) => {
     const characterCount = value.length;
     if (characterCount > limit) {
