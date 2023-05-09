@@ -39,9 +39,10 @@ for (const datePattern of datePatterns) {
   }
 }
 
-export function isoDatetime(
-  message: Message<ISODatetimeErrorDetails> = formatISODatetimeError,
-) {
+export function isoDatetime(options: {
+  message?: Message<ISODatetimeErrorDetails>,
+} = {}) {
+  const message = options.message || formatISODatetimeError;
   return (value: string) => {
     const isValid = patterns.some((pattern) => value.match(pattern));
     if (!isValid) {
