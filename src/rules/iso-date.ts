@@ -18,9 +18,10 @@ const patterns = [
   // YYYY-MM-DD
   regex`^${year}-${month}-${day}$`,
 ];
-export function isoDate(
-  message: Message<ISODateErrorDetails> = formatISODateError,
-) {
+export function isoDate(options: {
+  message?: Message<ISODateErrorDetails>;
+} = {}) {
+  const message = options.message || formatISODateError;
   return (value: string) => {
     const isValid = patterns.some((pattern) => value.match(pattern));
     if (!isValid) {
