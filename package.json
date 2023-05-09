@@ -1,6 +1,6 @@
 {
   "name": "safe-data",
-  "version": "3.2.1",
+  "version": "4.0.0",
   "description": "A simple schema-based validation library for typescript and javascript.",
   "homepage": "https://github.com/alexzimakov/safe-data#readme",
   "license": "MIT",
