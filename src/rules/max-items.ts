@@ -9,10 +9,12 @@ export type MaxItemsErrorDetails = {
   itemCount: number;
 };
 
-export function maxItems(
+export function maxItems(options: {
   limit: number,
-  message: Message<MaxItemsErrorDetails> = formatMaxItemsError,
-) {
+  message?: Message<MaxItemsErrorDetails>,
+}) {
+  const limit = options.limit;
+  const message = options.message || formatMaxItemsError;
   return (value: unknown[]) => {
     const itemCount = value.length;
     if (itemCount > limit) {
