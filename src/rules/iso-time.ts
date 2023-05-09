@@ -20,9 +20,10 @@ const patterns = [
   regex`^${hour}:${minute}:${second}(?<millisecond>\\.[0-9]+)${timeZone}?$`,
 ];
 
-export function isoTime(
-  message: Message<ISOTimeErrorDetails> = formatISOTimeError,
-) {
+export function isoTime(options: {
+  message?: Message<ISOTimeErrorDetails>,
+} = {}) {
+  const message = options.message || formatISOTimeError;
   return (value: string) => {
     const isValid = patterns.some((pattern) => value.match(pattern));
     if (!isValid) {

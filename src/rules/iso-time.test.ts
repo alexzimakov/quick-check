@@ -49,15 +49,15 @@ describe('negative cases', () => {
 
 test('should throw an error with custom message', () => {
   const message = 'invalid ISO time';
-  const checkISOTime = isoTime(message);
+  const checkISOTime = isoTime({ message });
   expect(() => checkISOTime('')).toThrow(message);
 });
 
 test('should throw an error with formatted message', () => {
   const value = '17 21';
   const message = 'invalid ISO time';
-  const formatter = vi.fn(() => message);
-  const checkISOTime = isoTime(formatter);
+  const messageFormatter = vi.fn(() => message);
+  const checkISOTime = isoTime({ message: messageFormatter });
   expect(() => checkISOTime(value)).toThrow(message);
-  expect(formatter).toBeCalledWith({ value });
+  expect(messageFormatter).toBeCalledWith({ value });
 });
