@@ -9,7 +9,7 @@ describe('positive cases', () => {
   ];
   limits.forEach(([type, limit]) => {
     describe(type, () => {
-      const checkMin = min(limit);
+      const checkMin = min({ limit });
       positiveCases.forEach((value) => {
         const arg = typeof value === 'bigint' ? `${value}n` : value;
         test(`max(${arg}) does not throw an error`, () => {
@@ -28,7 +28,7 @@ describe('negative cases', () => {
   ];
   limits.forEach(([type, limit]) => {
     describe(type, () => {
-      const checkMin = min(limit);
+      const checkMin = min({ limit });
       negativeCases.forEach((value) => {
         const arg = typeof value === 'bigint' ? `${value}n` : value;
         test(`max(${arg}) throws an error`, () => {
@@ -41,7 +41,7 @@ describe('negative cases', () => {
 
 test('should throw an error with custom message', () => {
   const message = 'must be >= 2';
-  const checkMin = min(2, message);
+  const checkMin = min({ limit: 2, message });
   expect(() => checkMin(1)).toThrow(message);
 });
 
@@ -49,8 +49,8 @@ test('should throw an error with formatted message', () => {
   const value = 1;
   const limit = 2;
   const message = 'must be >= 2';
-  const messageFormat = vi.fn(() => message);
-  const checkMin = min(limit, messageFormat);
+  const messageFormatter = vi.fn(() => message);
+  const checkMin = min({ limit, message: messageFormatter });
   expect(() => checkMin(value)).toThrow(message);
-  expect(messageFormat).toBeCalledWith({ value, limit });
+  expect(messageFormatter).toBeCalledWith({ value, limit });
 });

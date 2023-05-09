@@ -7,10 +7,12 @@ export type MinErrorDetails = {
   limit: number | bigint;
 };
 
-export function min(
-  limit: number | bigint,
-  message: Message<MinErrorDetails> = formatMinError,
-) {
+export function min(options: {
+  limit: number | bigint;
+  message?: Message<MinErrorDetails>;
+}) {
+  const limit = options.limit;
+  const message = options.message || formatMinError;
   return (value: number | bigint) => {
     const isValid = value >= limit;
     if (!isValid) {
