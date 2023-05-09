@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from 'vitest';
 import { pattern } from './pattern.js';
 
 describe('positive cases', () => {
-  const checkPattern = pattern(/^\d+$/);
+  const checkPattern = pattern({ pattern: /^\d+$/ });
   const positiveCases = ['1', '25'];
   positiveCases.forEach((input) => {
     test(`pattern('${input}') does not throw an error`, () => {
@@ -12,7 +12,7 @@ describe('positive cases', () => {
 });
 
 describe('negative cases', () => {
-  const checkPattern = pattern(/^\d+$/);
+  const checkPattern = pattern({ pattern: /^\d+$/ });
   const negativeCases = ['', 'abc'];
   negativeCases.forEach((input) => {
     test(`pattern('${input}') throws an error`, () => {
@@ -23,17 +23,20 @@ describe('negative cases', () => {
 
 test('should throw an error with custom message', () => {
   const message = 'invalid value';
-  const checkPattern = pattern(/^\d+$/, message);
+  const checkPattern = pattern({ pattern: /^\d+$/, message });
   expect(() => checkPattern('')).toThrow(message);
 });
 
 test('should throw an error with formatted message', () => {
   const value = 'abc';
   const message = 'invalid value';
-  const messageFormat = vi.fn(() => message);
-  const checkPattern = pattern(/^\d+$/, messageFormat);
+  const messageFormatter = vi.fn(() => message);
+  const checkPattern = pattern({
+    pattern: /^\d+$/,
+    message: messageFormatter,
+  });
   expect(() => checkPattern(value)).toThrow(message);
-  expect(messageFormat).toBeCalledWith({
+  expect(messageFormatter).toBeCalledWith({
     value,
     pattern: String(/^\d+$/),
   });

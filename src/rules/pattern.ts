@@ -7,10 +7,12 @@ export type PatternErrorDetails = {
   pattern: string,
 };
 
-export function pattern(
-  pattern: RegExp,
-  message: Message<PatternErrorDetails> = formatPatternError,
-) {
+export function pattern(options: {
+  pattern: RegExp;
+  message?: Message<PatternErrorDetails>;
+}) {
+  const pattern = options.pattern;
+  const message = options.message || formatPatternError;
   return (value: string) => {
     if (!value.match(pattern)) {
       const details: PatternErrorDetails = { value, pattern: String(pattern) };
