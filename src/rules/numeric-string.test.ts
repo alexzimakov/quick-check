@@ -23,15 +23,15 @@ describe('negative cases', () => {
 
 test('should throw an error with custom message', () => {
   const message = 'invalid value';
-  const checkNumericString = numericString(message);
+  const checkNumericString = numericString({ message });
   expect(() => checkNumericString('')).toThrow(message);
 });
 
 test('should throw an error with formatted message', () => {
   const value = 'abc';
   const message = 'invalid value';
-  const messageFormat = vi.fn(() => message);
-  const checkNumericString = numericString(messageFormat);
+  const messageFormatter = vi.fn(() => message);
+  const checkNumericString = numericString({ message: messageFormatter });
   expect(() => checkNumericString(value)).toThrow(message);
-  expect(messageFormat).toBeCalledWith({ value });
+  expect(messageFormatter).toBeCalledWith({ value });
 });

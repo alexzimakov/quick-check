@@ -6,9 +6,10 @@ export type NumericStringErrorDetails = {
   value: string;
 };
 
-export function numericString(
-  message: Message<NumericStringErrorDetails> = formatPatternError,
-) {
+export function numericString(options: {
+  message?: Message<NumericStringErrorDetails>;
+} = {}) {
+  const message = options.message || formatPatternError;
   return (value: string) => {
     if (!value.match(/^(0|[1-9][0-9]*)$/)) {
       const details: NumericStringErrorDetails = { value };
