@@ -7,10 +7,12 @@ export type MaxErrorDetails = {
   limit: number | bigint;
 };
 
-export function max(
+export function max(options: {
   limit: number | bigint,
-  message: Message<MaxErrorDetails> = formatMaxError,
-) {
+  message?: Message<MaxErrorDetails>,
+}) {
+  const limit = options.limit;
+  const message = options.message || formatMaxError;
   return (value: number | bigint) => {
     const isValid = value <= limit;
     if (!isValid) {
