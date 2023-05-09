@@ -21,7 +21,7 @@ const patterns = [
 ];
 
 export function isoTime(options: {
-  message?: Message<ISOTimeErrorDetails>,
+  message?: Message<ISOTimeErrorDetails>;
 } = {}) {
   const message = options.message || formatISOTimeError;
   return (value: string) => {

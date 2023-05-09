@@ -8,8 +8,8 @@ export type MaxErrorDetails = {
 };
 
 export function max(options: {
-  limit: number | bigint,
-  message?: Message<MaxErrorDetails>,
+  limit: number | bigint;
+  message?: Message<MaxErrorDetails>;
 }) {
   const limit = options.limit;
   const message = options.message || formatMaxError;

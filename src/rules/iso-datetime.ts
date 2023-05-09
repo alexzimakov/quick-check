@@ -40,7 +40,7 @@ for (const datePattern of datePatterns) {
 }
 
 export function isoDatetime(options: {
-  message?: Message<ISODatetimeErrorDetails>,
+  message?: Message<ISODatetimeErrorDetails>;
 } = {}) {
   const message = options.message || formatISODatetimeError;
   return (value: string) => {
