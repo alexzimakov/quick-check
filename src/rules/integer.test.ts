@@ -33,15 +33,15 @@ describe('negative cases', () => {
 
 test('should throw an error with custom message', () => {
   const message = 'invalid integer';
-  const checkInteger = integer(message);
+  const checkInteger = integer({ message });
   expect(() => checkInteger(10.5)).toThrow(message);
 });
 
 test('should throw an error with formatted message', () => {
   const value = 10.5;
   const message = 'invalid integer';
-  const messageFormat = vi.fn(() => message);
-  const checkInteger = integer(messageFormat);
+  const messageFormatter = vi.fn(() => message);
+  const checkInteger = integer({ message: messageFormatter });
   expect(() => checkInteger(value)).toThrow(message);
-  expect(messageFormat).toBeCalledWith({ value });
+  expect(messageFormatter).toBeCalledWith({ value });
 });

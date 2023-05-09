@@ -6,9 +6,10 @@ export type IntegerErrorDetails = {
   value: number;
 };
 
-export function integer(
-  message: Message<IntegerErrorDetails> = formatIntegerError,
-) {
+export function integer(options: {
+  message?: Message<IntegerErrorDetails>;
+} = {}) {
+  const message = options.message || formatIntegerError;
   return (value: number) => {
     if (!Number.isInteger(value)) {
       const details: IntegerErrorDetails = { value };
