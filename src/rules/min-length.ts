@@ -9,10 +9,12 @@ export type MinLengthErrorDetails = {
   characterCount: number;
 };
 
-export function minLength(
-  limit: number,
-  message: Message<MinLengthErrorDetails> = formatMinLengthError,
-) {
+export function minLength(options: {
+  limit: number;
+  message?: Message<MinLengthErrorDetails>;
+}) {
+  const limit = options.limit;
+  const message = options.message || formatMinLengthError;
   return (value: string) => {
     const characterCount = value.length;
     if (characterCount < limit) {
