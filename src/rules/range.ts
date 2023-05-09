@@ -8,11 +8,14 @@ export type RangeErrorDetails = {
   max: number;
 };
 
-export function range(
-  min: number,
-  max: number,
-  message: Message<RangeErrorDetails> = formatRangeError,
-) {
+export function range(options: {
+  min: number;
+  max: number;
+  message?: Message<RangeErrorDetails>;
+}) {
+  const min = options.min;
+  const max = options.max;
+  const message = options.message || formatRangeError;
   if (min >= max) {
     throw new RangeError('The `min` argument must be less than `max`.');
   }
