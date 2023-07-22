@@ -1,4 +1,4 @@
-import { InferInput, InferOutput } from './abstract-schema.js';
+import { AnySchema, InferInput, InferOutput } from './abstract-schema.js';
 import { ValidationError, ValidationErrorOptions } from './validation-error.js';
 import { errorCodes } from './error-codes.js';
 import {
@@ -89,4 +89,5 @@ export {
   type InstanceSchemaOptions,
   type ShapeSchemaOptions,
   type UnionSchemaOptions,
+  type AnySchema,
 };
