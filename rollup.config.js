@@ -2,7 +2,7 @@ import path from 'node:path';
 import del from 'rollup-plugin-delete';
 import typescript from '@rollup/plugin-typescript';
 
-const input = './src/safe-data.ts';
+const input = './src/index.ts';
 const outputDir = {
   types: './types',
   esm: './esm',
@@ -19,7 +19,7 @@ export default [
     plugins: [
       del({ targets: outputDir.types }),
       del({
-        targets: path.join(outputDir.types, '/safe-data.js'),
+        targets: path.join(outputDir.types, '/index.js'),
         hook: 'writeBundle',
       }),
       typescript({
