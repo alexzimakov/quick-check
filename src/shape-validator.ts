@@ -28,7 +28,7 @@ export class ShapeValidator<T extends object> extends BaseValidator<T> {
     this._options = Object.freeze({ ...options });
   }
 
-  get<K extends keyof T>(key: K): PropertyValidator<T[K]> {
+  get<K extends keyof T>(key: K): ShapeValidatorSchema<T>[K] {
     return this._schema[key];
   }
 
