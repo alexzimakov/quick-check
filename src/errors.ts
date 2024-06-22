@@ -9,7 +9,6 @@ export class ValidationError extends Error {
   }) {
     super(props.message);
     this.name = 'ValidationError';
-    this.stack = undefined;
     this.code = props.code;
     this.message = props.message;
     this.details = props.details || {};
