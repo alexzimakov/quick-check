@@ -97,7 +97,7 @@ export class ShapeValidator<T extends object> extends BaseValidator<T> {
         code: ValidationError.Code.INVALID_OBJECT_SHAPE,
         message: keysWithError.length === 1
           ? `The property ${formattedKeys} is invalid.`
-          : 'The properties ${formattedKeys} are invalid.',
+          : `The properties ${formattedKeys} are invalid.`,
         details: errors,
       }));
     }
