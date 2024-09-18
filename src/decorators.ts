@@ -27,6 +27,9 @@ export class OptionalDecorator<T extends AnyValidator> implements Validator<
   }
 
   parse(value: unknown): Infer<T> | undefined {
+    if (value === undefined) {
+      return value;
+    }
     return this._validator.parse(value);
   }
 
@@ -56,6 +59,9 @@ export class NullableDecorator<T extends AnyValidator> implements Validator<
   }
 
   parse(value: unknown): Infer<T> | null {
+    if (value === null) {
+      return value;
+    }
     return this._validator.parse(value);
   }
 
@@ -86,6 +92,9 @@ export class NilDecorator<T extends AnyValidator> implements Validator<
   }
 
   parse(value: unknown): Infer<T> | null | undefined {
+    if (value === undefined || value === null) {
+      return value;
+    }
     return this._validator.parse(value);
   }
 
